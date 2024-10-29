@@ -14,4 +14,10 @@ export default defineConfig({
   integrations: [tailwind(), auth({ injectEndpoints: false }), vue()],
   output: 'server',
   adapter: cloudflare(),
+
+  vite: {
+    build: {
+      minify: false,
+    },
+  },
 });
