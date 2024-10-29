@@ -22,5 +22,8 @@ export default defineConfig({
     ssr: {
       external: ['node:path'],
     },
+    define: {
+      "process.env": process.env
+    }
   },
 });
