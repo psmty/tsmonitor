@@ -1,6 +1,6 @@
 import type { ParsedData, VersionInfo } from "./versions.types";
 
-const urls = ["https://staging.tempus-resource.com/sg"];
+const urls: string[] = [];
 const action = "/Home/VersionInfo";
 
 
