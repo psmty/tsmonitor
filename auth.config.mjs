@@ -5,7 +5,6 @@ import { defineConfig } from "auth-astro";
 
 
 export default defineConfig({
-  injectEndpoints: false,
   callbacks: {
     signIn: ({ user, profile }) => {
       return (
