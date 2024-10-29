@@ -1,7 +1,4 @@
 ---
-import pkg from '../../package.json' assert { type: 'json' };
-
-import { url } from '../lib/data';
 import { SITE_TITLE } from '../lib/constants';
 import CopyrightNotice from '../components/CopyrightNotice.astro';
 
@@ -16,19 +13,6 @@ const { class: clazz } = Astro.props;
 		<title>{SITE_TITLE}</title>
 
 		<meta name="generator" content={Astro.generator} />
-		<meta name="description" content={pkg.description} />
-		<meta name="" content={pkg.description} />
-		<link rel="icon" type="image/svg+xml" href={url('favicon.svg')} />
-		<link
-			rel="sitemap"
-			type="application/xml"
-			href={url('sitemap-index.xml')}
-		/>
-
-		<meta
-			name="author"
-			content="Julian Cataldo, Zoltán Szőgyényi, Robert Tanislav"
-		/>
 		<meta name="copyright" content="MIT" />
 
 		<script is:inline>
