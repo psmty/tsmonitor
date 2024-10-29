@@ -12,9 +12,6 @@ const { class: clazz } = Astro.props;
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>{SITE_TITLE}</title>
 
-		<meta name="generator" content={Astro.generator} />
-		<meta name="copyright" content="MIT" />
-
 		<script is:inline>
 			if (
 				localStorage.getItem('color-theme') === 'dark' ||

@@ -19,5 +19,8 @@ export default defineConfig({
     build: {
       minify: false,
     },
+    ssr: {
+      external: ['node:path'],
+    },
   },
 });
