@@ -11,7 +11,7 @@ import vue from '@astrojs/vue';
 
 // https://astro.build/config
 export default defineConfig({
-  integrations: [tailwind(), auth({ injectEndpoints: false }), vue()],
+  integrations: [tailwind(), vue(), auth()],
   output: 'server',
   adapter: cloudflare(),
 
