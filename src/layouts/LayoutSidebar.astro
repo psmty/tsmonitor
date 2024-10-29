@@ -1,0 +1,32 @@
+---
+import LayoutCommon from './LayoutCommon.astro';
+import NavBarSidebar from './NavBarSidebar.astro';
+
+import { getSession } from "auth-astro/server";
+import FormSignIn from "../components/FormSignIn.astro";
+
+const session = await getSession(Astro.request);
+---
+
+<LayoutCommon>
+
+{
+	session ? (
+  
+	<NavBarSidebar />
+
+	<div class="flex pt-16 overflow-hidden bg-gray-50 dark:bg-gray-900">
+		<div
+			id="main-content"
+			class="relative w-full h-full overflow-y-auto bg-gray-50 dark:bg-gray-900 min-h-screen"
+		>
+			<slot />
+		</div>
+	</div>
+	) : (
+	  <div class="min-h-screen align-middle flex pb-[12vh]">
+		<FormSignIn />
+	  </div>
+	)
+  }
+</LayoutCommon>
