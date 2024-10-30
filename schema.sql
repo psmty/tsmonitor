@@ -1,8 +1,10 @@
 /**
  * https://developers.cloudflare.com/d1/get-started/
+ * run local db:
  * npx wrangler d1 execute tempus-db --local --file=./schema.sql
  *
- * deploy npx wrangler d1 execute tempus-db --remote --file=./schema.sql
+ * deploy:
+ * npx wrangler d1 execute tempus-db --remote --file=./schema.sql
  */
 DROP TABLE IF EXISTS Sites;
 CREATE TABLE IF NOT EXISTS Sites (Url TEXT PRIMARY KEY, Settings JSON);
