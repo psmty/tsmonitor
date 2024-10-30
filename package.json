@@ -28,5 +28,8 @@
     "vite-plugin-lib-inject-css": "^2.1.1",
     "vue": "^3.5.12",
     "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "wrangler": "^3.83.0"
   }
 }
