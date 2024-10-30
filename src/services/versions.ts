@@ -3,7 +3,7 @@ import type { ParsedData, VersionInfo } from "./versions.types";
 
 
 function parseVersionInfo(section: string): VersionInfo {
-  const versionMatch = section.match(/Version:\s*([\d.]+)/);
+  const versionMatch = section.match(/Version:\s*(.+)/);
   const relativeURLMatch = section.match(/Relative URL:\s*(\S+)/);
   const revisionMatch = section.match(/Revision:\s*(\S+)/);
   const dateMatch = section.match(/Date:\s*([^\n]+)/);
@@ -71,7 +71,7 @@ export function parseString(input: string): ParsedData {
     } else if (section.match(/^Server \d+/)) {
       parsedData.serversOnline += section;
     } else if (section.startsWith("SGT5 Public Version")) {
-      const versionMatch = section.match(/SGT5 Public Version:\s*([\d.]+)/);
+      const versionMatch = section.match(/SGT5 Public Version:\s*(.+)/);
       parsedData.sgt5PublicVersion = versionMatch ? versionMatch[1] : "";
     }
   }
