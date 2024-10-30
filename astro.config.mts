@@ -9,13 +9,16 @@ import auth from 'auth-astro';
 
 import vue from '@astrojs/vue';
 
-import db from '@astrojs/db';
 
 // https://astro.build/config
 export default defineConfig({
-  integrations: [tailwind(), vue(), auth(), db()],
+  integrations: [tailwind(), vue(), auth()],
   output: 'server',
-  adapter: cloudflare(),
+  adapter: cloudflare({
+    platformProxy: {
+      enabled: true,
+    }
+  }),
 
   vite: {
     build: {

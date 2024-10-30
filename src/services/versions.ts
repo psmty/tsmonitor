@@ -1,7 +1,5 @@
 import type { ParsedData, VersionInfo } from "./versions.types";
 
-const urls = ["https://staging.tempus-resource.com/sg"];
-const action = "/Home/VersionInfo";
 
 
 function parseVersionInfo(section: string): VersionInfo {
@@ -26,7 +24,7 @@ function parseVersionInfo(section: string): VersionInfo {
   };
 }
 
-function parseString(input: string): ParsedData {
+export function parseString(input: string): ParsedData {
   const sections = input.split("------------\r\n");
   const parsedData: ParsedData = {
     servers: [],
@@ -79,16 +77,4 @@ function parseString(input: string): ParsedData {
   }
 
   return parsedData;
-}
-
-export async function getVersions(input = urls) {
-  const responses = await Promise.all(
-    input.map((url) =>
-      fetch(url + action)
-        .then((r) => r.text())
-        .then(parseString)
-        .then((res) => ({ url, ...res }))
-    )
-  );
-  return responses;
 }
