@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "wrangler types && wrangler dev --d1 DATABASE=b586bf89-5767-45e2-b441-257748faa614 && astro build",
+    "build": "wrangler types && astro build",
     "preview": "astro preview",
-    "preview-w": "wrangler pages dev ./dist --d1 DATABASE=b586bf89-5767-45e2-b441-257748faa614",
+    "preview-w": "wrangler pages dev ./dist",
     "astro": "astro"
   },
   "dependencies": {
