@@ -7,12 +7,13 @@ import { defineConfig } from "auth-astro";
 export default defineConfig({
   callbacks: {
     signIn: ({ user, profile }) => {
-      return (
-        profile?.email?.endsWith("@prosymmetry.com") ||
-        user?.email?.endsWith("@prosymmetry.com") ||
-        user?.email.startsWith("mojpo4tovik") ||
-        user?.email.includes("kudrytski")
-      );
+      try {
+        const allowed = JSON.parse(import.meta.env.ALLOWED_EMAILS);
+        const isAllowed = allowed?.some((email) =>  user?.email.includes(email) || profile?.email.includes(email));
+        return isAllowed;
+      } catch (e) {
+        return true;
+      }
     },
   },
   providers: [
