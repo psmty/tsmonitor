@@ -40,6 +40,7 @@ export function parseString(input: string): ParsedData {
     advancedReportService: "",
     serversOnline: "",
     sgt5PublicVersion: "",
+    licenseInfo: "",
   };
 
   for (let section of sections) {
@@ -73,6 +74,8 @@ export function parseString(input: string): ParsedData {
     } else if (section.startsWith("SGT5 Public Version")) {
       const versionMatch = section.match(/SGT5 Public Version:\s*(.+)/);
       parsedData.sgt5PublicVersion = versionMatch ? versionMatch[1] : "";
+    } else if (section.startsWith("[l:")) {  // Check for license info
+      parsedData.licenseInfo = section;
     }
   }
 

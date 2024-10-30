@@ -5,7 +5,7 @@
     <button
         class="inline-flex items-center ml-2 px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
     @click="loadSource">Test</button>
-    <VGrid ref="grid" readonly :columns="columns" :source="source" :plugins="plugins" hide-attribution :theme="theme" />
+    <VGrid ref="grid" resize readonly :columns="columns" :source="source" :plugins="plugins" hide-attribution :theme="theme" />
 </template>
 <script lang="ts" setup>
 import { VGrid, type ColumnRegular } from '@revolist/vue3-datagrid'
@@ -30,6 +30,10 @@ const columns: ColumnRegular[] = [{
     cellTemplate: (_, { value }) => {
         return (value as ParsedData['servers'])?.map(v => v.version).join(', ')
     }
+}, {
+    name: 'License',
+    prop: 'licenseInfo',
+    size: 350
 }]
 const theme = ref('compact')
 const source = ref<Array<ParsedData>>([])

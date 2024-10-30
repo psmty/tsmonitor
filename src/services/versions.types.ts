@@ -21,4 +21,5 @@ export interface ParsedData {
   advancedReportService: string;
   serversOnline: string;
   sgt5PublicVersion: string;
+  licenseInfo: string;
 }
