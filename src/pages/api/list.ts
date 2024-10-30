@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+import { db } from '../../db';
 import { parseString } from "../../services";
 const action = "/Home/VersionInfo";
 
@@ -15,16 +16,17 @@ async function getVersions(input: string[] = []) {
 }
 
 export const GET: APIRoute = async ({ locals, request }) => {
-  // @ts-ignore
-  const dbdata = await locals.runtime.env.DATABASE.prepare(
-    "SELECT * FROM Sites"
-  ).run();
+  try {
+    const res = await db.query('SELECT * FROM sites;');
+    
+  const data = await getVersions(res.rows.map((r: { url: string }) => r.url));
 
-  const data = await getVersions(dbdata.results.map((r: { Url: string }) => r.Url));
 
-  return new Response(
-    JSON.stringify(data)
-  );
+    return new Response(JSON.stringify(data));
+  } catch (error) {
+    console.error('Database connection error:', error);
+    return new Response('Failed to fetch data from PostgreSQL', { status: 500 });
+  }
 };
 
 export const POST: APIRoute = async ({ props, locals, request }) => {

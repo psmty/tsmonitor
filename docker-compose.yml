@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile # Assume your Dockerfile for the Node.js app is named 'Dockerfile' and located in the same directory
+    container_name: tsmonitor
+    image: tsmonitor
+    ports:
+      - 4322:4321
+    env_file:
+      - .env
+    depends_on:
+      - db # Ensures db container starts before the app
+
+  db:
+    image: postgres:latest # Use the official PostgreSQL image
+    container_name: postgres-db
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT} # Map PostgreSQL's default port
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER} # PostgreSQL username
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD} # PostgreSQL password
+      POSTGRES_DB: ${POSTGRES_DB} # Name of the database
+    volumes:
+      - pgdata:/var/lib/postgresql/data # Persist data in a Docker volume
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com        # Set pgAdmin default email
+      PGADMIN_DEFAULT_PASSWORD: admin               # Set pgAdmin default password
+    ports:
+      - 5050:80  # Expose pgAdmin on http://localhost:5050
+    depends_on:
+      - db
+
+volumes:
+  pgdata:
