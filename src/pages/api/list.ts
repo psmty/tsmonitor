@@ -16,12 +16,22 @@ export const GET: APIRoute = async ({ locals, request }) => {
 
 export const POST: APIRoute = async ({ props, locals, request }) => {
   const urls: string[] = await request.json();
+  const { rows: savedRows } = await db.query("SELECT * FROM sites;");
+
+  const filterUrls = new Set(savedRows.map((row) => row.url));
+  const filteredUrls = urls.filter((url) => !filterUrls.has(url));
 
   try {
-    const values = urls.map((value, idx) => `($${idx + 1})`).join(',');
+    if (!filteredUrls.length) {
+      return new Response("No new URL was added.", {
+        status: 200,
+      });
+    }
+
+    const values = filteredUrls.map((value, idx) => `($${idx + 1})`).join(',');
     const sql = `INSERT INTO sites ("url") VALUES ${values}`;
-    // TODO: Remove duplicates
-    await db.query(sql, urls);
+
+    await db.query(sql, filteredUrls);
 
     return new Response("Saved to PostgreSQL", {
       status: 200,
