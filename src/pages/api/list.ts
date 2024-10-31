@@ -15,12 +15,23 @@ export const GET: APIRoute = async ({ locals, request }) => {
 };
 
 export const POST: APIRoute = async ({ props, locals, request }) => {
-  return new Response(
-    JSON.stringify({
-      data: await request.json(),
-      message: "This was a POST!",
-    })
-  );
+  const urls: string[] = await request.json();
+
+  try {
+    const values = urls.map((value, idx) => `($${idx + 1})`).join(',');
+    const sql = `INSERT INTO sites ("url") VALUES ${values}`;
+    // TODO: Remove duplicates
+    await db.query(sql, urls);
+
+    return new Response("Saved to PostgreSQL", {
+      status: 200,
+    });
+  } catch (error) {
+    console.error("Database connection error:", error);
+    return new Response("Failed to fetch data from PostgreSQL", {
+      status: 500,
+    });
+  }
 };
 
 export const DELETE: APIRoute = ({ request }) => {
