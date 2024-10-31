@@ -1,5 +1,5 @@
 /** @type {import("prettier").Config} */
-const config = {
+export const config = {
   printWidth: 120,
   tabWidth: 2,
   useTabs: false,
@@ -20,4 +20,3 @@ const config = {
   singleAttributePerLine: true,
 };
 
-module.exports = config;

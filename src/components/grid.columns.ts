@@ -1,5 +1,5 @@
 import type { ColumnRegular } from '@revolist/vue3-datagrid';
-import type { ParsedData } from '../services/versions.types';
+import type { ParsedData } from '../services';
 
 export const GRID_COLUMNS: ColumnRegular[] = [
   {
@@ -24,12 +24,12 @@ export const GRID_COLUMNS: ColumnRegular[] = [
   },
   {
     name: 'SG Users',
-    prop: 'sgusers',
+    prop: 'sgUsers',
     size: 150,
   },
   {
     name: 'TS Users',
-    prop: 'tsusers',
+    prop: 'tsUsers',
     size: 150,
   },
   {
@@ -48,16 +48,16 @@ export const GRID_COLUMNS: ColumnRegular[] = [
     size: 150,
   },
   {
+    name: 'License',
+    prop: 'licenseInfo',
+    size: 350,
+  },
+  {
     name: 'Backend',
     prop: 'servers',
     size: 350,
     cellTemplate: (_, { value }) => {
-      return (value as ParsedData['servers'])?.map((v) => v.version).join(', ');
+      return (value as ParsedData['servers'])?.map((v) => v.name).join(', ');
     },
-  },
-  {
-    name: 'License',
-    prop: 'licenseInfo',
-    size: 350,
   },
 ];

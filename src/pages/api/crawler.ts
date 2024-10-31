@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { parseString } from "../../services";
+import { parseHtmlString } from "../../services/parser";
 const action = "/Home/VersionInfo";
 
 async function getVersions(input: string[] = []) {
@@ -7,7 +7,7 @@ async function getVersions(input: string[] = []) {
     input.map((url) =>
       fetch(url + action)
         .then((r) => r.text())
-        .then(parseString)
+        .then(parseHtmlString)
         .then((res) => ({ ...res, url }))
     )
   );
@@ -21,8 +21,10 @@ export const POST: APIRoute = async ({ locals, request }) => {
 
     return new Response(JSON.stringify(data));
   } catch (error) {
-    return new Response("Failed to fetch data", {
+    console.error(error);
+    return new Response(JSON.stringify(error), {
       status: 500,
+      statusText: "Failed to fetch data",
     });
   }
 };

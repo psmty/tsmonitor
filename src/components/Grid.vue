@@ -4,7 +4,7 @@
 <script lang="ts" setup>
 import { VGrid } from '@revolist/vue3-datagrid'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import type { ParsedData } from '../services/versions.types';
+import type { ParsedData } from '../services';
 import { GRID_COLUMNS } from './grid.columns';
 const grid = ref<{ $el: HTMLRevoGridElement } | null>(null);
 
