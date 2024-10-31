@@ -2,7 +2,7 @@
   <div
     class="flex flex-col grow bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 dark:bg-gray-800"
   >
-    <ImportUrlsButton @saveUrls="saveUrlsToDataBase"/>
+    <ImportUrlsButton @saveUrls="saveUrlsToDataBase" class="my-5 mx-5 "/>
     <Grid :data="data" @load-source="loadSource"/>
   </div>
 </template>
