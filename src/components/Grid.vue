@@ -4,6 +4,8 @@
     ref="grid"
     resize
     readonly
+    filter
+    can-move-columns
     :columns="columns"
     :source="source"
     hide-attribution
