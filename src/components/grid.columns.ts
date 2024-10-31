@@ -51,6 +51,12 @@ export const GRID_COLUMNS: ColumnRegular[] = [
     name: 'License',
     prop: 'licenseInfo',
     size: 350,
+    cellTemplate: (_, { value }) => {
+      if (!value) {
+        return '';
+      }
+      return JSON.stringify(value, null, 2);
+    }
   },
   {
     name: 'Backend',
