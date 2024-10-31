@@ -1,51 +1,71 @@
 import type { ColumnRegular } from '@revolist/vue3-datagrid';
-import type { ParsedData } from '../services';
 
 export const GRID_COLUMNS: ColumnRegular[] = [
   {
     name: 'Customer',
     prop: 'customer',
     size: 300,
+    sortable: true,
   },
   {
     name: 'Instance',
     prop: 'url',
     size: 300,
+    sortable: true,
   },
   {
     name: 'Integrations',
     prop: 'integrations',
     size: 300,
+    sortable: true,
   },
   {
     name: 'Version',
     prop: 'sgt5PublicVersion',
     size: 150,
+    sortable: true,
   },
   {
     name: 'SG Users',
     prop: 'sgUsers',
     size: 150,
+    sortable: true,
   },
   {
     name: 'TS Users',
     prop: 'tsUsers',
     size: 150,
-  },
-  {
-    name: 'RDP',
-    prop: 'rdp',
-    size: 150,
+    sortable: true,
   },
   {
     name: 'Online',
     prop: 'online',
     size: 150,
+    sortable: true,
   },
   {
-    name: 'Sync service',
-    prop: 'sync',
+    name: 'Sync',
+    prop: 'syncRunning',
     size: 150,
+    sortable: true,
+  },
+  {
+    name: 'I+',
+    prop: 'insightsRunning',
+    size: 150,
+    sortable: true,
+  },
+  {
+    name: 'Cleanup',
+    prop: 'cleanupRunning',
+    size: 150,
+    sortable: true,
+  },
+  {
+    name: 'Api notification',
+    prop: 'apinotificationRunning',
+    size: 150,
+    sortable: true,
   },
   {
     name: 'License',
@@ -59,11 +79,9 @@ export const GRID_COLUMNS: ColumnRegular[] = [
     }
   },
   {
-    name: 'Backend',
-    prop: 'servers',
+    name: 'Backend date',
+    prop: 'date',
     size: 350,
-    cellTemplate: (_, { value }) => {
-      return (value as ParsedData['servers'])?.map((v) => v.name).join(', ');
-    },
+    sortable: true,
   },
 ];

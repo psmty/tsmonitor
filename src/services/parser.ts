@@ -1,6 +1,4 @@
-import { parse } from "vue/compiler-sfc";
 import type {
-  ServiceInfo,
   ServerInfo,
   DocumentInfo,
   VersionInfo,
@@ -39,37 +37,6 @@ function parseLicenseLine(line: string) {
   return licenseInfo;
 }
 
-function parseServiceEntry(serviceEntry: string) {
-  const serviceTypeRegex = /(\w+ service):\n\n(.*?)\n/;
-  const metadataRegex = /Relative URL: (.*?)\nRevision: (.*?)\nDate: (.*?)\n/;
-  const revisionAndServerRegex = /Latest Origin Revision: (.*?)\nRunning on (.*?)\n/;
-  // 1. Match Service Type and Description
-  const serviceTypeMatch = serviceEntry.match(serviceTypeRegex);
-  const serviceName = serviceTypeMatch ? serviceTypeMatch[1] : null;
-  const description = serviceTypeMatch ? serviceTypeMatch[2] : null;
-
-  // 2. Match Metadata
-  const metadataMatch = serviceEntry.match(metadataRegex);
-  const relativeUrl = metadataMatch ? metadataMatch[1] : null;
-  const revision = metadataMatch ? metadataMatch[2] : null;
-  const date = metadataMatch ? metadataMatch[3] : null;
-
-  // 3. Match Latest Origin Revision and Running Server
-  const revisionAndServerMatch = serviceEntry.match(revisionAndServerRegex);
-  const latestOriginRevision = revisionAndServerMatch ? revisionAndServerMatch[1] : null;
-  const runningOnServer = revisionAndServerMatch ? revisionAndServerMatch[2] : null;
-
-  // Constructing the result object
-  return {
-      serviceName,
-      description,
-      relativeUrl,
-      revision,
-      date,
-      latestOriginRevision,
-      runningOnServer
-  };
-}
 
 
 // Function to find and parse all license fragments in a larger string
@@ -78,6 +45,32 @@ function extractLicensesFromString(input: string) {
   if (!matches?.[0]) return undefined; // Return empty array if no license fragments are found
 
   return parseLicenseLine(matches[0]);
+}
+
+
+function extractTextAfterDate(input = ''): string | null {
+  // Regex to match text after "Date:" up to the end of the line
+  const dateRegex = /Date:\s*(.*)$/m;
+  
+  // Execute the regex to capture the text
+  const match = dateRegex.exec(input);
+
+  // Return the captured text, or null if no match found
+  return match ? match[1].trim() : null;
+}
+
+
+function services(htmlString: string) {
+  const sections = htmlString.split("------------");
+  const backend = sections.splice(0, 1)?.[0];
+
+  return {
+    date: extractTextAfterDate(backend),
+    syncRunning: /Sync service:[\s\S]*?Relative URL:[\s\S]*?Running on\s+Server \d+/g.test(htmlString),
+    cleanupRunning: /Cleanup service:\s*SG\.Cleanup\.Service/.test(htmlString),
+    insightsRunning: /Advanced Report service:\s*SG\.InsightPlus\.Sync\.Service/.test(htmlString),
+    apinotificationRunning: /Api notification service:\s*SGT5\.ApiNotifications\.Service/.test(htmlString),
+  };
 }
 
 export function parseHtmlString(htmlString: string) {
@@ -141,9 +134,9 @@ export function parseHtmlString(htmlString: string) {
   }
 
   return {
+    htmlString,
     modules,
     uiVersions,
-    services: parseServiceEntry(htmlString),
     servers,
     documentInfo,
     sgt5PublicVersion,
@@ -152,5 +145,6 @@ export function parseHtmlString(htmlString: string) {
       sgUsers: (licenseInfo.sg?.[licenseInfo.sg.length - 1] || 0) - (licenseInfo.sg?.[0] || 0),
       tsUsers: (licenseInfo.ts?.[licenseInfo.ts.length - 1] || 0) - (licenseInfo.ts?.[0] || 0),
     } : {}),
+    ...services(htmlString),
   };
 }
