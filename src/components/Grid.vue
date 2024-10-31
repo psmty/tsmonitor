@@ -33,7 +33,6 @@ onMounted(() => {
     document.addEventListener('dark-mode', () => {
         checkTheme()
     })
-    emits('loadSource');
 })
 const source = computed(() => props.data.values())
 </script>
