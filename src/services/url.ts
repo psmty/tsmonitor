@@ -9,3 +9,11 @@ export function addHttpsProtocol(url: string) {
     }
     return url;
 }
+
+export function addDefaultDomainToString(domain: string) {
+  if (domain.includes(' ')) {
+    return null;
+  }
+
+  return `https://${domain}.tempus-resource.com/sg`
+}

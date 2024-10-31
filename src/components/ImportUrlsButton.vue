@@ -4,7 +4,7 @@
 
 <script setup lang="ts">
 import Papa from 'papaparse';
-import {addHttpsProtocol, validateUrl} from '../services';
+import {addDefaultDomainToString, addHttpsProtocol, validateUrl} from '../services';
 
 const emits = defineEmits<{
   (e: 'loadUrls'): void;
@@ -14,9 +14,13 @@ const parseUrls = (data: string[][]) => {
   const urls: string[] = [];
 
   for (const item of data) {
-    const url = item[0];
+    let url: string|null = item[0];
 
     if (!validateUrl(url)) {
+      url = addDefaultDomainToString(url);
+    }
+
+    if (url === null) {
       continue;
     }
 
@@ -32,6 +36,7 @@ const saveUrlsToDataBase = async (data: string[][]) => {
     method: 'POST', body: JSON.stringify(urls)
   });
   console.log(response, 'urls');
+  // TODO: Load urls
 }
 
 const parseCsv = (e: Event & {target: HTMLInputElement}) => {
