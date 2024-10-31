@@ -35,7 +35,9 @@ const saveUrlsToDataBase = async (data: string[][]) => {
   const response = await fetch("/api/list", {
     method: 'POST', body: JSON.stringify(urls)
   });
-  console.log(response, 'urls');
+
+  const newAddedUrls = await response.json();
+  console.log(newAddedUrls, 'urls');
   // TODO: Load urls
 }
 

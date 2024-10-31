@@ -33,9 +33,7 @@ export const POST: APIRoute = async ({ props, locals, request }) => {
 
     await db.query(sql, filteredUrls);
 
-    return new Response("Saved to PostgreSQL", {
-      status: 200,
-    });
+    return new Response(JSON.stringify(filteredUrls));
   } catch (error) {
     console.error("Database connection error:", error);
     return new Response("Failed to fetch data from PostgreSQL", {
