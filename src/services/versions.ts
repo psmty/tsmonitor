@@ -27,6 +27,7 @@ function parseVersionInfo(section: string): VersionInfo {
 export function parseString(input: string): ParsedData {
   const sections = input.split("------------\r\n");
   const parsedData: ParsedData = {
+    url: "",
     servers: [],
     sgUI: "",
     tempusUI: "",

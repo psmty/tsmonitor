@@ -1,20 +1,12 @@
 <template>
-    <button
-        class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-    @click="exportToExcel">Export</button>
-    <button
-        class="inline-flex items-center ml-2 px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-    @click="loadSource">Test</button>
-    <VGrid ref="grid" resize readonly :columns="columns" :source="source" :plugins="plugins" hide-attribution :theme="theme" />
+    <VGrid ref="grid" resize readonly :columns="columns" :source="source" hide-attribution :theme="theme" />
 </template>
 <script lang="ts" setup>
 import { VGrid, type ColumnRegular } from '@revolist/vue3-datagrid'
-import { onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import type { ParsedData } from '../services/versions.types';
-import { ExportExcelPlugin } from './plugins/export-excel';
 const grid = ref<{ $el: HTMLRevoGridElement } | null>(null);
 
-const plugins = [ExportExcelPlugin]
 const columns: ColumnRegular[] = [{
     name: 'URL',
     prop: 'url',
@@ -36,7 +28,6 @@ const columns: ColumnRegular[] = [{
     size: 350
 }]
 const theme = ref('compact')
-const source = ref<Array<ParsedData>>([])
 
 const checkTheme = () => {
     if (
@@ -46,17 +37,6 @@ const checkTheme = () => {
                 theme.value = 'compact'
             }
 }
-const exportConfig = { sheetName: 'my-file.xlsx' }
-
-const exportToExcel = async () => {
-  if (grid.value) {
-    const plugins = await grid.value.$el.getPlugins()
-    const exportPlugin = plugins.find(
-      (plugin) => plugin instanceof ExportExcelPlugin
-    ) as ExportExcelPlugin
-    exportPlugin?.export(exportConfig)
-  }
-}
 onMounted(() => {
     checkTheme()
     document.addEventListener('dark-mode', () => {
@@ -64,8 +44,31 @@ onMounted(() => {
     })
     loadSource()
 })
+const source = computed(() => data.value.values())
+const data = ref(new Map<string, ParsedData>())
+
+const crawler = async (urls: string[] = []) => {
+    const response = await fetch("/api/crawler", {
+        method: 'POST', body: JSON.stringify(urls)});
+    const sites: ParsedData[] = await response.json();
+    console.log(sites)
+    data.value = new Map(sites.map(v => [v.url, v]))
+}
+
+let interval: NodeJS.Timeout | null = null
 const loadSource = async () => {
     const response = await fetch("/api/list");
-    source.value = await response.json();
+    const sites: ParsedData[] = await response.json();
+    data.value = new Map(sites.map(v => [v.url, v]))
+    const urls: string[] = Array.from(data.value.keys())
+
+    interval = setInterval(() => crawler(urls), 5 * 60 * 1000)
+    crawler(urls)
 }
+
+onBeforeUnmount(() => {
+    if (interval) {
+        clearInterval(interval)
+    }
+})
 </script>
