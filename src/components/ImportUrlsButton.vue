@@ -7,7 +7,7 @@ import Papa from 'papaparse';
 import {addDefaultDomainToString, addHttpsProtocol, validateUrl} from '../services';
 
 const emits = defineEmits<{
-  (e: 'loadUrls'): void;
+  (e: 'saveUrls', urls: string[]): void;
 }>()
 
 const parseUrls = (data: string[][]) => {
@@ -30,16 +30,6 @@ const parseUrls = (data: string[][]) => {
   return urls;
 }
 
-const saveUrlsToDataBase = async (data: string[][]) => {
-  const urls = parseUrls(data);
-  const response = await fetch("/api/list", {
-    method: 'POST', body: JSON.stringify(urls)
-  });
-
-  const newAddedUrls = await response.json();
-  console.log(newAddedUrls, 'urls');
-  // TODO: Load urls
-}
 
 const parseCsv = (e: Event & {target: HTMLInputElement}) => {
   const file = e.target.files?.[0];
@@ -50,7 +40,8 @@ const parseCsv = (e: Event & {target: HTMLInputElement}) => {
 
   Papa.parse<string[], File>(file, {
     complete(results) {
-      saveUrlsToDataBase(results.data);
+      const urls = parseUrls(results.data);
+      emits('saveUrls', urls)
     },
     error(res) {
       console.error(res);
