@@ -1,32 +1,14 @@
 <template>
-    <VGrid ref="grid" resize readonly :columns="columns" :source="source" hide-attribution :theme="theme" />
+    <VGrid class="grow" ref="grid" resize readonly :columns="columns" :source="source" hide-attribution :theme="theme" />
 </template>
 <script lang="ts" setup>
-import { VGrid, type ColumnRegular } from '@revolist/vue3-datagrid'
+import { VGrid } from '@revolist/vue3-datagrid'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import type { ParsedData } from '../services/versions.types';
+import { GRID_COLUMNS } from './grid.columns';
 const grid = ref<{ $el: HTMLRevoGridElement } | null>(null);
 
-const columns: ColumnRegular[] = [{
-    name: 'URL',
-    prop: 'url',
-    size: 300,
-}, {
-    name: 'Public Version',
-    prop: 'sgt5PublicVersion',
-    size: 150
-}, {
-    name: 'Backend',
-    prop: 'servers',
-    size: 350,
-    cellTemplate: (_, { value }) => {
-        return (value as ParsedData['servers'])?.map(v => v.version).join(', ')
-    }
-}, {
-    name: 'License',
-    prop: 'licenseInfo',
-    size: 350
-}]
+const columns = [...GRID_COLUMNS]
 const theme = ref('compact')
 
 const checkTheme = () => {
