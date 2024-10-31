@@ -3,7 +3,7 @@
 </template>
 <script lang="ts" setup>
 import { VGrid, type ColumnRegular } from '@revolist/vue3-datagrid'
-import { onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import type { ParsedData } from '../services/versions.types';
 const grid = ref<{ $el: HTMLRevoGridElement } | null>(null);
 
@@ -28,7 +28,6 @@ const columns: ColumnRegular[] = [{
     size: 350
 }]
 const theme = ref('compact')
-const source = ref<Array<ParsedData>>([])
 
 const checkTheme = () => {
     if (
@@ -45,8 +44,31 @@ onMounted(() => {
     })
     loadSource()
 })
+const source = computed(() => data.value.values())
+const data = ref(new Map<string, ParsedData>())
+
+const crawler = async (urls: string[] = []) => {
+    const response = await fetch("/api/crawler", {
+        method: 'POST', body: JSON.stringify(urls)});
+    const sites: ParsedData[] = await response.json();
+    console.log(sites)
+    data.value = new Map(sites.map(v => [v.url, v]))
+}
+
+let interval: NodeJS.Timeout | null = null
 const loadSource = async () => {
     const response = await fetch("/api/list");
-    source.value = await response.json();
+    const sites: ParsedData[] = await response.json();
+    data.value = new Map(sites.map(v => [v.url, v]))
+    const urls: string[] = Array.from(data.value.keys())
+
+    interval = setInterval(() => crawler(urls), 5 * 60 * 1000)
+    crawler(urls)
 }
+
+onBeforeUnmount(() => {
+    if (interval) {
+        clearInterval(interval)
+    }
+})
 </script>

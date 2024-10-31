@@ -1,6 +1,4 @@
-// @ts-check
 import { defineConfig } from 'astro/config';
-
 import tailwind from '@astrojs/tailwind';
 
 import node from '@astrojs/node';
@@ -18,7 +16,8 @@ export default defineConfig({
   }),
   vite: {
     ssr: {
-      noExternal: true
+      // true for production
+      noExternal: import.meta.env.PROD ? true : undefined
     },
     // define: {
     //   "process.env": process.env

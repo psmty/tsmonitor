@@ -8,6 +8,7 @@ export interface VersionInfo {
 }
 
 export interface ParsedData {
+  url: string;
   servers: VersionInfo[];
   sgUI: string;
   tempusUI: string;
