@@ -88,7 +88,8 @@ const editRow = async (editFields: SitesData) => {
   updateSiteSettings(siteData);
 };
 
+const grid = ref<(typeof Grid|null)>(null)
 const exportToCsv = () => {
-
+  grid.value?.exportToCSV();
 }
 </script>

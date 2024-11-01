@@ -15,8 +15,7 @@
   />
 </template>
 <script lang="ts" setup>
-import {type ColumnRegular, VGrid, VGridVueTemplate} from "@revolist/vue3-datagrid";
-// import ExportFilePlugin from '@revolist/revogrid/dist/types/plugins/export/export.plugin';
+import {type ColumnRegular, type ExportFilePlugin, VGrid, VGridVueTemplate} from "@revolist/vue3-datagrid";
 import {computed, onMounted, ref} from "vue";
 import type {Site} from "../services";
 import {GRID_COLUMNS} from "./grid.columns";
@@ -68,23 +67,20 @@ const onEditRow = (e: CustomEvent) => {
 };
 
 const getExportingPlugin = async () => {
-  // const plugins = await grid.value?.$el.getPlugins() as ExportFilePlugin;
-  //   const exportPlugin: ExportFilePlugin | undefined = plugins.find(p => p.exportFile);
+  const plugins = await grid.value?.$el.getPlugins() as ExportFilePlugin;
+  const exportPlugin: ExportFilePlugin | undefined = plugins.find(p => p.exportFile);
 
-  // const plugins = await grid.value?.$el.getPlugins() as Array<unknown>;
-  //   const exportPlugin = plugins.find(p => p.exportFile);
-  // console.log(exportPlugin, 'exportPlugin');
-  // return exportPlugin ?? null;
+  return exportPlugin ?? null;
 }
 
 const exportToCSV = async () => {
-  // const exportPlugin = getExportingPlugin();
-  //
-  // if (!exportPlugin) {
-  //   return;
-  // }
-  //
-  // await exportPlugin.exportFile({filename: `Tempus monitor - ${new Date()}`});
+  const exportPlugin = await getExportingPlugin();
+
+  if (!exportPlugin) {
+    return;
+  }
+
+  await exportPlugin.exportFile({filename: `Tempus monitor - ${new Date()}`});
 }
 
 defineExpose({
