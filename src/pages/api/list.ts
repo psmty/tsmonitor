@@ -1,39 +1,70 @@
 import type { APIRoute } from "astro";
-import { parseString } from "../../services";
-const action = "/Home/VersionInfo";
-
-async function getVersions(input: string[] = []) {
-  const responses = await Promise.all(
-    input.map((url) =>
-      fetch(url + action)
-        .then((r) => r.text())
-        .then(parseString)
-        .then((res) => ({ url, ...res }))
-    )
-  );
-  return responses;
-}
+import { db } from "../../db";
+import type {SitesData} from '../../services';
 
 export const GET: APIRoute = async ({ locals, request }) => {
-  // @ts-ignore
-  const dbdata = await locals.runtime.env.DATABASE.prepare(
-    "SELECT * FROM Sites"
-  ).run();
+  try {
+    const { rows } = await db.query("SELECT * FROM sites;");
 
-  const data = await getVersions(dbdata.results.map((r: { Url: string }) => r.Url));
-
-  return new Response(
-    JSON.stringify(data)
-  );
+    return new Response(JSON.stringify(rows));
+  } catch (error) {
+    console.error("Database connection error:", error);
+    return new Response("Failed to fetch data from PostgreSQL", {
+      status: 500,
+    });
+  }
 };
 
 export const POST: APIRoute = async ({ props, locals, request }) => {
-  return new Response(
-    JSON.stringify({
-      data: await request.json(),
-      message: "This was a POST!",
-    })
-  );
+  // TODO: Add ability to save settings
+  const urls: string[] = await request.json();
+  const { rows: savedRows } = await db.query("SELECT * FROM sites;");
+
+  const filterUrls = new Set(savedRows.map((row) => row.url));
+  const filteredUrls = urls.filter((url) => !filterUrls.has(url));
+
+  try {
+    if (!filteredUrls.length) {
+      return new Response("No new URL was added.", {
+        status: 200,
+      });
+    }
+
+    const values = filteredUrls.map((value, idx) => `($${idx + 1})`).join(',');
+    const sql = `INSERT INTO sites ("url") VALUES ${values}`;
+
+    await db.query(sql, filteredUrls);
+// TODO: Return rows all  data
+    return new Response(JSON.stringify(filteredUrls));
+  } catch (error) {
+    console.error("Database connection error:", error);
+    return new Response("Failed to fetch data from PostgreSQL", {
+      status: 500,
+    });
+  }
+};
+
+export const PUT: APIRoute = async ({ props, locals, request }) => {
+    const sql = `
+      UPDATE sites
+      SET settings = $1
+      WHERE url = $2
+      RETURNING *;
+    `;
+
+  try {
+    const settings: SitesData = await request.json();
+
+    const values = [settings.settings, settings.url]
+    await db.query(sql, values);
+
+    return new Response(JSON.stringify(settings));
+  } catch (error) {
+    console.error("Database connection error:", error);
+    return new Response("Failed to fetch data from PostgreSQL", {
+      status: 500,
+    });
+  }
 };
 
 export const DELETE: APIRoute = ({ request }) => {

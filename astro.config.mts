@@ -1,10 +1,7 @@
-// @ts-check
 import { defineConfig } from 'astro/config';
-
 import tailwind from '@astrojs/tailwind';
 
-// import node from '@astrojs/node';
-import cloudflare from '@astrojs/cloudflare';
+import node from '@astrojs/node';
 import auth from 'auth-astro';
 
 import vue from '@astrojs/vue';
@@ -14,21 +11,16 @@ import vue from '@astrojs/vue';
 export default defineConfig({
   integrations: [tailwind(), vue(), auth()],
   output: 'server',
-  adapter: cloudflare({
-    platformProxy: {
-      enabled: true,
-    }
+  adapter: node({
+    mode: 'standalone',
   }),
-
   vite: {
-    build: {
-      minify: false,
-    },
     ssr: {
-      external: ['node:path'],
+      // true for production
+      noExternal: import.meta.env.PROD ? true : undefined
     },
-    define: {
-      "process.env": process.env
-    }
+    // define: {
+    //   "process.env": process.env
+    // }
   },
 });
