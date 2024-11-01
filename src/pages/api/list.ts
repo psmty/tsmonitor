@@ -34,15 +34,30 @@ export const POST: APIRoute = async ({ props, locals, request }) => {
   }
 
   try {
-    const values: Array<unknown> = [];
-    const placeholders = newSites.map((value, idx) =>  {
-      const baseIndex = idx * 2;
-      values.push(value.url, value.settings); // Push url and second_column values
-      return `($${baseIndex + 1}, $${baseIndex + 2})`
-    }).join(',');
-    const sql = `INSERT INTO sites ("url", "settings") VALUES ${placeholders}`;
+    if (!newSites.length && !existingSites.size) {
+      return new Response("No new URL was added.", {
+        status: 200,
+      });
+    }
 
-    await db.query(sql, values);
+    // Save new Sites
+    if (newSites.length) {
+      const values: Array<unknown> = [];
+      const placeholders = newSites.map((value, idx) => {
+        const baseIndex = idx * 2;
+        values.push(value.url, value.settings); // Push url and second_column values
+        return `($${baseIndex + 1}, $${baseIndex + 2})`
+      }).join(',');
+      const sql = `INSERT INTO sites ("url", "settings") VALUES ${placeholders}`;
+
+      await db.query(sql, values);
+    }
+
+    // Merge new values
+    if (sitesToMerge.length) {
+// TODO: Implement merging
+    }
+
 // TODO: Return rows all  data
     return new Response(JSON.stringify(newSites));
   } catch (error) {
