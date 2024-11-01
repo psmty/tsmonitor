@@ -18,7 +18,7 @@ const session = await getSession(Astro.request);
 	<div class="flex pt-16 overflow-hidden bg-gray-50 dark:bg-gray-900">
 		<div
 			id="main-content"
-			class="relative w-full h-full flex flex-col overflow-y-hidden bg-gray-50 dark:bg-gray-900 min-h-screen"
+			class="relative w-full h-full flex flex-col overflow-y-hidden bg-gray-50 dark:bg-gray-900"
 		>
 			<slot />
 		</div>
@@ -30,3 +30,10 @@ const session = await getSession(Astro.request);
 	)
   }
 </LayoutCommon>
+
+<style>
+	#main-content {
+		max-height: calc(100vh - 70px);
+		min-height: calc(100vh - 70px);
+	}
+</style>
