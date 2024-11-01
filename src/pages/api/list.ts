@@ -4,12 +4,13 @@ import type {SitesData} from '../../services';
 
 export const GET: APIRoute = async ({ locals, request }) => {
   try {
-    const { rows } = await db.query("SELECT * FROM sites;");
+    // const { rows } = await db.query("SELECT * FROM sites;");
 
     // cloudflare
-    // const { results: rows } = await locals.runtime.env.DATABASE.prepare(
-    //   "SELECT * FROM sites"
-    // ).run();
+    // @ts-ignore
+    const { results: rows } = await locals.runtime.env.DATABASE.prepare(
+      "SELECT * FROM sites"
+    ).run();
 
     return new Response(JSON.stringify(rows));
   } catch (error) {
