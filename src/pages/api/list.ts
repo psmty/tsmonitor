@@ -4,7 +4,7 @@ import type {SitesData} from '../../services';
 export const GET: APIRoute = async ({ locals, request }) => {
   try {
     const { results: rows } = await locals.runtime.env.DATABASE.prepare("SELECT * FROM sites;").run();
-
+    rows.map((row) => row.settings = JSON.parse(row.settings));
     return new Response(JSON.stringify(rows));
   } catch (error) {
     console.error("Database connection error:", error);
