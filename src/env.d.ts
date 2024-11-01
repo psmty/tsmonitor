@@ -1,6 +1,8 @@
 /// <reference path="../.astro/types.d.ts" />
 
-type KVNamespace = import("@cloudflare/workers-types").KVNamespace;
+type KVNamespace = import("@cloudflare/workers-types").KVNamespace & {
+  prepare: (sql: string, values?: any[]) => Promise<{ results: any[] }>;
+};
 type ENV = {
   // replace `MY_KV` with your KV namespace
   DATABASE: KVNamespace;
@@ -9,6 +11,7 @@ type ENV = {
 // use a default runtime configuration (advanced mode).
 type Runtime = import("@astrojs/cloudflare").Runtime<ENV>;
 declare namespace App {
-  interface Locals extends Runtime {}
+  interface Locals extends Runtime {
+  }
 }
 
