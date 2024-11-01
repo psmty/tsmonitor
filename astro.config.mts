@@ -25,7 +25,7 @@ export default defineConfig({
       // nodejs true for production
       // noExternal: import.meta.env.PROD ? true : undefined,
       // cloudflare
-      external: ['node:path'],
+      external: ['node:path', 'pg'],
     },
     // cloudflare
     define: {
