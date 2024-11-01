@@ -10,25 +10,37 @@
     :source="source"
     hide-attribution
     :theme="theme"
+    @on-edit-row="onEditRow"
   />
 </template>
 <script lang="ts" setup>
-import { VGrid } from "@revolist/vue3-datagrid";
-import { computed, onMounted, ref } from "vue";
-import type { ParsedData } from "../services";
-import { GRID_COLUMNS } from "./grid.columns";
+import {type ColumnRegular, VGrid, VGridVueTemplate} from "@revolist/vue3-datagrid";
+import {computed, onMounted, ref} from "vue";
+import type {ParsedData} from "../services";
+import {GRID_COLUMNS} from "./grid.columns";
+import EditRenderer from './gridRenderers/EditRenderer.vue';
+import EditIcon from './icons/EditIcon.vue';
+
 const grid = ref<{ $el: HTMLRevoGridElement } | null>(null);
 
 interface Props {
-  data: Map<string, ParsedData>;
+  data: Array<ParsedData>;
 }
 
 const props = defineProps<Props>();
 const emits = defineEmits<{
-  (e: "loadSource"): void;
+  (e: "editRow", index: number): void;
 }>();
 
-const columns = [...GRID_COLUMNS];
+const editGrid: ColumnRegular = {
+  name: '',
+  prop: '',
+  size: 50,
+  sortable: false,
+  cellTemplate: VGridVueTemplate(EditRenderer)
+};
+
+const columns = [editGrid, ...GRID_COLUMNS];
 const theme = ref("compact");
 
 const checkTheme = () => {
@@ -45,4 +57,9 @@ onMounted(() => {
   });
 });
 const source = computed(() => props.data.values());
+
+const onEditRow = (e: CustomEvent) => {
+  const {rowIndex} = e.detail;
+  emits('editRow', rowIndex);
+};
 </script>

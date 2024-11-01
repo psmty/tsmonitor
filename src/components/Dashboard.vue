@@ -3,17 +3,26 @@
     class="flex flex-col grow bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 dark:bg-gray-800"
   >
     <ImportUrlsButton @saveUrls="saveUrlsToDataBase" class="my-5 mx-5" />
-    <Grid :data="source" @load-source="loadSource" />
+    <Grid :data="source" @editRow="editRow"/>
+
+    <SideBar v-model="visibleSideBar">
+      <template #title>Update row</template>
+
+      <div>Some test</div>
+    </SideBar>
   </div>
 </template>
 
 <script setup lang="ts">
 import Grid from "./Grid.vue";
 import ImportUrlsButton from "./ImportUrlsButton.vue";
-import { computed, onBeforeUnmount, onMounted } from "vue";
+import {computed, onBeforeUnmount, onMounted, ref} from "vue";
 import { useCrawler } from './useCrawler';
+import SideBar from './SideBar.vue';
 
 const { siteStatuses, addSites, startCrawler, } = useCrawler();
+
+const visibleSideBar = ref(false);
 
 onMounted(async () => {
   const response = await fetch("/api/list");
@@ -42,4 +51,8 @@ onBeforeUnmount(() => {
     clearInterval(interval);
   }
 });
+
+const editRow = (rowIndex: number) => {
+  visibleSideBar.value = true;
+}
 </script>
