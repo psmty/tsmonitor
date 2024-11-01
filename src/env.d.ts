@@ -3,7 +3,7 @@
 type KVNamespace = import("@cloudflare/workers-types").KVNamespace & {
   prepare: (sql: string, values?: any[]) => {
     run: (values?: any[]) => Promise<{ results: any[] }>
-    bind: (...values: any[]) => Promise<{ results: any[] }>
+    bind: (...values: any[]) => { run: (values?: any[]) => Promise<{ results: any[] }> }
   };
 };
 type ENV = {

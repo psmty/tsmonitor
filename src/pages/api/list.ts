@@ -43,13 +43,11 @@ export const POST: APIRoute = async ({ props, locals, request }) => {
     if (newSites.length) {
       const values: Array<unknown> = [];
       const placeholders = newSites.map((value, idx) => {
-        const baseIndex = idx * 2;
         values.push(value.url, JSON.stringify(value.settings)); // Push url and second_column values
-        return `(?${baseIndex + 1}, ?${baseIndex + 2})`
+        return `(?, ?)`
       }).join(',');
-      const sql = `INSERT INTO sites ("url", "settings") VALUES ${placeholders}`;
-
-      await locals.runtime.env.DATABASE.prepare(sql).bind(...values);
+      const sql = `INSERT INTO sites (url, settings) VALUES ${placeholders}`;
+      await locals.runtime.env.DATABASE.prepare(sql).bind(...values.flat()).run();
     }
 
     // Merge new values
@@ -79,7 +77,7 @@ export const PUT: APIRoute = async ({ props, locals, request }) => {
     const settings: SitesData = await request.json();
 
     const values = [JSON.stringify(settings.settings), settings.url]
-    await locals.runtime.env.DATABASE.prepare(sql).bind(...values);
+    await locals.runtime.env.DATABASE.prepare(sql).bind(...values).run();
 
     return new Response(JSON.stringify(settings));
   } catch (error) {
