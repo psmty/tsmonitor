@@ -15,8 +15,9 @@ export const GET: APIRoute = async ({ locals, request }) => {
     return new Response(JSON.stringify(rows));
   } catch (error) {
     console.error("Database connection error:", error);
-    return new Response("Failed to fetch data from PostgreSQL", {
+    return new Response(JSON.stringify(error), {
       status: 500,
+      statusText: "Failed to fetch data from PostgreSQL",
     });
   }
 };

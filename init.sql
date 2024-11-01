@@ -8,5 +8,5 @@
  */
 
 DROP TABLE IF EXISTS sites;
-CREATE TABLE IF NOT EXISTS sites (Url TEXT PRIMARY KEY, settings JSON);
+CREATE TABLE IF NOT EXISTS sites (url TEXT PRIMARY KEY, settings JSON);
 INSERT INTO sites (url) VALUES ('https://staging.tempus-resource.com/sg');
