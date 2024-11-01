@@ -18,6 +18,7 @@
 import {
   type ColumnFilterConfig,
   type ColumnRegular,
+  type ExportFilePlugin,
   dispatch,
   FILTER_CONFIG_CHANGED_EVENT,
   VGrid,
@@ -25,7 +26,7 @@ import {
 } from "@revolist/vue3-datagrid";
 // import ExportFilePlugin from '@revolist/revogrid/dist/types/plugins/export/export.plugin';
 import { computed, onMounted, ref } from "vue";
-import type { Site } from "../services";
+import { localJsDateToDateString, type Site } from "../services";
 import { GRID_COLUMNS } from "./grid.columns";
 import EditRenderer from "./gridRenderers/EditRenderer.vue";
 
@@ -86,23 +87,21 @@ const onEditRow = (e: CustomEvent) => {
 };
 
 const getExportingPlugin = async () => {
-  // const plugins = await grid.value?.$el.getPlugins() as ExportFilePlugin;
-  //   const exportPlugin: ExportFilePlugin | undefined = plugins.find(p => p.exportFile);
-  // const plugins = await grid.value?.$el.getPlugins() as Array<unknown>;
-  //   const exportPlugin = plugins.find(p => p.exportFile);
-  // console.log(exportPlugin, 'exportPlugin');
-  // return exportPlugin ?? null;
-};
+  const plugins = await grid.value?.$el.getPlugins() as ExportFilePlugin[];
+  const exportPlugin: ExportFilePlugin | undefined = plugins.find(p => p.exportFile);
+
+  return exportPlugin ?? null;
+}
 
 const exportToCSV = async () => {
-  // const exportPlugin = getExportingPlugin();
-  //
-  // if (!exportPlugin) {
-  //   return;
-  // }
-  //
-  // await exportPlugin.exportFile({filename: `Tempus monitor - ${new Date()}`});
-};
+  const exportPlugin = await getExportingPlugin();
+
+  if (!exportPlugin) {
+    return;
+  }
+
+  await exportPlugin.exportFile({filename: `Tempus monitor - ${localJsDateToDateString(new Date())}`});
+}
 
 defineExpose({
   exportToCSV,
