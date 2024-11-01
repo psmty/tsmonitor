@@ -17,7 +17,7 @@
 <script lang="ts" setup>
 import {type ColumnRegular, type ExportFilePlugin, VGrid, VGridVueTemplate} from "@revolist/vue3-datagrid";
 import {computed, onMounted, ref} from "vue";
-import type {Site} from "../services";
+import {localJsDateToDateString, type Site} from "../services";
 import {GRID_COLUMNS} from "./grid.columns";
 import EditRenderer from './gridRenderers/EditRenderer.vue';
 
@@ -80,7 +80,7 @@ const exportToCSV = async () => {
     return;
   }
 
-  await exportPlugin.exportFile({filename: `Tempus monitor - ${new Date()}`});
+  await exportPlugin.exportFile({filename: `Tempus monitor - ${localJsDateToDateString(new Date())}`});
 }
 
 defineExpose({
