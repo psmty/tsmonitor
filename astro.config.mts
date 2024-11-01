@@ -21,6 +21,13 @@ export default defineConfig({
     }
   }),
   vite: {
+    css: {
+      preprocessorOptions: {
+        scss: {
+          api: 'modern-compiler' // or "modern"
+        }
+      }
+    },
     ssr: {
       // nodejs true for production
       // noExternal: import.meta.env.PROD ? true : undefined,
