@@ -1,18 +1,6 @@
 <template>
-  <VGrid
-    class="grow"
-    ref="grid"
-    resize
-    readonly
-    filter
-    can-move-columns
-    :columns="columns"
-    :source="source"
-    :exporting="true"
-    hide-attribution
-    :theme="theme"
-    @on-edit-row="onEditRow"
-  />
+  <VGrid class="grow rv-grid" ref="grid" resize readonly filter can-move-columns :columns="columns" :source="source"
+    :exporting="true" hide-attribution :theme="theme" @on-edit-row="onEditRow" />
 </template>
 <script lang="ts" setup>
 import {type ColumnRegular, type ExportFilePlugin, VGrid, VGridVueTemplate} from "@revolist/vue3-datagrid";
@@ -37,6 +25,7 @@ const editGrid: ColumnRegular = {
   prop: '',
   size: 50,
   sortable: false,
+  cellProperties: () => ({ class: { 'edit-cell': true } }),
   cellTemplate: VGridVueTemplate(EditRenderer)
 };
 
@@ -62,12 +51,12 @@ const source = computed(() => {
 });
 
 const onEditRow = (e: CustomEvent) => {
-  const {url} = e.detail;
+  const { url } = e.detail;
   emits('editRow', url);
 };
 
 const getExportingPlugin = async () => {
-  const plugins = await grid.value?.$el.getPlugins() as ExportFilePlugin;
+  const plugins = await grid.value?.$el.getPlugins() as ExportFilePlugin[];
   const exportPlugin: ExportFilePlugin | undefined = plugins.find(p => p.exportFile);
 
   return exportPlugin ?? null;
@@ -87,3 +76,17 @@ defineExpose({
   exportToCSV
 })
 </script>
+
+<style lang="scss" scoped>
+.rv-grid {
+  :deep(.edit-cell) {
+    > span {
+      & {
+        height: 100%;
+        display: block;
+        line-height: 34px;
+      }
+    }
+  }
+}
+</style>
