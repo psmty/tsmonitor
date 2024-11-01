@@ -31,6 +31,12 @@ export default defineConfig({
     MS({
       clientId: import.meta.env.MS_CLIENT_ID,
       clientSecret: import.meta.env.MS_CLIENT_SECRET,
+      tenantId: import.meta.env.MS_TENANT_ID,
+      authorization: {
+        params: {
+          scope: 'openid profile email',
+        },
+      },
     }),
   ],
 });

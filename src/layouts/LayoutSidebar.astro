@@ -3,16 +3,14 @@ import LayoutCommon from './LayoutCommon.astro';
 import NavBarSidebar from './NavBarSidebar.astro';
 
 import { getSession } from "auth-astro/server";
-import FormSignIn from "../components/FormSignIn.astro";
 
 const session = await getSession(Astro.request);
+if (!session) {
+	Astro.redirect("/api/auth/signin");
+}
 ---
 
 <LayoutCommon>
-
-{
-	session ? (
-  
 	<NavBarSidebar />
 
 	<div class="flex pt-16 overflow-hidden bg-gray-50 dark:bg-gray-900">
@@ -23,12 +21,6 @@ const session = await getSession(Astro.request);
 			<slot />
 		</div>
 	</div>
-	) : (
-	  <div class="min-h-screen align-middle flex pb-[12vh]">
-		<FormSignIn />
-	  </div>
-	)
-  }
 </LayoutCommon>
 
 <style>
