@@ -1,13 +1,34 @@
 <template>
-  <VGrid class="grow rv-grid" ref="grid" resize readonly filter can-move-columns :columns="columns" :source="source"
-    :exporting="true" hide-attribution :theme="theme" @on-edit-row="onEditRow" />
+  <VGrid
+    class="grow rv-grid"
+    ref="grid"
+    resize
+    readonly
+    :filter="filters"
+    can-move-columns
+    :columns="columns"
+    :source="source"
+    :exporting="true"
+    hide-attribution
+    :theme="theme"
+    @on-edit-row="onEditRow"
+  />
 </template>
 <script lang="ts" setup>
-import {type ColumnRegular, type ExportFilePlugin, VGrid, VGridVueTemplate} from "@revolist/vue3-datagrid";
-import {computed, onMounted, ref} from "vue";
-import {localJsDateToDateString, type Site} from "../services";
-import {GRID_COLUMNS} from "./grid.columns";
-import EditRenderer from './gridRenderers/EditRenderer.vue';
+import {
+  type ColumnFilterConfig,
+  type ColumnRegular,
+  type ExportFilePlugin,
+  dispatch,
+  FILTER_CONFIG_CHANGED_EVENT,
+  VGrid,
+  VGridVueTemplate,
+} from "@revolist/vue3-datagrid";
+// import ExportFilePlugin from '@revolist/revogrid/dist/types/plugins/export/export.plugin';
+import { computed, onMounted, ref } from "vue";
+import { localJsDateToDateString, type Site } from "../services";
+import { GRID_COLUMNS } from "./grid.columns";
+import EditRenderer from "./gridRenderers/EditRenderer.vue";
 
 const grid = ref<{ $el: HTMLRevoGridElement } | null>(null);
 
@@ -20,16 +41,27 @@ const emits = defineEmits<{
   (e: "editRow", url: string): void;
 }>();
 
-const editGrid: ColumnRegular = {
-  name: '',
-  prop: '',
-  size: 50,
-  sortable: false,
-  cellProperties: () => ({ class: { 'edit-cell': true } }),
-  cellTemplate: VGridVueTemplate(EditRenderer)
+const filters: ColumnFilterConfig = {
+  multiFilterItems: {
+    customer: [{ id: 0, type: "contains", value: "", relation: "or" }],
+    url: [{ id: 1, type: "contains", value: "", relation: "or" }],
+  },
 };
 
-const columns = [editGrid, ...GRID_COLUMNS];
+const editGrid: ColumnRegular = {
+  name: "",
+  prop: "edit",
+  size: 50,
+  sortable: false,
+  pin: "colPinStart",
+  cellProperties: () => ({ class: { "edit-cell": true } }),
+  cellTemplate: VGridVueTemplate(EditRenderer),
+};
+
+const columns: ColumnRegular[] = [
+  editGrid,
+  ...GRID_COLUMNS,
+];
 const theme = ref("compact");
 
 const checkTheme = () => {
@@ -44,15 +76,14 @@ onMounted(() => {
   document.addEventListener("dark-mode", () => {
     checkTheme();
   });
-
 });
 const source = computed(() => {
-  return props.data
+  return props.data;
 });
 
 const onEditRow = (e: CustomEvent) => {
   const { url } = e.detail;
-  emits('editRow', url);
+  emits("editRow", url);
 };
 
 const getExportingPlugin = async () => {
@@ -73,8 +104,8 @@ const exportToCSV = async () => {
 }
 
 defineExpose({
-  exportToCSV
-})
+  exportToCSV,
+});
 </script>
 
 <style lang="scss" scoped>
