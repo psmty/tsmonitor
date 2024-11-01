@@ -5,6 +5,7 @@
     resize
     readonly
     :filter="filters"
+    :pinned-top-source="topFilterRow"
     can-move-columns
     :columns="columns"
     :source="source"
@@ -40,6 +41,7 @@ const emits = defineEmits<{
   (e: "editRow", url: string): void;
 }>();
 
+const topFilterRow = ref([{}]);
 const filters: ColumnFilterConfig = {
   multiFilterItems: {
     customer: [{ id: 0, type: "contains", value: "", relation: "or" }],
@@ -57,8 +59,54 @@ const editGrid: ColumnRegular = {
   cellTemplate: VGridVueTemplate(EditRenderer),
 };
 
+const filterCell: Partial<ColumnRegular> = {
+  cellProperties: ({ type }) =>
+    type === "rowPinStart"
+      ? {
+          onMouseDown: (e: MouseEvent) => {
+            e.stopPropagation();
+          },
+          class: { "filter-cell": true },
+        }
+      : undefined,
+
+  cellTemplate: (h, { value, type }) => {
+    if (type === "rowPinStart") {
+      return h(
+        "input",
+        {
+          type: "text",
+          onInput: (e: Event) => {
+            if (!grid.value?.$el || !(e.target instanceof HTMLInputElement)) {
+              return;
+            }
+            if (!filters.multiFilterItems) {
+              filters.multiFilterItems = {
+                customer: [
+                  { id: 0, type: "contains", value: "", relation: "or" },
+                ],
+              };
+            }
+            filters.multiFilterItems.customer[0].value = e.target.value;
+            dispatch(grid.value?.$el, FILTER_CONFIG_CHANGED_EVENT, filters);
+          },
+        },
+        "",
+      );
+    }
+    return value;
+  },
+};
+
 const columns: ColumnRegular[] = [
   editGrid,
+  {
+    name: "Customer",
+    prop: "customer",
+    size: 300,
+    sortable: true,
+    ...filterCell,
+  },
   ...GRID_COLUMNS,
 ];
 const theme = ref("compact");
@@ -118,6 +166,18 @@ defineExpose({
         display: block;
         line-height: 34px;
       }
+    }
+  }
+  :deep(.filter-cell) {
+    padding: 0;
+    overflow: hidden;
+    input {
+      background-color: transparent;
+      width: 100%;
+      height: 100%;
+      border: none;
+      padding: 0 8px;
+      box-sizing: border-box;
     }
   }
 }

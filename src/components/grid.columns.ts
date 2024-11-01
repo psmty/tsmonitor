@@ -37,12 +37,6 @@ const NEGATIVE_CHECK = (h: HyperFunc<VNode>, { value }: { value?: number }) => {
 
 export const GRID_COLUMNS: ColumnRegular[] = [
   {
-    name: 'Customer',
-    prop: 'customer',
-    size: 300,
-    sortable: true,
-  },
-  {
     name: 'Instance',
     prop: 'url',
     size: 300,
