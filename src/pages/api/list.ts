@@ -3,7 +3,7 @@ import type {SitesData} from '../../services';
 
 export const GET: APIRoute = async ({ locals, request }) => {
   try {
-    const { results: rows } = await locals.runtime.env.DATABASE.prepare("SELECT * FROM sites;");
+    const { results: rows } = await locals.runtime.env.DATABASE.prepare("SELECT * FROM sites;").run();
 
     return new Response(JSON.stringify(rows));
   } catch (error) {
@@ -17,7 +17,7 @@ export const GET: APIRoute = async ({ locals, request }) => {
 export const POST: APIRoute = async ({ props, locals, request }) => {
   // TODO: Add ability to save settings
   const sites: SitesData[] = await request.json();
-  const { results: savedRows } = await locals.runtime.env.DATABASE.prepare("SELECT * FROM sites;");
+  const { results: savedRows } = await locals.runtime.env.DATABASE.prepare("SELECT * FROM sites;").run();
 
   const existingSites = new Set(savedRows.map((row) => row.url));
   const newSites: SitesData[] = [];
@@ -49,7 +49,7 @@ export const POST: APIRoute = async ({ props, locals, request }) => {
       }).join(',');
       const sql = `INSERT INTO sites ("url", "settings") VALUES ${placeholders}`;
 
-      await locals.runtime.env.DATABASE.prepare(sql, values);
+      await locals.runtime.env.DATABASE.prepare(sql, values).run();
     }
 
     // Merge new values
@@ -79,7 +79,7 @@ export const PUT: APIRoute = async ({ props, locals, request }) => {
     const settings: SitesData = await request.json();
 
     const values = [settings.settings, settings.url]
-    await locals.runtime.env.DATABASE.prepare(sql, values);
+    await locals.runtime.env.DATABASE.prepare(sql, values).run();
 
     return new Response(JSON.stringify(settings));
   } catch (error) {

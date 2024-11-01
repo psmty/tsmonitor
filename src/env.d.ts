@@ -1,7 +1,7 @@
 /// <reference path="../.astro/types.d.ts" />
 
 type KVNamespace = import("@cloudflare/workers-types").KVNamespace & {
-  prepare: (sql: string, values?: any[]) => Promise<{ results: any[] }>;
+  prepare: (sql: string, values?: any[]) => { run: (values?: any[]) => Promise<{ results: any[] }>};
 };
 type ENV = {
   // replace `MY_KV` with your KV namespace
