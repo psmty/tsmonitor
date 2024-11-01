@@ -22,8 +22,8 @@ export default defineConfig({
   }),
   vite: {
     ssr: {
-      // true for production
-      noExternal: import.meta.env.PROD ? true : undefined,
+      // nodejs true for production
+      // noExternal: import.meta.env.PROD ? true : undefined,
       // cloudflare
       external: ['node:path'],
     },
