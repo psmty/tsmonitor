@@ -16,20 +16,19 @@
 <script lang="ts" setup>
 import {type ColumnRegular, VGrid, VGridVueTemplate} from "@revolist/vue3-datagrid";
 import {computed, onMounted, ref} from "vue";
-import type {ParsedData} from "../services";
+import type {Site} from "../services";
 import {GRID_COLUMNS} from "./grid.columns";
 import EditRenderer from './gridRenderers/EditRenderer.vue';
-import EditIcon from './icons/EditIcon.vue';
 
 const grid = ref<{ $el: HTMLRevoGridElement } | null>(null);
 
 interface Props {
-  data: Array<ParsedData>;
+  data: Array<Site>;
 }
 
 const props = defineProps<Props>();
 const emits = defineEmits<{
-  (e: "editRow", index: number): void;
+  (e: "editRow", url: string): void;
 }>();
 
 const editGrid: ColumnRegular = {
@@ -56,10 +55,12 @@ onMounted(() => {
     checkTheme();
   });
 });
-const source = computed(() => props.data.values());
+const source = computed(() => {
+  return props.data
+});
 
 const onEditRow = (e: CustomEvent) => {
-  const {rowIndex} = e.detail;
-  emits('editRow', rowIndex);
+  const {url} = e.detail;
+  emits('editRow', url);
 };
 </script>

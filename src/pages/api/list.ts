@@ -32,7 +32,7 @@ export const POST: APIRoute = async ({ props, locals, request }) => {
     const sql = `INSERT INTO sites ("url") VALUES ${values}`;
 
     await db.query(sql, filteredUrls);
-
+// TODO: Return rows all  data
     return new Response(JSON.stringify(filteredUrls));
   } catch (error) {
     console.error("Database connection error:", error);

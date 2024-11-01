@@ -13,10 +13,10 @@ const props = defineProps<ColumnDataSchemaModel>();
 const cell = ref<HTMLElement>();
 
 const onClick = () => {
-  const rowIndex = props.rowIndex;
+  const url = props.model.url;
   const event = new CustomEvent('on-edit-row', {
     bubbles: true,
-    detail: {rowIndex}
+    detail: {url}
   });
   cell.value?.dispatchEvent(event);
 };

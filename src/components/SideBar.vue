@@ -34,84 +34,50 @@
       >
       <span class="sr-only">Close menu</span>
     </button>
-    <form action="#">
-      <div class="space-y-4">
-        <slot name="default"></slot>
-        <div
-          class="bottom-0 left-0 flex justify-center w-full pb-4 space-x-4 md:px-4 md:absolute"
-        >
-          <button
-            type="submit"
-            class="text-white w-full justify-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-          >
-            Add product
-          </button>
-          <button
-            type="button"
-            data-drawer-dismiss="drawer-create-product-default"
-            aria-controls="drawer-create-product-default"
-            class="inline-flex w-full justify-center text-gray-500 items-center bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-primary-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600"
-          >
-            <svg
-              aria-hidden="true"
-              class="w-5 h-5 -ml-1 sm:mr-1"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"></path>
-            </svg
-            >
-            Cancel
-          </button>
-        </div>
-      </div>
-    </form>
+
+    <slot name="default"></slot>
   </div>
 </template>
 
 <script setup lang="ts">
 import {onMounted, useTemplateRef, watch} from 'vue';
-import { Drawer } from 'flowbite'
-import type { DrawerOptions } from 'flowbite';
-
+import {Drawer} from 'flowbite';
+import type {DrawerOptions} from 'flowbite';
 
 const emits = defineEmits<{
-  (e: 'onHide'):void
-  (e: 'onShow'):void
-}>()
+  (e: 'onHide'): void
+  (e: 'onShow'): void
+}>();
 
 const visible = defineModel<boolean>();
 
 
 const drawerRef = useTemplateRef<HTMLDivElement>('drawerRef');
 const closeButtonRef = useTemplateRef<HTMLButtonElement>('close-button');
-let drawer: Drawer|null = null;
+let drawer: Drawer | null = null;
 
 const options: DrawerOptions = {
-    placement: 'right',
-    backdrop: true,
-    bodyScrolling: false,
-    edge: false,
-    edgeOffset: '',
-    backdropClasses:
-        'bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-30',
-    onHide: () => {
-        emits('onHide')
-    },
-    onShow: () => {
-        emits('onShow')
-    },
+  placement: 'right',
+  backdrop: true,
+  bodyScrolling: false,
+  edge: false,
+  edgeOffset: '',
+  backdropClasses:
+    'bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-30',
+  onHide: () => {
+    if (visible.value) {
+      closeDrawer();
+    }
+    emits('onHide');
+  },
+  onShow: () => {
+    emits('onShow');
+  }
 };
 
 const closeDrawer = () => {
-  visible.value = false
-}
+  visible.value = false;
+};
 
 
 onMounted(() => {
@@ -120,7 +86,7 @@ onMounted(() => {
   }
 
   closeButtonRef.value?.addEventListener('click', closeDrawer);
-})
+});
 
 watch(visible, () => {
   if (visible.value) {
@@ -128,5 +94,5 @@ watch(visible, () => {
   } else {
     drawer?.hide();
   }
-})
+});
 </script>

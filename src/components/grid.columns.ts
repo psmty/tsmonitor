@@ -20,6 +20,24 @@ export const GRID_COLUMNS: ColumnRegular[] = [
     sortable: true,
   },
   {
+    name: 'Has Integrations',
+    prop: 'hasIntegration',
+    size: 150,
+    sortable: true,
+  },
+  {
+    name: 'Environment',
+    prop: 'environment',
+    size: 150,
+    sortable: true,
+  },
+  {
+    name: 'CSM',
+    prop: 'csm',
+    size: 150,
+    sortable: true,
+  },
+  {
     name: 'Version',
     prop: 'sgt5PublicVersion',
     size: 150,

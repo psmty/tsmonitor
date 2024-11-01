@@ -3,12 +3,21 @@
     class="flex flex-col grow bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 dark:bg-gray-800"
   >
     <ImportUrlsButton @saveUrls="saveUrlsToDataBase" class="my-5 mx-5" />
-    <Grid :data="source" @editRow="editRow"/>
+    <Grid :data="source" @editRow="startEditRow" />
 
-    <SideBar v-model="visibleSideBar">
+    <SideBar
+      v-model="visibleSideBar"
+      @onHide="editUrl = null"
+    >
       <template #title>Update row</template>
 
-      <div>Some test</div>
+      <EditRowFields
+        :visible="visibleSideBar"
+        :editUrl="editUrl"
+        :source="siteStatuses"
+        @update="editRow"
+        @closePopup="visibleSideBar = false"
+      />
     </SideBar>
   </div>
 </template>
@@ -17,32 +26,36 @@
 import Grid from "./Grid.vue";
 import ImportUrlsButton from "./ImportUrlsButton.vue";
 import {computed, onBeforeUnmount, onMounted, ref} from "vue";
-import { useCrawler } from './useCrawler';
+import {useCrawler} from './useCrawler';
 import SideBar from './SideBar.vue';
+import EditRowFields from './EditRowFields.vue';
+import type {SiteSettings} from '../services';
 
-const { siteStatuses, addSites, startCrawler, } = useCrawler();
+const {siteStatuses, addSites, startCrawler} = useCrawler();
 
 const visibleSideBar = ref(false);
+const editUrl = ref<string | null>(null);
 
 onMounted(async () => {
   const response = await fetch("/api/list");
   const sites = await response.json();
-  startCrawler(sites.map((site: { url: string }) => site.url));
+  startCrawler(sites);
 });
 
 let interval: NodeJS.Timeout | null = null;
 
 const source = computed(() => {
   return [...siteStatuses.value.values()];
-})
+});
 
 const saveUrlsToDataBase = async (urls: string[]) => {
   const response = await fetch("/api/list", {
     method: "POST",
-    body: JSON.stringify(urls),
+    body: JSON.stringify(urls)
   });
 
   const newAddedUrls = await response.json();
+  // TODO: Update after returning all rows data
   addSites(newAddedUrls);
 };
 
@@ -52,7 +65,13 @@ onBeforeUnmount(() => {
   }
 });
 
-const editRow = (rowIndex: number) => {
+const startEditRow = (url: string) => {
+  editUrl.value = url;
   visibleSideBar.value = true;
+};
+
+const editRow = (editFields: SiteSettings) => {
+  console.log(editFields, 'editFields');
+  visibleSideBar.value = false;
 }
 </script>
