@@ -2,7 +2,7 @@ import type {ParsedData} from './parser.types.ts';
 
 export enum Environment {
   Dev = 'Dev',
-  Prop = 'Prod',
+  Prod = 'Prod',
   Trial = 'Trial'
 }
 

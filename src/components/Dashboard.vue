@@ -29,9 +29,9 @@ import {computed, onBeforeUnmount, onMounted, ref} from "vue";
 import {useCrawler} from './useCrawler';
 import SideBar from './SideBar.vue';
 import EditRowFields from './EditRowFields.vue';
-import type {SiteSettings} from '../services';
+import type {SitesData} from '../services';
 
-const {siteStatuses, addSites, startCrawler} = useCrawler();
+const {siteStatuses, addSites, startCrawler, updateSiteSettings} = useCrawler();
 
 const visibleSideBar = ref(false);
 const editUrl = ref<string | null>(null);
@@ -70,8 +70,13 @@ const startEditRow = (url: string) => {
   visibleSideBar.value = true;
 };
 
-const editRow = (editFields: SiteSettings) => {
-  console.log(editFields, 'editFields');
+const editRow = async (editFields: SitesData) => {
   visibleSideBar.value = false;
+  const response = await fetch("/api/list", {
+    method: "PUT",
+    body: JSON.stringify(editFields)
+  });
+  const siteData = await response.json();
+  updateSiteSettings(siteData);
 }
 </script>

@@ -30,6 +30,17 @@ export function useCrawler(
     checkSites();
   }
 
+  function updateSiteSettings({url, settings}: SitesData) {
+    if (!siteStatuses.value.has(url)) {
+      console.error(`${url} is not exists`)
+      return;
+    }
+
+    const currentData = siteStatuses.value.get(url)!;
+    siteStatuses.value.set(url, {...currentData, ...settings});
+    checkSites();
+  }
+
   // Function to check all sites in batches
   async function checkSites() {
     console.log("Starting site checks...");
@@ -91,5 +102,6 @@ export function useCrawler(
     addSites,
     startCrawler,
     stopCrawler,
+    updateSiteSettings,
   };
 }

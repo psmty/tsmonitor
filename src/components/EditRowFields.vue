@@ -69,8 +69,6 @@
         Update
       </button>
       <button
-        data-drawer-dismiss="drawer-create-product-default"
-        aria-controls="drawer-create-product-default"
         class="inline-flex w-full justify-center text-gray-500 items-center bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-primary-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600"
         @click="emits('closePopup')"
       >
@@ -96,7 +94,7 @@
 </template>
 
 <script setup lang="ts">
-import {Environment, type Site, type SiteSettings} from '../services';
+import {Environment, type Site, type SitesData, type SiteSettings} from '../services';
 import {ref, watch} from 'vue';
 import {DEFAULT_SETTINGS} from '../services/edit.defaults.ts';
 
@@ -112,12 +110,12 @@ interface Props {
 const props = defineProps<Props>();
 const emits = defineEmits<{
   (e: 'closePopup'): void
-  (e: 'update', row: SiteSettings): void
+  (e: 'update', row: SitesData): void
 }>();
 
 const editData = ref<SiteSettings>(DEFAULT_SETTINGS);
 
-const environmentDataSource = [Environment.Dev, Environment.Prop, Environment.Trial];
+const environmentDataSource = [Environment.Dev, Environment.Prod, Environment.Trial];
 const booleanDataSource = [{text: 'Yes', value: true}, {text: 'No', value: false}];
 
 const initEdit = () => {
@@ -142,7 +140,17 @@ const initEdit = () => {
 };
 
 const updateRow = () => {
-  emits('update', editData.value);
+  if (!props.editUrl) {
+    console.warn(`No site data found for ${props.editUrl}`);
+    emits('closePopup');
+    return;
+  }
+
+  const siteData: SitesData = {
+    url: props.editUrl,
+    settings: editData.value
+  }
+  emits('update', siteData);
 };
 
 watch(() => props.visible, () => {

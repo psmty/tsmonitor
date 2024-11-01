@@ -14,8 +14,6 @@
     </h5>
     <button
       type="button"
-      data-drawer-dismiss="drawer-create-product-default"
-      aria-controls="drawer-create-product-default"
       class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 absolute top-2.5 right-2.5 inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
       ref="close-button"
     >
