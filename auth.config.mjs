@@ -9,6 +9,9 @@ export default defineConfig({
     signIn: ({ user, profile }) => {
       try {
         const allowed = JSON.parse(import.meta.env.ALLOWED_EMAILS);
+        if (!allowed || allowed.length === 0) {
+          return true;
+        }
         const isAllowed = allowed?.some((email) =>  user?.email.includes(email) || profile?.email.includes(email));
         return isAllowed;
       } catch (e) {
