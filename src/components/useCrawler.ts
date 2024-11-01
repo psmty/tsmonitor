@@ -1,12 +1,7 @@
 import { ref, onUnmounted } from "vue";
-import type { ParsedData } from "../services";
+import type {ParsedData, Site, SitesData, SiteSettings} from "../services";
+import {DEFAULT_SETTINGS} from '../services/edit.defaults.ts';
 
-interface Site {
-  url: string;
-  online: boolean;
-  lastChecked: Date | null;
-  processedData: ParsedData | null;
-}
 
 export function useCrawler(
   concurrencyLimit = 10,
@@ -16,7 +11,7 @@ export function useCrawler(
   const siteStatuses = ref(new Map<string, Site>());
 
   // Function to initiate the crawler
-  function startCrawler(sites: string[]) {
+  function startCrawler(sites: SitesData[]) {
     addSites(sites);
     intervalId = setInterval(() => checkSites(), intervalMs); // Schedule subsequent checks
   }
@@ -25,13 +20,24 @@ export function useCrawler(
   function stopCrawler() {
     if (intervalId) clearInterval(intervalId);
   }
-  
-  function addSites(values: string[]) {
-    values.forEach((url) => {
+
+  function addSites(values: SitesData[]) {
+    values.forEach(({url, settings}) => {
       if (!siteStatuses.value.has(url)) {
-        siteStatuses.value.set(url, { url, online: true, lastChecked: null, processedData: null });
+        siteStatuses.value.set(url, { url, online: true, lastChecked: null, processedData: null, ...(settings ?? DEFAULT_SETTINGS) });
       }
     });
+    checkSites();
+  }
+
+  function updateSiteSettings({url, settings}: SitesData) {
+    if (!siteStatuses.value.has(url)) {
+      console.error(`${url} is not exists`)
+      return;
+    }
+
+    const currentData = siteStatuses.value.get(url)!;
+    siteStatuses.value.set(url, {...currentData, ...settings});
     checkSites();
   }
 
@@ -96,5 +102,6 @@ export function useCrawler(
     addSites,
     startCrawler,
     stopCrawler,
+    updateSiteSettings,
   };
 }
