@@ -1,38 +1,33 @@
 import type { ColumnRegular } from '@revolist/vue3-datagrid';
+import {CustomFieldsName} from '../services';
 
 export const GRID_COLUMNS: ColumnRegular[] = [
   {
-    name: 'Customer',
+    name: CustomFieldsName.Customer,
     prop: 'customer',
     size: 300,
     sortable: true,
   },
   {
-    name: 'Instance',
+    name: CustomFieldsName.URL,
     prop: 'url',
     size: 300,
     sortable: true,
   },
   {
-    name: 'Integrations',
-    prop: 'integrations',
-    size: 300,
-    sortable: true,
-  },
-  {
-    name: 'Has Integrations',
+    name: CustomFieldsName.Integrations,
     prop: 'hasIntegration',
     size: 150,
     sortable: true,
   },
   {
-    name: 'Environment',
+    name: CustomFieldsName.Environment,
     prop: 'environment',
     size: 150,
     sortable: true,
   },
   {
-    name: 'CSM',
+    name: CustomFieldsName.Csm,
     prop: 'csm',
     size: 150,
     sortable: true,

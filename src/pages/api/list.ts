@@ -17,25 +17,34 @@ export const GET: APIRoute = async ({ locals, request }) => {
 
 export const POST: APIRoute = async ({ props, locals, request }) => {
   // TODO: Add ability to save settings
-  const urls: string[] = await request.json();
+  const sites: SitesData[] = await request.json();
   const { rows: savedRows } = await db.query("SELECT * FROM sites;");
 
-  const filterUrls = new Set(savedRows.map((row) => row.url));
-  const filteredUrls = urls.filter((url) => !filterUrls.has(url));
+  const existingSites = new Set(savedRows.map((row) => row.url));
+  const newSites: SitesData[] = [];
+  const sitesToMerge: SitesData[] = [];
+
+  for (const site of sites) {
+    const existingSite = existingSites.has(site.url);
+    if (existingSite) {
+      sitesToMerge.push(site)
+    } else {
+      newSites.push(site);
+    }
+  }
 
   try {
-    if (!filteredUrls.length) {
-      return new Response("No new URL was added.", {
-        status: 200,
-      });
-    }
+    const values: Array<unknown> = [];
+    const placeholders = newSites.map((value, idx) =>  {
+      const baseIndex = idx * 2;
+      values.push(value.url, value.settings); // Push url and second_column values
+      return `($${baseIndex + 1}, $${baseIndex + 2})`
+    }).join(',');
+    const sql = `INSERT INTO sites ("url", "settings") VALUES ${placeholders}`;
 
-    const values = filteredUrls.map((value, idx) => `($${idx + 1})`).join(',');
-    const sql = `INSERT INTO sites ("url") VALUES ${values}`;
-
-    await db.query(sql, filteredUrls);
+    await db.query(sql, values);
 // TODO: Return rows all  data
-    return new Response(JSON.stringify(filteredUrls));
+    return new Response(JSON.stringify(newSites));
   } catch (error) {
     console.error("Database connection error:", error);
     return new Response("Failed to fetch data from PostgreSQL", {

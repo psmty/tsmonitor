@@ -6,6 +6,14 @@ export enum Environment {
   Trial = 'Trial'
 }
 
+export enum CustomFieldsName {
+  URL = 'Instance',
+  Customer = 'Customer',
+  Environment = 'Environment',
+  Integrations = 'Integrations',
+  Csm = 'CSM'
+}
+
 export interface SiteSettings {
   customer: string,
   environment: Environment|null,

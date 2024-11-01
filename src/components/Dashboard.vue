@@ -56,14 +56,13 @@ const source = computed(() => {
   return [...siteStatuses.value.values()];
 });
 
-const saveUrlsToDataBase = async (urls: string[]) => {
+const saveUrlsToDataBase = async (urls: SitesData[]) => {
   const response = await fetch("/api/list", {
     method: "POST",
     body: JSON.stringify(urls)
   });
 
   const newAddedUrls = await response.json();
-  // TODO: Update after returning all rows data
   addSites(newAddedUrls);
 };
 
