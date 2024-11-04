@@ -11,20 +11,28 @@
         Export to CSV
       </button>
     </div>
-    <Grid ref="grid" :data="source" @editRow="startEditRow" @delete-row="deleteRow" />
+    <Grid ref="grid" :data="source" @editRow="startEditRow" @delete-row="startDeleteRow" />
 
     <SideBar
       v-model="visibleSideBar"
-      @onHide="editUrl = null"
+      @onHide="onHideSidebar"
     >
-      <template #title>Update row</template>
+      <template #title>{{ sideBarTitle }}</template>
 
       <EditRowFields
+        v-if="sideBarType === SideBarType.Edit"
         :visible="visibleSideBar"
         :editUrl="editUrl"
         :source="siteStatuses"
         @update="editRow"
-        @closePopup="visibleSideBar = false"
+        @closePopup="hideSidebar"
+      />
+
+      <DeleteRowConfirmation
+        v-else-if="sideBarType === SideBarType.Delete"
+        :urls="deleteUrls"
+        @close="hideSidebar"
+        @delete="deleteRow"
       />
     </SideBar>
   </div>
@@ -38,17 +46,34 @@ import {useCrawler} from './useCrawler';
 import SideBar from './SideBar.vue';
 import EditRowFields from './EditRowFields.vue';
 import type {SitesData} from '../services';
+import DeleteRowConfirmation from './DeleteRowConfirmation.vue';
+import {SideBarType, useSideBar} from '../composables/useSideBar.ts';
+import {useEditRow} from '../composables/useEditRow.ts';
+import {useDeleteConfirmation} from '../composables/useDeleteConfirmation.ts';
 
 const {siteStatuses, addSites, startCrawler, updateSiteSettings, deleteSites} = useCrawler();
 
-const visibleSideBar = ref(false);
-const editUrl = ref<string | null>(null);
+const {visibleSideBar, sideBarType, sideBarTitle, hideSidebar, clearSideBarType} = useSideBar();
+const {editUrl, startEditRow, endEditRow} = useEditRow(visibleSideBar, sideBarType, sideBarTitle);
+const {deleteUrls, startDeleteRow, endDeleteRow} = useDeleteConfirmation(visibleSideBar, sideBarType, sideBarTitle);
 
 onMounted(async () => {
   const response = await fetch("/api/list");
   const sites = await response.json();
   startCrawler(sites);
 });
+
+const onHideSidebar = () => {
+  switch (sideBarType.value) {
+    case SideBarType.Edit:
+      endEditRow();
+      break;
+    case SideBarType.Delete:
+      endDeleteRow();
+      break;
+  }
+  clearSideBarType();
+};
 
 let interval: NodeJS.Timeout | null = null;
 
@@ -72,11 +97,6 @@ onBeforeUnmount(() => {
   }
 });
 
-const startEditRow = (url: string) => {
-  editUrl.value = url;
-  visibleSideBar.value = true;
-};
-
 const editRow = async (editFields: SitesData) => {
   visibleSideBar.value = false;
   const response = await fetch("/api/list", {
@@ -87,20 +107,20 @@ const editRow = async (editFields: SitesData) => {
   updateSiteSettings(siteData);
 };
 
-const deleteRow = async (url: string) => {
-  // TODO: Add confirmation modal
+const deleteRow = async (urls: string[]) => {
   const response = await fetch("/api/list", {
     method: "DELETE",
-    body: JSON.stringify([url])
+    body: JSON.stringify(urls)
   });
   const deletedRows: { rowCount: number } = await response.json();
   if (deletedRows.rowCount > 0) {
-    deleteSites([url]);
+    deleteSites(urls);
   }
-}
+  visibleSideBar.value = false;
+};
 
-const grid = ref<(typeof Grid|null)>(null)
+const grid = ref<(typeof Grid | null)>(null);
 const exportToCsv = () => {
   grid.value?.exportToCSV();
-}
+};
 </script>
