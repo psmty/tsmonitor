@@ -1,5 +1,5 @@
 <template>
-  <button class="align-middle opacity-90" ref="cell">
+  <button v-if="props.type !== 'rowPinStart'" class="align-middle opacity-90" ref="cell">
     <EditIcon @click="onClick" />
   </button>
 </template>
