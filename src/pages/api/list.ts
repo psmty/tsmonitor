@@ -2,7 +2,7 @@ import type { APIRoute } from "astro";
 import type {SitesData} from '../../services';
 import {
   getSites,
-  updateSiteSettings, setSites
+  updateSiteSettings, setSites, deleteSites
 } from '../../services/api/list/DBQueries.ts';
 import {getUpdatedSites, getSitesMap} from '../../services/api/list/helpers.ts';
 
@@ -60,12 +60,18 @@ export const PUT: APIRoute = async ({ props, locals, request }) => {
   }
 };
 
-export const DELETE: APIRoute = ({ request }) => {
-  return new Response(
-    JSON.stringify({
-      message: "This was a DELETE!",
-    })
-  );
+export const DELETE: APIRoute = async ({ request }) => {
+  try {
+    const urlsForDeletion: string[] = await request.json();
+    const deletedRows = await deleteSites(urlsForDeletion);
+
+    return new Response(JSON.stringify(deletedRows));
+  } catch (error) {
+    console.error("Database connection error:", error);
+    return new Response("Failed to fetch data from PostgreSQL", {
+      status: 500,
+    });
+  }
 };
 
 export const ALL: APIRoute = ({ request }) => {

@@ -11,7 +11,7 @@
         Export to CSV
       </button>
     </div>
-    <Grid ref="grid" :data="source" @editRow="startEditRow" />
+    <Grid ref="grid" :data="source" @editRow="startEditRow" @delete-row="deleteRow" />
 
     <SideBar
       v-model="visibleSideBar"
@@ -39,7 +39,7 @@ import SideBar from './SideBar.vue';
 import EditRowFields from './EditRowFields.vue';
 import type {SitesData} from '../services';
 
-const {siteStatuses, addSites, startCrawler, updateSiteSettings} = useCrawler();
+const {siteStatuses, addSites, startCrawler, updateSiteSettings, deleteSites} = useCrawler();
 
 const visibleSideBar = ref(false);
 const editUrl = ref<string | null>(null);
@@ -86,6 +86,18 @@ const editRow = async (editFields: SitesData) => {
   const siteData = await response.json();
   updateSiteSettings(siteData);
 };
+
+const deleteRow = async (url: string) => {
+  // TODO: Add confirmation modal
+  const response = await fetch("/api/list", {
+    method: "DELETE",
+    body: JSON.stringify([url])
+  });
+  const deletedRows: { rowCount: number } = await response.json();
+  if (deletedRows.rowCount > 0) {
+    deleteSites([url]);
+  }
+}
 
 const grid = ref<(typeof Grid|null)>(null)
 const exportToCsv = () => {

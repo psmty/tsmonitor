@@ -30,3 +30,18 @@ export async function setSites(sitesDataArray: SitesData[]) {
   const values = sitesDataArray.flatMap(siteData => [siteData.url, JSON.stringify(siteData.settings)]);
   return await db.query(sql, values);
 }
+
+export async function deleteSites(urls: Array<string>) {
+  if (urls.length === 0) {
+    return { rowCount: 0 }; // No URLs to delete
+  }
+
+  const sql = `
+    DELETE FROM sites
+    WHERE url = ANY($1::text[])
+    RETURNING *;
+  `;
+
+  const values = [urls];
+  return await db.query(sql, values);
+}

@@ -39,6 +39,10 @@ export function useCrawler(
     checkSites();
   }
 
+  function deleteSites(urls: string[]) {
+    urls.forEach(url => siteStatuses.value.delete(url))
+  }
+
   // Function to check all sites in batches
   async function checkSites() {
     console.log("Starting site checks...");
@@ -101,5 +105,6 @@ export function useCrawler(
     startCrawler,
     stopCrawler,
     updateSiteSettings,
+    deleteSites
   };
 }
