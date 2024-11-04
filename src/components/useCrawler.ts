@@ -23,9 +23,7 @@ export function useCrawler(
 
   function addSites(values: SitesData[]) {
     values.forEach(({url, settings}) => {
-      if (!siteStatuses.value.has(url)) {
         siteStatuses.value.set(url, { url, online: true, lastChecked: null, processedData: null, ...(settings ?? DEFAULT_SETTINGS) });
-      }
     });
     checkSites();
   }
