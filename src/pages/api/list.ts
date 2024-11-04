@@ -20,14 +20,14 @@ export const GET: APIRoute = async ({ locals, request }) => {
 };
 
 export const POST: APIRoute = async ({ props, locals, request }) => {
-  const sites: SitesData[] = await request.json();
-  const savedRows = await getSites();
-
-  const existingSitesMap = getSitesMap(savedRows);
-  const addedSites = getUpdatedSites(sites, existingSitesMap)
-
   try {
-    if (!addedSites.length && !existingSitesMap.size) {
+    const sites: SitesData[] = await request.json();
+    const savedRows = await getSites();
+
+    const existingSitesMap = getSitesMap(savedRows);
+    const addedSites = getUpdatedSites(sites, existingSitesMap)
+
+    if (!addedSites.length) {
       return new Response("No new URL was added.", {
         status: 200,
       });
