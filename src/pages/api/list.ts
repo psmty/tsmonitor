@@ -3,8 +3,8 @@ import type {SitesData} from '../../services';
 import {
   getSites,
   updateSiteSettings, setSites, deleteSites
-} from '../../services/api/list/DBQueries.ts';
-import {getUpdatedSites, getSitesMap} from '../../services/api/list/helpers.ts';
+} from '../../services/api/server/list/DBQueries.ts';
+import {getUpdatedSites, getSitesMap} from '../../services/api/server/list/helpers.ts';
 
 export const GET: APIRoute = async ({ locals, request }) => {
   try {
