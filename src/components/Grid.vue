@@ -12,6 +12,7 @@
     hide-attribution
     :theme="theme"
     @on-edit-row="onEditRow"
+    @on-delete-row="onDeleteRow"
   />
 </template>
 <script lang="ts" setup>
@@ -28,7 +29,7 @@ import {
 import { computed, onMounted, ref } from "vue";
 import { localJsDateToDateString, type Site } from "../services";
 import { GRID_COLUMNS } from "./grid.columns";
-import EditRenderer from "./gridRenderers/EditRenderer.vue";
+import ActionsRenderer from "./gridRenderers/ActionsRenderer.vue";
 
 const grid = ref<{ $el: HTMLRevoGridElement } | null>(null);
 
@@ -39,6 +40,7 @@ interface Props {
 const props = defineProps<Props>();
 const emits = defineEmits<{
   (e: "editRow", url: string): void;
+  (e: "deleteRow", url: string): void;
 }>();
 
 const filters: ColumnFilterConfig = {
@@ -48,18 +50,18 @@ const filters: ColumnFilterConfig = {
   },
 };
 
-const editGrid: ColumnRegular = {
+const actionsCell: ColumnRegular = {
   name: "",
   prop: "edit",
-  size: 50,
+  size: 70,
   sortable: false,
   pin: "colPinStart",
   cellProperties: () => ({ class: { "edit-cell": true } }),
-  cellTemplate: VGridVueTemplate(EditRenderer),
+  cellTemplate: VGridVueTemplate(ActionsRenderer),
 };
 
 const columns: ColumnRegular[] = [
-  editGrid,
+  actionsCell,
   ...GRID_COLUMNS,
 ];
 const theme = ref("compact");
@@ -85,6 +87,11 @@ const onEditRow = (e: CustomEvent) => {
   const { url } = e.detail;
   emits("editRow", url);
 };
+
+const onDeleteRow = (e: CustomEvent) => {
+  const { url } = e.detail;
+  emits("deleteRow", url);
+}
 
 const getExportingPlugin = async () => {
   const plugins = await grid.value?.$el.getPlugins() as ExportFilePlugin[];

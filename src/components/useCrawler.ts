@@ -23,9 +23,7 @@ export function useCrawler(
 
   function addSites(values: SitesData[]) {
     values.forEach(({url, settings}) => {
-      if (!siteStatuses.value.has(url)) {
         siteStatuses.value.set(url, { url, online: true, lastChecked: null, processedData: null, ...(settings ?? DEFAULT_SETTINGS) });
-      }
     });
     checkSites();
   }
@@ -39,6 +37,10 @@ export function useCrawler(
     const currentData = siteStatuses.value.get(url)!;
     siteStatuses.value.set(url, {...currentData, ...settings});
     checkSites();
+  }
+
+  function deleteSites(urls: string[]) {
+    urls.forEach(url => siteStatuses.value.delete(url))
   }
 
   // Function to check all sites in batches
@@ -103,5 +105,6 @@ export function useCrawler(
     startCrawler,
     stopCrawler,
     updateSiteSettings,
+    deleteSites
   };
 }
