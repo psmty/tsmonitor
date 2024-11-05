@@ -16,7 +16,13 @@ export const GET: APIRoute = async (context) => {
             crawlerService.stop();
             return;
           }
-          controller.enqueue(`data: ${JSON.stringify(data)}\n\n`);
+          let data = '';
+          try {
+            data = JSON.stringify(data);
+          } catch (error) {
+            console.error(error);
+          }
+          controller.enqueue(`data: ${data}\n\n`);
         } catch (error) {
           crawlerService.stop();
           console.error(`EventSource is failed: ${error}`);

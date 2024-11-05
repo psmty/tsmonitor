@@ -92,7 +92,7 @@ export const useSiteCrawler = () => {
   const stopCrawler = () => {
     eventSource?.close();
     eventSource = null;
-    siteStatuses.value.clear();
+    // siteStatuses.value.clear();
   };
 
   onMounted(async () => {
