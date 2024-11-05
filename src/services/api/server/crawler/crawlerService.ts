@@ -70,8 +70,18 @@ export class CrawlerService {
     if (this.sendEvent === undefined) {
       throw new Error("No saving event!");
     }
-    const data = await Promise.all(sites.map(site => CrawlerService.getVersions(site)));
-    this.sendEvent?.(data);
+    try {
+      for (const site of sites) {
+        if (!this.isWorking) {
+          break;
+        }
+        const v = await CrawlerService.getVersions(site);
+        this.sendEvent?.([v]);
+      }
+      sites.forEach(site => CrawlerService.getVersions(site));
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   private static async getVersions(site: SitesData): Promise<CrawlerParsed> {

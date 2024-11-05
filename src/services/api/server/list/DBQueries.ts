@@ -6,7 +6,7 @@ export async function getSites(context: APIContext): Promise<SitesData[]>  {
   rows.map((row) => row.settings = row.settings ? JSON.parse(row.settings) : null);
     
   return rows;
-} // locals.runtime.env.
+}
 
 export async function updateSiteSettings(prepare: KVNamespace['prepare'], siteData: SitesData) {
   const sql = `
