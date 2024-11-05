@@ -2,8 +2,9 @@ import type {APIRoute} from "astro";
 import {CrawlerService} from '../../services/api/server/crawler/crawlerService.ts';
 import type {CrawlerParsed, SitesData} from '../../services';
 
+const crawlerService = CrawlerService.getInstance();
+
 export const GET: APIRoute = async ({request}) => {
-  const crawlerService = CrawlerService.getInstance();
 
   // Creating a ReadableStream to push events
   const stream = new ReadableStream({
@@ -45,9 +46,15 @@ export const GET: APIRoute = async ({request}) => {
 export const POST: APIRoute = async ({request}) => {
   try {
     const sites: SitesData[] = await request.json();
-    const data = await CrawlerService.loadData(sites);
 
-    return new Response(JSON.stringify(data));
+    const siteChunks = CrawlerService.chunkArray(sites, CrawlerService.CONCURRENCY_LIMIT);
+
+    for (const chunk of siteChunks) {
+      // Send events with updated data
+      await crawlerService.loadData(chunk);
+    }
+
+    return new Response(null, {status: 200});
   } catch (error) {
     console.error(error);
     return new Response(JSON.stringify(error), {

@@ -52,25 +52,25 @@ export class CrawlerService {
 
   public async checkSites() {
     console.log("Starting site checks...");
-    if (this.sendEvent === undefined) {
-      throw new Error("No saving event!");
-    }
 
     const sites = await getSites();
     // Chunk the site list for limited concurrency (optional)
-    const siteChunks = this.chunkArray(sites, CrawlerService.CONCURRENCY_LIMIT);
+    const siteChunks = CrawlerService.chunkArray(sites, CrawlerService.CONCURRENCY_LIMIT);
 
     for (const chunk of siteChunks) {
       if (!this.isWorking) {
         break;
       }
-      const data = await CrawlerService.loadData(chunk);
-      this.sendEvent?.(data);
+      await this.loadData(chunk);
     }
   }
 
-  public static async loadData(sites: SitesData[]) {
-      return await Promise.all(sites.map(site => CrawlerService.getVersions(site)));
+  public async loadData(sites: SitesData[]) {
+    if (this.sendEvent === undefined) {
+      throw new Error("No saving event!");
+    }
+    const data = await Promise.all(sites.map(site => CrawlerService.getVersions(site)));
+    this.sendEvent?.(data);
   }
 
   private static async getVersions(site: SitesData): Promise<CrawlerParsed> {
@@ -87,7 +87,7 @@ export class CrawlerService {
   }
 
   // Utility function to chunk an array into smaller arrays of a specified size
-  private chunkArray<T>(array: T[], size: number): T[][] {
+  public static chunkArray<T>(array: T[], size: number): T[][] {
     const chunks: T[][] = [];
     for (let i = 0; i < array.length; i += size) {
       chunks.push(array.slice(i, i + size));
