@@ -37,6 +37,10 @@ export const useSiteCrawler = () => {
   };
 
   const loadSites = async (sites: SitesData[]) => {
+    if (eventSource === null) {
+      return;
+    }
+
     try {
       initSites(sites);
       const response = await fetch("/api/crawler", {
@@ -47,9 +51,6 @@ export const useSiteCrawler = () => {
       if (!response.ok) {
         throw new Error(`Update failed with status ${response.status}`);
       }
-
-      const parsedData: CrawlerParsed[] = await response.json();
-      saveSiteStatuses(parsedData);
     } catch (error) {
       console.error(`Failed to update sites`, error);
     }
