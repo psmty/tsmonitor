@@ -1,5 +1,5 @@
-import {db} from '../../../db.ts';
-import type {SitesData} from '../../site.types.ts';
+import {db} from '../../../../db.ts';
+import type {SitesData} from '../../../site.types.ts';
 
 export async function getSites(): Promise<SitesData[]>  {
   const {rows} = await db.query("SELECT * FROM sites;");

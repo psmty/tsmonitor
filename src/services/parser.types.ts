@@ -1,3 +1,5 @@
+import type {SiteSettings} from './site.types.ts';
+
 export interface VersionInfo {
   name: string;
   version: string;
@@ -32,12 +34,18 @@ export interface DocumentInfo {
 }
 
 export interface ParsedData {
-  url: string;
+  htmlString: string,
   modules: VersionInfo[];
   uiVersions: { sgUI: string; tempusUI: string };
-  services: ServiceInfo[];
   servers: ServerInfo[];
   licenseInfo?: LicenseInfo;
   documentInfo: DocumentInfo;
   sgt5PublicVersion: string;
+}
+
+export interface CrawlerParsed {
+  url: string;
+  settings: SiteSettings|null;
+  online: boolean;
+  parsedData: ParsedData|null
 }
