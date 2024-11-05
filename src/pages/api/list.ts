@@ -3,8 +3,8 @@ import type {SitesData} from '../../services';
 import {
   getSites,
   updateSiteSettings, setSites, deleteSites
-} from '../../services/api/list/DBQueries.ts';
-import {getUpdatedSites, getSitesMap} from '../../services/api/list/helpers.ts';
+} from '../../services/api/server/list/DBQueries.ts';
+import {getUpdatedSites, getSitesMap} from '../../services/api/server/list/helpers.ts';
 
 export const GET: APIRoute = async ({ locals, request }) => {
   try {
@@ -28,7 +28,7 @@ export const POST: APIRoute = async ({ props, locals, request }) => {
     const addedSites = getUpdatedSites(sites, existingSitesMap)
 
     if (!addedSites.length) {
-      return new Response("No new URL was added.", {
+      return new Response(JSON.stringify(null), {
         status: 200,
       });
     }

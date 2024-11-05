@@ -1,5 +1,5 @@
-import type {SitesData, SiteSettings} from '../../site.types.ts';
-import {DEFAULT_SETTINGS} from '../../edit.defaults.ts';
+import type {SitesData, SiteSettings} from '../../../site.types.ts';
+import {DEFAULT_SETTINGS} from '../../../edit.defaults.ts';
 
 export function getSitesMap(sites: SitesData[] ): Map<string, SitesData> {
   return new Map<string, SitesData>(
