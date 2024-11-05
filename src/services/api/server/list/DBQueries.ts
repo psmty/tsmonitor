@@ -3,7 +3,7 @@ import type {SitesData} from '../../../site.types.ts';
 
 export async function getSites(context: APIContext): Promise<SitesData[]>  {
   const { results: rows } = await context.locals.runtime.env.DATABASE.prepare("SELECT * FROM sites;").run();
-    rows.map((row) => row.settings = JSON.parse(row.settings));
+  rows.map((row) => row.settings = row.settings ? JSON.parse(row.settings) : null);
     
   return rows;
 } // locals.runtime.env.

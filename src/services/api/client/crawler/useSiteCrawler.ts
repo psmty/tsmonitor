@@ -75,8 +75,12 @@ export const useSiteCrawler = () => {
     eventSource = new EventSource('/api/crawler');
 
     eventSource.onmessage = (event) => {
-      const eventData: CrawlerParsed[] = JSON.parse(event.data);
-      saveSiteStatuses(eventData);
+      try {
+        const eventData: CrawlerParsed[] = JSON.parse(event.data);
+        saveSiteStatuses(eventData);
+      } catch (error) {
+        console.error(`EventSource is failed: ${error}`);
+      }
     };
 
     eventSource.onerror = (e) => {
