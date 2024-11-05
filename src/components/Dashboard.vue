@@ -76,7 +76,6 @@ const source = computed(() => {
 });
 
 const saveUrlsToDataBase = async (urls: SitesData[]) => {
-  // TODO: Load sites befor ask data
   const response = await fetch("/api/list", {
     method: "POST",
     body: JSON.stringify(urls)
