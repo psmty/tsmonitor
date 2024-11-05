@@ -41,8 +41,8 @@
 <script setup lang="ts">
 import Grid from "./Grid.vue";
 import ImportUrlsButton from "./ImportUrlsButton.vue";
-import {computed, onBeforeUnmount, onMounted, ref} from "vue";
-import {useCrawler} from './useCrawler';
+import {computed, onBeforeUnmount, ref} from "vue";
+import {useSiteCrawler} from '../services/api/client/crawler/useSiteCrawler.ts';
 import SideBar from './SideBar.vue';
 import EditRowFields from './EditRowFields.vue';
 import type {SitesData} from '../services';
@@ -51,17 +51,11 @@ import {SideBarType, useSideBar} from '../composables/useSideBar.ts';
 import {useEditRow} from '../composables/useEditRow.ts';
 import {useDeleteConfirmation} from '../composables/useDeleteConfirmation.ts';
 
-const {siteStatuses, addSites, startCrawler, updateSiteSettings, deleteSites} = useCrawler();
+const {siteStatuses, deleteSites, loadSites, updateSiteSettings} = useSiteCrawler();
 
 const {visibleSideBar, sideBarType, sideBarTitle, hideSidebar, clearSideBarType} = useSideBar();
 const {editUrl, startEditRow, endEditRow} = useEditRow(visibleSideBar, sideBarType, sideBarTitle);
 const {deleteUrls, startDeleteRow, endDeleteRow} = useDeleteConfirmation(visibleSideBar, sideBarType, sideBarTitle);
-
-onMounted(async () => {
-  const response = await fetch("/api/list");
-  const sites = await response.json();
-  startCrawler(sites);
-});
 
 const onHideSidebar = () => {
   switch (sideBarType.value) {
@@ -82,13 +76,18 @@ const source = computed(() => {
 });
 
 const saveUrlsToDataBase = async (urls: SitesData[]) => {
+  // TODO: Load sites befor ask data
   const response = await fetch("/api/list", {
     method: "POST",
     body: JSON.stringify(urls)
   });
 
-  const newAddedUrls = await response.json();
-  addSites(newAddedUrls);
+  const newAddedUrls: SitesData[] | null = await response.json();
+  if (newAddedUrls === null) {
+    console.warn('No new sites have been added.')
+    return;
+  }
+  await loadSites(newAddedUrls);
 };
 
 onBeforeUnmount(() => {

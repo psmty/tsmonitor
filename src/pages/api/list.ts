@@ -28,7 +28,7 @@ export const POST: APIRoute = async ({ props, locals, request }) => {
     const addedSites = getUpdatedSites(sites, existingSitesMap)
 
     if (!addedSites.length) {
-      return new Response("No new URL was added.", {
+      return new Response(JSON.stringify(null), {
         status: 200,
       });
     }
