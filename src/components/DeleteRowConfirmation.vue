@@ -1,6 +1,9 @@
 <template>
   <h3 class="mb-6 text-lg text-gray-500 dark:text-gray-400">
-    Are you sure you want to delete <b>{{links}}</b> from grid?
+    Are you sure you want to delete the following sites from the grid?
+    <ul class="max-w-md space-y-1 text-gray-500 list-disc list-inside dark:text-gray-400">
+      <li v-for="url of urls" :key="url"><b>{{url}}</b></li>
+    </ul>
   </h3>
   <button
     class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm inline-flex items-center px-3 py-2.5 text-center mr-2 dark:focus:ring-red-900"

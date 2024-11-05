@@ -5,9 +5,9 @@ export const useDeleteConfirmation = (visibleSideBar: Ref<boolean>, sideBarType:
   const title = 'Delete row';
   const deleteUrls = ref<string[]>([]);
 
-  const startDeleteRow = (url: string) => {
+  const startDeleteRow = (urls: string[]) => {
     sideBarTitle.value = title;
-    deleteUrls.value = [url];
+    deleteUrls.value = urls;
     sideBarType.value = SideBarType.Delete;
     visibleSideBar.value = true;
   };
