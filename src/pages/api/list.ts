@@ -1,10 +1,15 @@
 import type { APIRoute } from "astro";
 import type {SitesData} from '../../services';
+import {
+  getSites,
+  updateSiteSettings, setSites, deleteSites
+} from '../../services/api/server/list/DBQueries.ts';
+import {getUpdatedSites, getSitesMap} from '../../services/api/server/list/helpers.ts';
 
-export const GET: APIRoute = async ({ locals, request }) => {
+export const GET: APIRoute = async (context) => {
   try {
-    const { results: rows } = await locals.runtime.env.DATABASE.prepare("SELECT * FROM sites;").run();
-    rows.map((row) => row.settings = JSON.parse(row.settings));
+    const rows = await getSites(context);
+
     return new Response(JSON.stringify(rows));
   } catch (error) {
     console.error("Database connection error:", error);
@@ -14,49 +19,25 @@ export const GET: APIRoute = async ({ locals, request }) => {
   }
 };
 
-export const POST: APIRoute = async ({ props, locals, request }) => {
-  // TODO: Add ability to save settings
-  const sites: SitesData[] = await request.json();
-  const { results: savedRows } = await locals.runtime.env.DATABASE.prepare("SELECT * FROM sites;").run();
-
-  const existingSites = new Set(savedRows.map((row) => row.url));
-  const newSites: SitesData[] = [];
-  const sitesToMerge: SitesData[] = [];
-
-  for (const site of sites) {
-    const existingSite = existingSites.has(site.url);
-    if (existingSite) {
-      sitesToMerge.push(site)
-    } else {
-      newSites.push(site);
-    }
-  }
-
+export const POST: APIRoute = async (context) => {
   try {
-    if (!newSites.length && !existingSites.size) {
-      return new Response("No new URL was added.", {
+    const sites: SitesData[] = await context.request.json();
+    const savedRows = await getSites(context);
+
+    const existingSitesMap = getSitesMap(savedRows);
+    const addedSites = getUpdatedSites(sites, existingSitesMap)
+
+    if (!addedSites.length) {
+      return new Response(JSON.stringify(null), {
         status: 200,
       });
     }
 
-    // Save new Sites
-    if (newSites.length) {
-      const values: Array<unknown> = [];
-      const placeholders = newSites.map((value, idx) => {
-        values.push(value.url, JSON.stringify(value.settings)); // Push url and second_column values
-        return `(?, ?)`
-      }).join(',');
-      const sql = `INSERT INTO sites (url, settings) VALUES ${placeholders}`;
-      await locals.runtime.env.DATABASE.prepare(sql).bind(...values.flat()).run();
+    if (addedSites.length) {
+      await setSites(context, addedSites);
     }
 
-    // Merge new values
-    if (sitesToMerge.length) {
-// TODO: Implement merging
-    }
-
-// TODO: Return rows all  data
-    return new Response(JSON.stringify(newSites));
+    return new Response(JSON.stringify(addedSites));
   } catch (error) {
     console.error("Database connection error:", error);
     return new Response("Failed to fetch data from PostgreSQL", {
@@ -66,20 +47,11 @@ export const POST: APIRoute = async ({ props, locals, request }) => {
 };
 
 export const PUT: APIRoute = async ({ props, locals, request }) => {
-    const sql = `
-      UPDATE sites
-      SET settings = ?1
-      WHERE url = ?2
-      RETURNING *;
-    `;
-
   try {
-    const settings: SitesData = await request.json();
+    const siteData: SitesData = await request.json();
+    await updateSiteSettings(locals.runtime.env.DATABASE.prepare, siteData);
 
-    const values = [JSON.stringify(settings.settings), settings.url]
-    await locals.runtime.env.DATABASE.prepare(sql).bind(...values).run();
-
-    return new Response(JSON.stringify(settings));
+    return new Response(JSON.stringify(siteData));
   } catch (error) {
     console.error("Database connection error:", error);
     return new Response("Failed to fetch data from PostgreSQL", {
@@ -88,12 +60,18 @@ export const PUT: APIRoute = async ({ props, locals, request }) => {
   }
 };
 
-export const DELETE: APIRoute = ({ request }) => {
-  return new Response(
-    JSON.stringify({
-      message: "This was a DELETE!",
-    })
-  );
+export const DELETE: APIRoute = async ({ locals, request }) => {
+  try {
+    const urlsForDeletion: string[] = await request.json();
+    const deletedRows = await deleteSites(locals.runtime.env.DATABASE.prepare, urlsForDeletion);
+
+    return new Response(JSON.stringify(deletedRows));
+  } catch (error) {
+    console.error("Database connection error:", error);
+    return new Response("Failed to fetch data from PostgreSQL", {
+      status: 500,
+    });
+  }
 };
 
 export const ALL: APIRoute = ({ request }) => {

@@ -2,7 +2,7 @@ import type {
   ServerInfo,
   DocumentInfo,
   VersionInfo,
-  LicenseInfo,
+  LicenseInfo, ParsedData
 } from "./parser.types";
 
 const licenseFragmentRegex = /\[l:dl=[^\]]+\]/g;
@@ -51,7 +51,7 @@ function extractLicensesFromString(input: string) {
 function extractTextAfterDate(input = ''): string | null {
   // Regex to match text after "Date:" up to the end of the line
   const dateRegex = /Date:\s*(.*)$/m;
-  
+
   // Execute the regex to capture the text
   const match = dateRegex.exec(input);
 
@@ -73,7 +73,7 @@ function services(htmlString: string) {
   };
 }
 
-export function parseHtmlString(htmlString: string) {
+export function parseHtmlString(htmlString: string): ParsedData {
   const modules: VersionInfo[] = [];
   const servers: ServerInfo[] = [];
   let documentInfo: DocumentInfo = { totalSizeMB: 0 };
@@ -85,7 +85,7 @@ export function parseHtmlString(htmlString: string) {
 
 
   const serverRegex = /Server (\d+) - Active (\d+) seconds ago/g;
-  
+
   const docSizeRegex = /Total Document Size: (\d+) MB/;
 
   const tempusUIRegex = /Tempus UI\s*\r?\n\r?\n([a-f0-9]+)\s*\r?\n/i;

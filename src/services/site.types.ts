@@ -14,7 +14,7 @@ export enum CustomFieldsName {
   Csm = 'CSM'
 }
 
-export interface SiteSettings {
+export interface SiteSettings extends Partial<ParsedData> {
   customer: string,
   environment: Environment|null,
   csm: string,
@@ -30,5 +30,4 @@ export interface Site extends SiteSettings {
   url: string;
   online: boolean;
   lastChecked: Date | null;
-  processedData: ParsedData | null; // TODO: Why do we need processedData
 }

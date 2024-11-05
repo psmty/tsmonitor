@@ -98,8 +98,6 @@ import {Environment, type Site, type SitesData, type SiteSettings} from '../serv
 import {ref, watch} from 'vue';
 import {DEFAULT_SETTINGS} from '../services/edit.defaults.ts';
 
-// TODO: Probably add URL field
-
 interface Props {
   visible: boolean;
   editUrl: string | null;
