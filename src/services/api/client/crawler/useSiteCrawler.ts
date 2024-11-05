@@ -38,6 +38,7 @@ export const useSiteCrawler = () => {
 
   const loadSites = async (sites: SitesData[]) => {
     try {
+      initSites(sites);
       const response = await fetch("/api/crawler", {
         method: "POST",
         body: JSON.stringify(sites)
@@ -53,6 +54,17 @@ export const useSiteCrawler = () => {
       console.error(`Failed to update sites`, error);
     }
   };
+
+  const initSites = (sites: SitesData[]) => {
+    sites.forEach(site => {
+      siteStatuses.value.set(site.url, {
+        url: site.url,
+        online: false,
+        lastChecked: null,
+        ...DEFAULT_SETTINGS
+      })
+    })
+  }
 
   const startCrawler = () => {
     if (eventSource) {
@@ -78,10 +90,10 @@ export const useSiteCrawler = () => {
     siteStatuses.value.clear();
   };
 
-  onMounted(() => {
-    // TODO: load inital sites list
-  //   const response = await fetch("/api/list");
-  // const sites = await response.json();
+  onMounted(async () => {
+    const response = await fetch("/api/list");
+    const sites: SitesData[] = await response.json();
+    initSites(sites);
     startCrawler();
   });
 
