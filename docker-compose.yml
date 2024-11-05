@@ -30,7 +30,7 @@ services:
     image: dpage/pgadmin4
     container_name: pgadmin
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${POSTGRES_USER}       # Set pgAdmin default email
+      PGADMIN_DEFAULT_EMAIL: ${POSTGRES_USER_EMAIL}       # Set pgAdmin default email
       PGADMIN_DEFAULT_PASSWORD: ${POSTGRES_PASSWORD}               # Set pgAdmin default password
     ports:
       - 5050:80  # Expose pgAdmin on http://localhost:5050

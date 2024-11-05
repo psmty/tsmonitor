@@ -73,11 +73,3 @@ export const DELETE: APIRoute = async ({ request }) => {
     });
   }
 };
-
-export const ALL: APIRoute = ({ request }) => {
-  return new Response(
-    JSON.stringify({
-      message: `This was a ${request.method}!`,
-    })
-  );
-};

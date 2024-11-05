@@ -2,6 +2,7 @@ import {onMounted, onUnmounted, ref} from 'vue';
 import type {CrawlerParsed, ParsedData} from '../../../parser.types.ts';
 import type {Site, SitesData} from '../../../site.types.ts';
 import {DEFAULT_SETTINGS} from '../../../edit.defaults.ts';
+import type { AttributeData } from '../../../attribute.types.ts';
 
 export const useSiteCrawler = () => {
   let eventSource: EventSource | null = null;
@@ -93,6 +94,8 @@ export const useSiteCrawler = () => {
 
   onMounted(async () => {
     const response = await fetch("/api/list");
+    const attributes: AttributeData[] = await (await fetch("/api/attributes")).json();
+    console.log(attributes)
     const sites: SitesData[] = await response.json();
     initSites(sites);
     startCrawler();

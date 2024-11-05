@@ -1,8 +1,14 @@
 import {db} from '../../../../db.ts';
+import type { AttributeData } from '../../../attribute.types.ts';
 import type {SitesData} from '../../../site.types.ts';
 
 export async function getSites(): Promise<SitesData[]>  {
   const {rows} = await db.query("SELECT * FROM sites;");
+  return rows;
+}
+
+export async function getAttributes(): Promise<AttributeData[]>  {
+  const {rows} = await db.query("SELECT * FROM attributes;");
   return rows;
 }
 
