@@ -15,7 +15,7 @@
       <template #title>{{ sideBarTitle }}</template>
 
       <EditRowFields v-if="sideBarType === SideBarType.Edit" :visible="visibleSideBar" :editUrl="editUrl"
-        :source="siteStatuses" @update="editRow" @closePopup="hideSidebar" />
+        :source="siteStatuses" @update="editRow" @closePopup="hideSidebar" :resources="props.resources" />
 
       <DeleteRowConfirmation v-else-if="sideBarType === SideBarType.Delete" :urls="deleteUrls" @close="hideSidebar"
         @delete="deleteRow" />
@@ -42,6 +42,13 @@ const { visibleSideBar, sideBarType, sideBarTitle, hideSidebar, clearSideBarType
 const { editUrl, startEditRow, endEditRow } = useEditRow(visibleSideBar, sideBarType, sideBarTitle);
 const { deleteUrls, startDeleteRow, endDeleteRow } = useDeleteConfirmation(visibleSideBar, sideBarType, sideBarTitle);
 
+const props = defineProps({
+  resources: {
+    type: Object,
+    default: () => [],
+  },
+});
+
 const onHideSidebar = () => {
   switch (sideBarType.value) {
     case SideBarType.Edit:
@@ -59,13 +66,13 @@ const source = computed(() => {
 });
 
 const editRow = async (editFields: SitesData) => {
-  visibleSideBar.value = false;
+  hideSidebar();
   updateSites(editFields);
 };
 
 const deleteRow = async (urls: string[]) => {
   await deleteSites(urls);
-  visibleSideBar.value = false;
+  hideSidebar();
 };
 
 const grid = ref<(typeof Grid | null)>(null);
