@@ -70,7 +70,15 @@ export class CrawlerService {
         break;
       }
 
-      const sitesToLoad = await this.getNotLoadedSites(chunk);
+      const sitesToLoad: SitesData[] = [];
+      await Promise.all(
+        chunk.map(async (site) => {
+          const isFileExists = await fileExists(site.url);
+          if (!isFileExists) {
+            sitesToLoad.push(site);
+          }
+        }),
+      );
 
       if (sitesToLoad.length !== 0) {
         await this.loadData(sitesToLoad);
@@ -88,20 +96,6 @@ export class CrawlerService {
 
   disconnectClient(id: string) {
     this.clientsSender.delete(id);
-  }
-
-  private async getNotLoadedSites(sites: SitesData[]) {
-    const sitesToLoad: SitesData[] = [];
-    await Promise.all(
-      sites.map(async (site) => {
-        const isFileExists = await fileExists(site.url);
-        if (!isFileExists) {
-          sitesToLoad.push(site);
-        }
-      }),
-    );
-
-    return sitesToLoad;
   }
 
   private async getSiteChunks() {
