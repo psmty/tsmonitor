@@ -1,12 +1,10 @@
-import type {APIRoute} from "astro";
-import {CrawlerService} from '../../services/api/server/crawler/CrawlerService.ts';
-import type {CrawlerParsed, SitesData} from '../../services';
-import {chunkArray} from '../../services/api/server/crawler/helpers.ts';
+import type { APIRoute } from "astro";
+import type { CrawlerParsed, SitesData } from "../../services";
+import { chunkArray } from "../../crawler/server/helpers";
+import { CONCURRENCY_LIMIT, getInstance } from "../../crawler/server";
 
-const crawlerService = CrawlerService.getInstance();
-
-export const GET: APIRoute = async ({request}) => {
-  const connectionID = crypto.randomUUID()
+export const GET: APIRoute = async ({ request }) => {
+  const connectionID = crypto.randomUUID();
 
   // Creating a ReadableStream to push events
   const stream = new ReadableStream({
@@ -25,44 +23,43 @@ export const GET: APIRoute = async ({request}) => {
         }
       };
 
-      await crawlerService.connectClient(connectionID, sendEvent);
+      await getInstance().connectClient(connectionID, sendEvent);
     },
     cancel: (controller) => {
-      crawlerService.disconnectClient(connectionID);
+      getInstance().disconnectClient(connectionID);
       controller.close();
-    }
-
+    },
   });
 
   // Returning the Response with the stream as the body
   return new Response(stream, {
     headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive'
-    }
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+    },
   });
 };
 
-
-export const POST: APIRoute = async ({request}) => {
+export const POST: APIRoute = async ({ request }) => {
   try {
     const sites: SitesData[] = await request.json();
 
-    const siteChunks = chunkArray(sites, CrawlerService.CONCURRENCY_LIMIT);
+    const siteChunks = chunkArray(sites, CONCURRENCY_LIMIT);
+    const crawler = getInstance();
 
     for (const chunk of siteChunks) {
       // Send events with updated data
-      await crawlerService.loadData(chunk);
-      await crawlerService.notifyClients(chunk);
+      await crawler.loadData(chunk);
+      await crawler.notifyClients(chunk);
     }
 
-    return new Response(null, {status: 200});
+    return new Response(null, { status: 200 });
   } catch (error) {
     console.error(error);
     return new Response(JSON.stringify(error), {
       status: 500,
-      statusText: "Failed to fetch data"
+      statusText: "Failed to fetch data",
     });
   }
 };
