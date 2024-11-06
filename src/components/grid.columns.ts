@@ -1,5 +1,6 @@
 import type { ColumnDataSchemaModel, ColumnRegular, HyperFunc, VNode } from '@revolist/vue3-datagrid';
 import { CustomFieldsName } from '../services/consts';
+import type { Ref } from 'vue';
 const YES_CLASS = 'bg-green-100 text-green-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-md dark:bg-gray-700 dark:text-green-400 border border-green-100 dark:border-green-500';
 const NO_CLASS = 'bg-red-100 text-red-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-md border border-red-100 dark:border-red-400 dark:bg-gray-700 dark:text-red-400';
 const NO_OPT_CLASS = 'bg-purple-100 text-purple-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-md border border-purple-100 dark:bg-gray-700 dark:border-purple-500 dark:text-purple-400';
@@ -150,3 +151,50 @@ export const GRID_COLUMNS: ColumnRegular[] = [
     sortable: true,
   },
 ];
+
+const CHECKBOX_CLASS = "w-4 h-4 border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600";
+export const CHECKBOX_COLUMN = (selectedRows: Ref<Set<string>>, source: Ref<any[]>): ColumnRegular => ({
+  name: "",
+  prop: "checkbox",
+  size: 50,
+  sortable: false,
+  filter: false,
+  // pin: "colPinStart",
+  columnTemplate: (h, p) => {
+    const selected = selectedRows.value.size === source.value.length;
+    return h('input', {
+      type: "checkbox",
+      checked: selected,
+      class: CHECKBOX_CLASS,
+      onChange: (e: Event & { target: HTMLInputElement }) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (e.target.checked) {
+          source.value.map(i => selectedRows.value.add(i.url));
+        } else {
+          selectedRows.value.clear();
+        }
+      }
+    });
+  },
+  cellTemplate: (h, p) => {
+    const url = p.model.url;
+    const selected = selectedRows.value.has(url);
+    return h('input', {
+      type: "checkbox",
+      class: CHECKBOX_CLASS,
+      checked: selected,
+      onChange: (e: Event & { target: HTMLInputElement }) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (e.target.checked) {
+          selectedRows.value.add(url);
+        } else {
+          selectedRows.value.delete(url);
+        }
+      }
+    });
+  }
+});
