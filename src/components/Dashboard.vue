@@ -3,13 +3,17 @@
     class="flex flex-col grow bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 dark:bg-gray-800">
     <div class="flex items-center justify-between my-5 mx-5">
       <ImportUrlsButton @saveUrls="addSites" />
-      <button
-        class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-gray-500 items-center bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-primary-300 rounded-lg border border-gray-200 text-sm font-medium hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600"
-        @click="exportToCsv">
-        Export to CSV
-      </button>
+      <div class="flex flex-row space-x-4">
+        <Select :source="groupByOptions" v-model:value="groupBy" />
+
+        <button
+          class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-gray-500 items-center bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-primary-300 rounded-lg border border-gray-200 text-sm font-medium hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600"
+          @click="exportToCsv">
+          Export to CSV
+        </button>
+      </div>
     </div>
-    <Grid ref="grid" :data="source" @editRow="startEditRow" @delete-row="startDeleteRow" />
+    <Grid ref="grid" :columns="columns" :data="source" :grouping="grouping" @editRow="startEditRow" @delete-row="startDeleteRow" />
 
     <SideBar v-model="visibleSideBar" @onHide="onHideSidebar">
       <template #title>{{ sideBarTitle }}</template>
@@ -26,6 +30,7 @@
 <script setup lang="ts">
 import Grid from "./Grid.vue";
 import ImportUrlsButton from "./ImportUrlsButton.vue";
+import Select from './Select.vue';
 import { computed, ref } from "vue";
 import { useDashboardApi } from '../composables/useDashboard.ts';
 import SideBar from './SideBar.vue';
@@ -35,6 +40,8 @@ import DeleteRowConfirmation from './DeleteRowConfirmation.vue';
 import { SideBarType, useSideBar } from '../composables/useSideBar.ts';
 import { useEditRow } from '../composables/useEditRow.ts';
 import { useDeleteConfirmation } from '../composables/useDeleteConfirmation.ts';
+import { GRID_COLUMNS } from "./grid.columns.ts";
+import type { ColumnProp } from "@revolist/vue3-datagrid";
 
 const { siteStatuses, deleteSites, addSites, updateSites } = useDashboardApi();
 
@@ -44,9 +51,20 @@ const { deleteUrls, startDeleteRow, endDeleteRow } = useDeleteConfirmation(visib
 
 const props = defineProps({
   resources: {
-    type: Object,
+    type: Array as () => string[],
     default: () => [],
   },
+});
+
+const groupBy = ref<string>();
+const columns = [...GRID_COLUMNS];
+const groupByOptions = ref(columns.map((column) => column.name));
+const grouping = computed((): { props: [ColumnProp] } | undefined => {
+  const column = columns.find((column) => column.name === groupBy.value);
+  if (!column) {
+    return;
+  }
+  return { props: [column.prop] };
 });
 
 const onHideSidebar = () => {
