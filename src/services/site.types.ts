@@ -1,24 +1,12 @@
 import type {ParsedData} from './parser.types.ts';
 
-export enum Environment {
-  Dev = 'Dev',
-  Prod = 'Prod',
-  Trial = 'Trial'
-}
-
-export enum CustomFieldsName {
-  URL = 'Instance',
-  Customer = 'Customer',
-  Environment = 'Environment',
-  Integrations = 'Integrations',
-  Csm = 'CSM'
-}
 
 export interface SiteSettings extends Partial<ParsedData> {
   customer: string,
-  environment: Environment|null,
+  environment: string|null,
   csm: string,
   hasIntegration: boolean,
+  resource?: string
 }
 
 export interface SitesData {

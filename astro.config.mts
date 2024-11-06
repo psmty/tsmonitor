@@ -11,9 +11,8 @@ import vue from '@astrojs/vue';
 export default defineConfig({
   integrations: [tailwind(), vue(), auth()],
   output: 'server',
-  adapter: node({
-    mode: 'standalone',
-  }),
+  base: '/',
+  adapter: node({ mode: 'standalone' }),
   vite: {
     css: {
       preprocessorOptions: {

@@ -3,11 +3,15 @@ import type {SitesData} from '../../services';
 import {
   getSites,
   updateSiteSettings, setSites, deleteSites
-} from '../../services/api/server/list/DBQueries.ts';
+} from '../../db/DBQueries.ts';
 import {getUpdatedSites, getSitesMap} from '../../services/api/server/list/helpers.ts';
-
+import { getInstance } from "../../crawler/server/index.ts";
+import { deleteFile } from "../../crawler/server/fileService.ts";
 export const GET: APIRoute = async ({ locals, request }) => {
   try {
+    // Start the crawler if it's not already running
+    getInstance()?.startIfNotWorking();
+  
     const rows = await getSites();
 
     return new Response(JSON.stringify(rows));
@@ -64,6 +68,14 @@ export const DELETE: APIRoute = async ({ request }) => {
   try {
     const urlsForDeletion: string[] = await request.json();
     const deletedRows = await deleteSites(urlsForDeletion);
+
+    try {
+      await Promise.all(urlsForDeletion.map(async (url) => {
+        await deleteFile(url);
+      }));
+    } catch (e) {
+      console.error("Deletion failed:", e);
+    }
 
     return new Response(JSON.stringify(deletedRows));
   } catch (error) {
