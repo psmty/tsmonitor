@@ -12,9 +12,7 @@ export default defineConfig({
   integrations: [tailwind(), vue(), auth()],
   output: 'server',
   base: '/',
-  adapter: node({
-    mode: 'middleware',
-  }),
+  adapter: node({ mode: 'standalone' }),
   vite: {
     css: {
       preprocessorOptions: {
