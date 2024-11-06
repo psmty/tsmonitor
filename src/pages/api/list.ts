@@ -5,6 +5,7 @@ import {
   updateSiteSettings, setSites, deleteSites
 } from '../../services/api/server/list/DBQueries.ts';
 import {getUpdatedSites, getSitesMap} from '../../services/api/server/list/helpers.ts';
+import {SiteFileReaderService} from '../../services/api/server/crawler/SiteFileReaderService.ts';
 
 export const GET: APIRoute = async ({ locals, request }) => {
   try {
@@ -64,6 +65,14 @@ export const DELETE: APIRoute = async ({ request }) => {
   try {
     const urlsForDeletion: string[] = await request.json();
     const deletedRows = await deleteSites(urlsForDeletion);
+
+    try {
+      await Promise.all(urlsForDeletion.map(async (url) => {
+        await SiteFileReaderService.deleteFile(url);
+      }));
+    } catch (e) {
+      console.error("Deletion failed:", e);
+    }
 
     return new Response(JSON.stringify(deletedRows));
   } catch (error) {
