@@ -12,12 +12,12 @@ import Papa from 'papaparse';
 import {
   addDefaultDomainToString,
   addHttpsProtocol,
-  CustomFieldsName, Environment,
   type SitesData,
   type SiteSettings,
   validateUrl
 } from '../services';
 import {DEFAULT_SETTINGS} from '../services/edit.defaults.ts';
+import { CustomFieldsName, Environment } from '../services/consts.ts';
 
 const emits = defineEmits<{
   (e: 'saveUrls', urls: SitesData[]): void;
@@ -45,7 +45,7 @@ const correctUrlString = (url: string) => {
   return link !== null ? addHttpsProtocol(link) : link;
 };
 
-function isEnumValue<T>(value: string, enumObj: T): value is T[keyof T] {
+function isEnumValue<T extends { [key: string]: string }>(value: string, enumObj: T): value is T[keyof T] {
   return Object.values(enumObj as any).includes(value);
 }
 

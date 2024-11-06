@@ -1,11 +1,12 @@
 <template>
   <div
-    class="fixed top-0 right-0 z-40 w-full h-screen max-w-xs p-4 overflow-y-auto transition-transform translate-x-full bg-white dark:bg-gray-800"
+    class="fixed top-0 right-0 z-40 w-full h-screen max-w-xs py-4 transition-transform translate-x-full bg-white dark:bg-gray-800"
     tabindex="-1"
     aria-labelledby="drawer-label"
     aria-hidden="true"
     ref="drawerRef"
   >
+  <div class="flex items-center justify-between px-4">
     <h5
       id="drawer-label"
       class="inline-flex items-center mb-6 text-sm font-semibold text-gray-500 uppercase dark:text-gray-400"
@@ -32,7 +33,7 @@
       >
       <span class="sr-only">Close menu</span>
     </button>
-
+  </div>
     <slot name="default"></slot>
   </div>
 </template>
