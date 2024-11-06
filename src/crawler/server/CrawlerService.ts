@@ -32,7 +32,7 @@ export class CrawlerService {
   }
 
   start() {
-    console.log("START");
+    console.log("START CrawlerService");
     if (this.isWorking) {
       this.stop();
     }
@@ -146,7 +146,7 @@ export class CrawlerService {
         event(data);
       }
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
 

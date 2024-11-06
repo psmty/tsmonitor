@@ -83,6 +83,7 @@ export const useDashboardApi = () => {
       body: JSON.stringify(editFields),
     });
     const siteData = await response.json();
+    // TODO: notify all clients
     updateSiteSettings(siteData);
   };
 

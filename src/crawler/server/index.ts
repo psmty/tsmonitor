@@ -1,8 +1,7 @@
 import { getSites } from "../../db/DBQueries";
 import { CrawlerService } from "./CrawlerService";
 
-// private static readonly timeout = 3 * 60 * 1000; // 3 min
-const timeout = 60 * 1000; // 3 min
+const timeout = 3 * 60 * 1000; // 3 min
 
 // The static instance that holds the single instance of the class
 let instance: CrawlerService | undefined;
