@@ -9,7 +9,8 @@
 </template>
 
 <script setup lang="ts">
-import type {SelectSource} from './defaults.ts';
+import type {SelectItemId, SelectSource} from './defaults.ts';
+import type {PropType} from 'vue';
 
 defineProps({
   source: {
@@ -20,7 +21,7 @@ defineProps({
     type: String,
   },
   value: {
-    type: String,
+    type: String as PropType<SelectItemId>,
   }
 })
 const emit = defineEmits<{
