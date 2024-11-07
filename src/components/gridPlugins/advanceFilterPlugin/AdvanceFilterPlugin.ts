@@ -45,7 +45,7 @@ export class AdvanceFilterPlugin extends FilterPlugin {
         slot: 'header',
       },
       [
-        'Filter by value' as any,
+        'Select values' as any,
         h('div', {
           ref: (el?: HTMLElement) => (this.miniFilter = el ?? undefined),
         }),
@@ -77,6 +77,7 @@ export class AdvanceFilterPlugin extends FilterPlugin {
               type: FIlTER_MINI,
               value: excluded,
               relation: 'and',
+              hidden: true,
             };
             filters.push(currentMiniFilter);
           } else {

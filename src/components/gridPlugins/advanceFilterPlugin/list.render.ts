@@ -38,7 +38,7 @@ export function renderList(
   miniFilter: HTMLElement,
   columnProp: ColumnProp,
   dataProvider: RowDataSources,
-  exlude = new Set(),
+  exlude = new Set<string>(),
   filter: (excluded: Set<any>) => void,
 ) {
   const columnData = new Map<
@@ -79,9 +79,11 @@ export function renderList(
 
   Object.entries(dataProvider).forEach(([_type, storeService]) => {
     storeService.store.get('source').forEach((item) => {
-      const value = item[columnProp];
+      let originalValue = item[columnProp]?.toString().trim();
+      let value = originalValue?.toLowerCase();
       if (!value) {
-        return;
+        value = '';
+        originalValue = 'Empty';
       }
       // Create the label element
       const label = document.createElement('label');
@@ -103,7 +105,7 @@ export function renderList(
 
       // Append the input element and text node to the label element
       label.appendChild(input);
-      label.appendChild(document.createTextNode(value));
+      label.appendChild(document.createTextNode(originalValue));
       columnData.set(value, {
         el: label,
         input,
