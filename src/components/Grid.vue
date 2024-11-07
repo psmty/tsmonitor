@@ -143,5 +143,9 @@ defineExpose({
       }
     }
   }
+
+  :deep(.group-expand) {
+    padding-left: 5px;
+  }
 }
 </style>
