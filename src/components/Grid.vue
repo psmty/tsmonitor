@@ -12,6 +12,7 @@
     :grouping="grouping"
     hide-attribution
     :theme="theme"
+    :plugins="[AdvanceFilterPlugin]"
     @on-edit-row="onEditRow"
     @on-delete-row="onDeleteRow"
   />
@@ -30,6 +31,7 @@ import {computed, onMounted, ref, toRef} from "vue";
 import {localJsDateToDateString, type Site} from "../services";
 import {CHECKBOX_COLUMN, GRID_COLUMNS} from "./grid.columns";
 import ActionsRenderer from "./gridRenderers/ActionsRenderer.vue";
+import {AdvanceFilterPlugin} from './gridPlugins/advanceFilterPlugin/AdvanceFilterPlugin.ts';
 
 const grid = ref<{ $el: HTMLRevoGridElement } | null>(null);
 
@@ -50,7 +52,7 @@ const emits = defineEmits<{
 const filters: ColumnFilterConfig = {
   multiFilterItems: {
     customer: [{id: 0, type: "contains", value: "", relation: "or"}],
-    url: [{id: 1, type: "contains", value: "", relation: "or"}]
+    url: [{id: 1, type: "contains", value: "", relation: "or"}],
   }
 };
 
