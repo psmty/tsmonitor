@@ -42,8 +42,7 @@ export function usePersonalization<T extends Record<string, any>>(pageKey: Perso
     });
   }
 
-  // Add or update a key-value pair in IndexedDB
-  async function setPersonalization(key: keyof T, value: valueOf<T>) {
+  async function setPersonalizationValue(key: keyof T, value: valueOf<T>) {
     await openDB();
     const transaction = dbInstance!.transaction(STORE_NAME, 'readwrite');
     const store = transaction.objectStore(STORE_NAME);
@@ -58,7 +57,21 @@ export function usePersonalization<T extends Record<string, any>>(pageKey: Perso
     };
   }
 
-  // Get a value by key from IndexedDB
+  async function setPersonalization(value: T) {
+    await openDB();
+    const transaction = dbInstance!.transaction(STORE_NAME, 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    store.put(value, pageKey); // Storing the object with key-value pair
+
+    transaction.oncomplete = () => {
+      fetchPersonalization(); // Reload items after adding/updating
+    };
+
+    transaction.onerror = (event) => {
+      console.error('Error setting item:', event);
+    };
+  }
+
   async function fetchPersonalization() {
     await openDB();
     const transaction = dbInstance!.transaction(STORE_NAME, 'readonly');
@@ -74,7 +87,6 @@ export function usePersonalization<T extends Record<string, any>>(pageKey: Perso
     };
   }
 
-  // Delete a key-value pair by key
   async function deletePersonalization() {
     await openDB();
     const transaction = dbInstance!.transaction(STORE_NAME, 'readwrite');
@@ -97,6 +109,7 @@ export function usePersonalization<T extends Record<string, any>>(pageKey: Perso
   return {
     personalization: readonly(personalization),
     setPersonalization,
+    setPersonalizationValue,
     fetchPersonalization,
     deletePersonalization
   };

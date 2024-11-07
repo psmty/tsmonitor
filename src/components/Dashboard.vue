@@ -46,7 +46,7 @@ import type {ColumnProp} from "@revolist/vue3-datagrid";
 import {EMPTY_ID, type SelectSource} from './select/defaults.ts';
 import {type MainGridPersonalization, usePersonalization} from '../composables/usePersonalization.ts';
 
-const {personalization, setPersonalization} = usePersonalization<MainGridPersonalization>('mainGrid');
+const {personalization, setPersonalizationValue} = usePersonalization<MainGridPersonalization>('mainGrid');
 const {siteStatuses, deleteSites, addSites, updateSites} = useDashboardApi();
 
 const {visibleSideBar, sideBarType, sideBarTitle, hideSidebar, clearSideBarType} = useSideBar();
@@ -70,7 +70,7 @@ const groupByOptions = computed<SelectSource[]>(() => {
 });
 const groupBy = computed({
   get: () => personalization.value?.groupBy ?? EMPTY_ID,
-  set: (value) => setPersonalization('groupBy',value)
+  set: (value) => setPersonalizationValue('groupBy',value)
 })
 const grouping = computed((): { props: [ColumnProp] } | undefined => {
   if (!groupBy.value) return;
