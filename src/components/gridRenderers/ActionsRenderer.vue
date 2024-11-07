@@ -1,11 +1,11 @@
 <template>
-  <div v-if="props.type !== 'rowPinStart'" ref="cell" class="h-full flex align-items-center gap-1">
+  <div v-if="props.type !== 'rowPinStart'" ref="cell" class="h-full flex align-items-center gap-3">
     <button v-if="!selectedFewRows" class="opacity-90" @click="onEditRow">
       <EditIcon />
     </button>
 
     <button>
-      <DeleteIcon class="text-red-600 dark:!text-red-500" @click="onDeleteRow"/>
+      <DeleteIcon class="opacity-90" @click="onDeleteRow"/>
     </button>
   </div>
 </template>

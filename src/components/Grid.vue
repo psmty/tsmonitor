@@ -9,6 +9,7 @@
     :columns="columns"
     :source="source"
     :exporting="true"
+    :grouping="grouping"
     hide-attribution
     :theme="theme"
     @on-edit-row="onEditRow"
@@ -18,17 +19,16 @@
 <script lang="ts" setup>
 import {
   type ColumnFilterConfig,
+  type ColumnProp,
   type ColumnRegular,
   type ExportFilePlugin,
-  dispatch,
-  FILTER_CONFIG_CHANGED_EVENT,
   VGrid,
   VGridVueTemplate
 } from "@revolist/vue3-datagrid";
 // import ExportFilePlugin from '@revolist/revogrid/dist/types/plugins/export/export.plugin';
 import {computed, onMounted, ref} from "vue";
 import {localJsDateToDateString, type Site} from "../services";
-import {GRID_COLUMNS} from "./grid.columns";
+import {CHECKBOX_COLUMN, GRID_COLUMNS} from "./grid.columns";
 import ActionsRenderer from "./gridRenderers/ActionsRenderer.vue";
 
 const grid = ref<{ $el: HTMLRevoGridElement } | null>(null);
@@ -37,6 +37,8 @@ const selectedRows = ref(new Set<string>());
 
 interface Props {
   data: Array<Site>;
+  columns: ColumnRegular[];
+  grouping?: { props: [ColumnProp] };
 }
 
 const props = defineProps<Props>();
@@ -52,49 +54,7 @@ const filters: ColumnFilterConfig = {
   }
 };
 
-const checkboxCell = computed<ColumnRegular>(() => ({
-  name: "",
-  prop: "checkbox",
-  size: 50,
-  sortable: false,
-  filter: false,
-  pin: "colPinStart",
-  columnTemplate: (h, p) => {
-    const selected = selectedRows.value.size === source.value.length;
-    return h('input', {
-      type: "checkbox",
-      checked: selected,
-      onChange: (e: Event & { target: HTMLInputElement }) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        if (e.target.checked) {
-          source.value.map(i => selectedRows.value.add(i.url));
-        } else {
-          selectedRows.value.clear();
-        }
-      }
-    });
-  },
-  cellTemplate: (h, p) => {
-    const url = p.model.url;
-    const selected = selectedRows.value.has(url);
-    return h('input', {
-      type: "checkbox",
-      checked: selected,
-      onChange: (e: Event & { target: HTMLInputElement }) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        if (e.target.checked) {
-          selectedRows.value.add(url);
-        } else {
-          selectedRows.value.delete(url);
-        }
-      }
-    });
-  }
-}));
+const checkboxCell = computed<ColumnRegular>(() => (CHECKBOX_COLUMN(selectedRows, source)));
 
 const actionsCell = computed<ColumnRegular>(() => ({
   name: "",
@@ -102,7 +62,7 @@ const actionsCell = computed<ColumnRegular>(() => ({
   size: 70,
   sortable: false,
   filter: false,
-  pin: "colPinStart",
+  // pin: "colPinStart",
   cellProperties: () => ({class: {"edit-cell": true}}),
   cellTemplate: VGridVueTemplate(ActionsRenderer, {
     selectedFewRows: selectedRows.value.size > 1
@@ -112,7 +72,7 @@ const actionsCell = computed<ColumnRegular>(() => ({
 const columns = computed<ColumnRegular[]>(() => [
   checkboxCell.value,
   actionsCell.value,
-  ...GRID_COLUMNS
+  ...props.columns,
 ]);
 const theme = ref("compact");
 
