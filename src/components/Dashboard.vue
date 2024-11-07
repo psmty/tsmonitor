@@ -44,7 +44,9 @@ import {useDeleteConfirmation} from '../composables/useDeleteConfirmation.ts';
 import {GRID_COLUMNS} from "./grid.columns.ts";
 import type {ColumnProp} from "@revolist/vue3-datagrid";
 import {EMPTY_ID, type SelectSource} from './select/defaults.ts';
+import {type MainGridPersonalization, usePersonalization} from '../composables/usePersonalization.ts';
 
+const {personalization, setPersonalization} = usePersonalization<MainGridPersonalization>('mainGrid');
 const {siteStatuses, deleteSites, addSites, updateSites} = useDashboardApi();
 
 const {visibleSideBar, sideBarType, sideBarTitle, hideSidebar, clearSideBarType} = useSideBar();
@@ -59,7 +61,6 @@ const props = defineProps({
 });
 
 const selectedRows = ref(new Set<string>());
-const groupBy = ref<string>(EMPTY_ID);
 const columns = [...GRID_COLUMNS];
 const groupByOptions = computed<SelectSource[]>(() => {
   return [
@@ -67,6 +68,10 @@ const groupByOptions = computed<SelectSource[]>(() => {
     ...columns.map((column) => ({value: column.name, id: column.name}))
   ];
 });
+const groupBy = computed({
+  get: () => personalization.value?.groupBy ?? EMPTY_ID,
+  set: (value) => setPersonalization('groupBy',value)
+})
 const grouping = computed((): { props: [ColumnProp] } | undefined => {
   if (!groupBy.value) return;
 
