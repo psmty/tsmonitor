@@ -13,16 +13,17 @@
         </button>
       </div>
     </div>
-    <Grid ref="grid" :columns="columns" :data="source" :selected-rows="selectedRows" :grouping="grouping" @editRow="startEditRow" @delete-row="startDeleteRow" />
+    <Grid ref="grid" :columns="columns" :data="source" :selected-rows="selectedRows" :grouping="grouping"
+          @editRow="startEditRow" @delete-row="startDeleteRow" />
 
     <SideBar v-model="visibleSideBar" @onHide="onHideSidebar">
       <template #title>{{ sideBarTitle }}</template>
 
       <EditRowFields v-if="sideBarType === SideBarType.Edit" :visible="visibleSideBar" :editUrl="editUrl"
-        :source="siteStatuses" @update="editRow" @closePopup="hideSidebar" :resources="props.resources" />
+                     :source="siteStatuses" @update="editRow" @closePopup="hideSidebar" :resources="props.resources" />
 
       <DeleteRowConfirmation v-else-if="sideBarType === SideBarType.Delete" :urls="deleteUrls" @close="hideSidebar"
-        @delete="deleteRow" />
+                             @delete="deleteRow" />
     </SideBar>
   </div>
 </template>
@@ -30,42 +31,50 @@
 <script setup lang="ts">
 import Grid from "./Grid.vue";
 import ImportUrlsButton from "./ImportUrlsButton.vue";
-import Select from './Select.vue';
-import { computed, ref } from "vue";
-import { useDashboardApi } from '../composables/useDashboard.ts';
+import Select from './select/Select.vue';
+import {computed, ref} from "vue";
+import {useDashboardApi} from '../composables/useDashboard.ts';
 import SideBar from './SideBar.vue';
 import EditRowFields from './EditRowFields.vue';
-import type { SitesData } from '../services';
+import type {SitesData} from '../services';
 import DeleteRowConfirmation from './DeleteRowConfirmation.vue';
-import { SideBarType, useSideBar } from '../composables/useSideBar.ts';
-import { useEditRow } from '../composables/useEditRow.ts';
-import { useDeleteConfirmation } from '../composables/useDeleteConfirmation.ts';
-import { GRID_COLUMNS } from "./grid.columns.ts";
-import type { ColumnProp } from "@revolist/vue3-datagrid";
+import {SideBarType, useSideBar} from '../composables/useSideBar.ts';
+import {useEditRow} from '../composables/useEditRow.ts';
+import {useDeleteConfirmation} from '../composables/useDeleteConfirmation.ts';
+import {GRID_COLUMNS} from "./grid.columns.ts";
+import type {ColumnProp} from "@revolist/vue3-datagrid";
+import {EMPTY_ID, type SelectSource} from './select/defaults.ts';
 
-const { siteStatuses, deleteSites, addSites, updateSites } = useDashboardApi();
+const {siteStatuses, deleteSites, addSites, updateSites} = useDashboardApi();
 
-const { visibleSideBar, sideBarType, sideBarTitle, hideSidebar, clearSideBarType } = useSideBar();
-const { editUrl, startEditRow, endEditRow } = useEditRow(visibleSideBar, sideBarType, sideBarTitle);
-const { deleteUrls, startDeleteRow, endDeleteRow } = useDeleteConfirmation(visibleSideBar, sideBarType, sideBarTitle);
+const {visibleSideBar, sideBarType, sideBarTitle, hideSidebar, clearSideBarType} = useSideBar();
+const {editUrl, startEditRow, endEditRow} = useEditRow(visibleSideBar, sideBarType, sideBarTitle);
+const {deleteUrls, startDeleteRow, endDeleteRow} = useDeleteConfirmation(visibleSideBar, sideBarType, sideBarTitle);
 
 const props = defineProps({
   resources: {
     type: Array as () => string[],
-    default: () => [],
-  },
+    default: () => []
+  }
 });
 
 const selectedRows = ref(new Set<string>());
-const groupBy = ref<string>();
+const groupBy = ref<string>(EMPTY_ID);
 const columns = [...GRID_COLUMNS];
-const groupByOptions = ref(columns.map((column) => column.name));
+const groupByOptions = computed<SelectSource[]>(() => {
+  return [
+    {value: 'Group by', id: EMPTY_ID},
+    ...columns.map((column) => ({value: column.name, id: column.name}))
+  ];
+});
 const grouping = computed((): { props: [ColumnProp] } | undefined => {
+  if (!groupBy.value) return;
+
   const column = columns.find((column) => column.name === groupBy.value);
   if (!column) {
     return;
   }
-  return { props: [column.prop] };
+  return {props: [column.prop]};
 });
 
 const onHideSidebar = () => {
