@@ -4,12 +4,13 @@ import {
   parseHtmlString,
   getTimeDifference,
 } from "../../services";
-import { fileExists, getFromFile, getLastEditTime, saveToFile } from "./fileService";
+import {deleteFile, fileExists, getFromFile, getLastEditTime, saveToFile} from "./fileService";
 import { chunkArray } from "./helpers";
 
 export class CrawlerService {
   private interval?: NodeJS.Timeout;
   private isWorking = false;
+  private recentlyDeletedUrls = new Set<string>();
 
   private clientsSender = new Map<
     string,
@@ -110,12 +111,17 @@ export class CrawlerService {
       if (!this.isWorking) {
         break;
       }
-      await this.loadData(chunk);
+
+      const actualChunk = chunk.filter((item) => !this.recentlyDeletedUrls.has(item.url))
+
+      await this.loadData(actualChunk);
 
       if (this.clientsSender.size > 0) {
-        await this.notifyClients(chunk);
+        await this.notifyClients(actualChunk);
       }
     }
+
+    this.recentlyDeletedUrls.clear();
   }
 
   async loadData(sites: SitesData[]) {
@@ -147,6 +153,19 @@ export class CrawlerService {
       }
     } catch (e) {
       console.error(e);
+    }
+  }
+
+  async deleteSites(urls: string[]) {
+     try {
+       urls.forEach((url) => {
+         this.recentlyDeletedUrls.add(url);
+       })
+      await Promise.all(urls.map(async (url) => {
+        await deleteFile(url);
+      }));
+    } catch (e) {
+      console.error("Deletion failed:", e);
     }
   }
 

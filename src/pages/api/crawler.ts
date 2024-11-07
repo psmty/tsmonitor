@@ -18,7 +18,9 @@ export const GET: APIRoute = async ({ request }) => {
           }
           controller.enqueue(`data: ${JSON.stringify(data)}\n\n`);
         } catch (error) {
-          stream.cancel();
+          if (controller.desiredSize === null) {
+            stream.cancel();
+          }
           console.error(`EventSource is failed: ${error}`);
         }
       };

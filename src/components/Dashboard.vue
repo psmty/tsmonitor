@@ -13,7 +13,7 @@
         </button>
       </div>
     </div>
-    <Grid ref="grid" :columns="columns" :data="source" :grouping="grouping" @editRow="startEditRow" @delete-row="startDeleteRow" />
+    <Grid ref="grid" :columns="columns" :data="source" :selected-rows="selectedRows" :grouping="grouping" @editRow="startEditRow" @delete-row="startDeleteRow" />
 
     <SideBar v-model="visibleSideBar" @onHide="onHideSidebar">
       <template #title>{{ sideBarTitle }}</template>
@@ -56,6 +56,7 @@ const props = defineProps({
   },
 });
 
+const selectedRows = ref(new Set<string>());
 const groupBy = ref<string>();
 const columns = [...GRID_COLUMNS];
 const groupByOptions = ref(columns.map((column) => column.name));
@@ -90,6 +91,7 @@ const editRow = async (editFields: SitesData) => {
 
 const deleteRow = async (urls: string[]) => {
   await deleteSites(urls);
+  selectedRows.value.clear();
   hideSidebar();
 };
 

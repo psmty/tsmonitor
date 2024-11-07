@@ -26,19 +26,19 @@ import {
   VGridVueTemplate
 } from "@revolist/vue3-datagrid";
 // import ExportFilePlugin from '@revolist/revogrid/dist/types/plugins/export/export.plugin';
-import {computed, onMounted, ref} from "vue";
+import {computed, onMounted, ref, toRef} from "vue";
 import {localJsDateToDateString, type Site} from "../services";
 import {CHECKBOX_COLUMN, GRID_COLUMNS} from "./grid.columns";
 import ActionsRenderer from "./gridRenderers/ActionsRenderer.vue";
 
 const grid = ref<{ $el: HTMLRevoGridElement } | null>(null);
 
-const selectedRows = ref(new Set<string>());
 
 interface Props {
   data: Array<Site>;
   columns: ColumnRegular[];
   grouping?: { props: [ColumnProp] };
+  selectedRows: Set<string>;
 }
 
 const props = defineProps<Props>();
@@ -54,7 +54,7 @@ const filters: ColumnFilterConfig = {
   }
 };
 
-const checkboxCell = computed<ColumnRegular>(() => (CHECKBOX_COLUMN(selectedRows, source)));
+const checkboxCell = computed<ColumnRegular>(() => (CHECKBOX_COLUMN(toRef(props.selectedRows), source)));
 
 const actionsCell = computed<ColumnRegular>(() => ({
   name: "",
@@ -65,7 +65,7 @@ const actionsCell = computed<ColumnRegular>(() => ({
   // pin: "colPinStart",
   cellProperties: () => ({class: {"edit-cell": true}}),
   cellTemplate: VGridVueTemplate(ActionsRenderer, {
-    selectedFewRows: selectedRows.value.size > 1
+  selectedFewRows: props.selectedRows.size > 1
   })
 }));
 
@@ -101,8 +101,8 @@ const onEditRow = (e: CustomEvent) => {
 const onDeleteRow = (e: CustomEvent) => {
   let urls: string[];
 
-  if (selectedRows.value.size > 0) {
-    urls = Array.from(selectedRows.value);
+  if (props.selectedRows.size > 0) {
+    urls = Array.from(props.selectedRows);
   } else {
     const {url} = e.detail;
     urls = [url];

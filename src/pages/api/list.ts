@@ -11,7 +11,7 @@ export const GET: APIRoute = async ({ locals, request }) => {
   try {
     // Start the crawler if it's not already running
     getInstance()?.startIfNotWorking();
-  
+
     const rows = await getSites();
 
     return new Response(JSON.stringify(rows));
@@ -69,13 +69,7 @@ export const DELETE: APIRoute = async ({ request }) => {
     const urlsForDeletion: string[] = await request.json();
     const deletedRows = await deleteSites(urlsForDeletion);
 
-    try {
-      await Promise.all(urlsForDeletion.map(async (url) => {
-        await deleteFile(url);
-      }));
-    } catch (e) {
-      console.error("Deletion failed:", e);
-    }
+    await getInstance().deleteSites(urlsForDeletion);
 
     return new Response(JSON.stringify(deletedRows));
   } catch (error) {
