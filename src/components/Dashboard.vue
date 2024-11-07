@@ -41,8 +41,8 @@ import DeleteRowConfirmation from './DeleteRowConfirmation.vue';
 import {SideBarType, useSideBar} from '../composables/useSideBar.ts';
 import {useEditRow} from '../composables/useEditRow.ts';
 import {useDeleteConfirmation} from '../composables/useDeleteConfirmation.ts';
-import {GRID_COLUMNS} from "./grid.columns.ts";
-import type {ColumnProp} from "@revolist/vue3-datagrid";
+import {GRID_COLUMNS, YES_NO, YES_NO_OPT} from "./grid.columns.ts";
+import type {GroupingOptions} from "@revolist/vue3-datagrid";
 import {EMPTY_ID, type SelectSource} from './select/defaults.ts';
 import {type MainGridPersonalization, usePersonalization} from '../composables/usePersonalization.ts';
 
@@ -72,14 +72,25 @@ const groupBy = computed({
   get: () => personalization.value?.groupBy ?? EMPTY_ID,
   set: (value) => setPersonalizationValue('groupBy',value)
 })
-const grouping = computed((): { props: [ColumnProp] } | undefined => {
+const grouping = computed((): GroupingOptions | undefined => {
   if (!groupBy.value) return;
 
   const column = columns.find((column) => column.name === groupBy.value);
   if (!column) {
     return;
   }
-  return {props: [column.prop]};
+
+  return {props: [column.prop], groupLabelTemplate: (h, props) => {
+    const attributes = {class: 'ml-2 flex items-center gap-4 h-full'};
+    const expanded = props.expanded;
+    const chevron = h('div', {class: `chevron ${expanded ? 'chevron-down' : 'chevron-right'}`}, '');
+
+      if (column.cellTemplate === YES_NO_OPT || column.cellTemplate === YES_NO) {
+        return h('div', attributes, [chevron, YES_NO_OPT(h, {value: props.name, type: 'rgRow'}) || null]);
+      }
+
+      return h('div', attributes, [chevron, h('span', {}, props.name ?? 'EMPTY')]);
+    }};
 });
 
 const onHideSidebar = () => {
