@@ -49,7 +49,9 @@ export function usePersonalization<T extends Record<string, any>>(pageKey: Perso
     store.put({...personalization.value, [key]: value}, pageKey); // Storing the object with key-value pair
 
     transaction.oncomplete = () => {
-      fetchPersonalization(); // Reload items after adding/updating
+      if (personalization.value) {
+        personalization.value = {...personalization.value, [key]: value};
+      }
     };
 
     transaction.onerror = (event) => {
