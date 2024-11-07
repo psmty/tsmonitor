@@ -11,6 +11,11 @@ const client = new pg.Client({
   password: import.meta.env.POSTGRES_PASSWORD,
 });
 
-await client.connect()
+try {
+  await client.connect();
+} catch (e) {
+  console.error("Database connection error:", e);
+  process.exit(1);
+}
 
 export { client as db };
