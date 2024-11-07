@@ -12,6 +12,7 @@
     :grouping="grouping"
     hide-attribution
     :theme="theme"
+    :plugins="[AdvanceFilterPlugin]"
     @on-edit-row="onEditRow"
     @on-delete-row="onDeleteRow"
   />
@@ -30,6 +31,7 @@ import {computed, onMounted, ref, toRef} from "vue";
 import {localJsDateToDateString, type Site} from "../services";
 import {CHECKBOX_COLUMN, GRID_COLUMNS} from "./grid.columns";
 import ActionsRenderer from "./gridRenderers/ActionsRenderer.vue";
+import {AdvanceFilterPlugin} from './gridPlugins/advanceFilterPlugin/AdvanceFilterPlugin.ts';
 
 const grid = ref<{ $el: HTMLRevoGridElement } | null>(null);
 
@@ -50,7 +52,7 @@ const emits = defineEmits<{
 const filters: ColumnFilterConfig = {
   multiFilterItems: {
     customer: [{id: 0, type: "contains", value: "", relation: "or"}],
-    url: [{id: 1, type: "contains", value: "", relation: "or"}]
+    url: [{id: 1, type: "contains", value: "", relation: "or"}],
   }
 };
 
@@ -144,8 +146,29 @@ defineExpose({
     }
   }
 
-  :deep(.group-expand) {
-    padding-left: 5px;
+  :deep(.groupingRow) {
+    & > div {
+      height: 100%;
+
+      // Chevron Icon for groups
+      .chevron {
+        display: inline-block;
+        width: 0;
+        height: 0;
+        border-style: solid;
+        cursor: pointer;
+      }
+
+      .chevron-down {
+        border-width: 8px 5px 0 5px;
+        border-color: black transparent transparent transparent;
+      }
+
+      .chevron-right {
+        border-width: 5px 0 5px 8px;
+        border-color: transparent transparent transparent black;
+      }
+    }
   }
 }
 </style>

@@ -15,14 +15,14 @@ const NO = (h: HyperFunc<VNode>, optional?: boolean) => {
   } }, 'No');
 }
 
-const YES_NO = (h: HyperFunc<VNode>, { value, type }: ColumnDataSchemaModel) => {
+export const YES_NO = (h: HyperFunc<VNode>, { value, type }: ColumnDataSchemaModel) => {
   if (type === 'rowPinStart') {
     return '';
   }
   return value ? YES(h) : NO(h);
 }
 
-const YES_NO_OPT = (h: HyperFunc<VNode>, { value, type }: ColumnDataSchemaModel) => {
+export const YES_NO_OPT = (h: HyperFunc<VNode>, { value, type }: Pick<ColumnDataSchemaModel, 'value'|'type'>) => {
   if (type === 'rowPinStart') {
     return '';
   }
