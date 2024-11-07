@@ -37,7 +37,7 @@ export const useDashboardApi = () => {
       method: "POST",
       body: JSON.stringify(urls)
     });
-  
+
     const newAddedUrls: SitesData[] | null = await response.json();
     if (newAddedUrls === null) {
       console.warn('No new sites have been added.')
@@ -83,8 +83,8 @@ export const useDashboardApi = () => {
       body: JSON.stringify(editFields),
     });
     const siteData = await response.json();
-    // TODO: notify all clients
     updateSiteSettings(siteData);
+    await loadSites([siteData]);
   };
 
   const initSites = (sites: SitesData[]) => {
