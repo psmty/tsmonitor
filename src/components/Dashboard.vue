@@ -106,7 +106,7 @@ const onHideSidebar = () => {
 };
 
 const source = computed(() => {
-  return [...siteStatuses.value.values()].sort((a, b) => a.url.localeCompare(b.url));
+  return [...siteStatuses.value.values()];
 });
 
 const editRow = async (editFields: SitesData) => {
