@@ -1,6 +1,7 @@
 ---
 import { SITE_TITLE } from '../lib/constants';
 import CopyrightNotice from '../components/CopyrightNotice.astro';
+import Alert from "../components/Alert.vue";
 
 const { class: clazz } = Astro.props;
 ---
@@ -35,6 +36,7 @@ const { class: clazz } = Astro.props;
 		]}
 	>
 		<slot />
+		<Alert client:only="vue" />
 		<CopyrightNotice />
 	</body>
 </html>
