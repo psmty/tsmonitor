@@ -159,7 +159,7 @@ export const CHECKBOX_COLUMN = (selectedRows: Ref<Set<string>>, source: Ref<any[
   size: 50,
   sortable: false,
   filter: false,
-  // pin: "colPinStart",
+  // pin: "colPinStart", // doesn't look good with grouping
   columnTemplate: (h, p) => {
     const selected = selectedRows.value.size === source.value.length;
     return h('input', {

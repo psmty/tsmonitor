@@ -64,7 +64,7 @@ const actionsCell = computed<ColumnRegular>(() => ({
   size: 70,
   sortable: false,
   filter: false,
-  // pin: "colPinStart",
+  // pin: "colPinStart",  // doesn't look good with grouping
   cellProperties: () => ({class: {"edit-cell": true}}),
   cellTemplate: VGridVueTemplate(ActionsRenderer, {
   selectedFewRows: props.selectedRows.size > 1

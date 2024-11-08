@@ -1,11 +1,11 @@
 import type { LogicFunction, LogicFunctionParam } from "@revolist/revogrid";
 
-export const contains: LogicFunction<LogicFunctionParam, Set<any> | undefined> = (value, extra) => {
+const contains: LogicFunction<LogicFunctionParam, Set<any> | undefined> = (value, extra) => {
   if (!extra) {
     return true;
   }
   if (!value) {
-    return false;
+    value = '';
   }
   if (extra) {
     if (typeof value !== 'string') {
@@ -19,5 +19,4 @@ export const contains: LogicFunction<LogicFunctionParam, Set<any> | undefined> =
 export const notContains: LogicFunction<LogicFunctionParam, Set<any> | undefined> = (value, extra) => {
   return !contains(value, extra);
 };
-notContains.extra = 'input';
-contains.extra = 'input';
+
