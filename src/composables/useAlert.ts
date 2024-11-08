@@ -13,14 +13,13 @@ const store = ref({
   type: AlertType.Warning,
 });
 
-let ticker: NodeJS.Timeout;
 export const showAlert = (text: string, type: AlertType) => {
   store.value.type = type;
   store.value.text = text;
   store.value.visible = true;
 
   if (type === AlertType.Warning) {
-    ticker = setTimeout(() => {
+    setTimeout(() => {
       hideAlert();
     }, WARNING_TIMEOUT_TIME)
   }
