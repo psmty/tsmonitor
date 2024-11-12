@@ -1,5 +1,5 @@
 # Stage 1: Builder
-FROM node:18-alpine AS builder
+FROM node:23-alpine AS builder
 WORKDIR /app
 
 # Copy package files and install dependencies
@@ -11,7 +11,7 @@ COPY . .
 RUN npm run build
 
 # Stage 2: Production
-FROM node:18-alpine
+FROM node:23-alpine
 WORKDIR /app
 
 # Copy only necessary build files from the builder stage
