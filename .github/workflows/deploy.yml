@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 env:
-  PATH:  /usr/local/tsmonitor
+  PATH_FILE:  /usr/local/tsmonitor
 jobs:
   deploy:
     runs-on: self-hosted
@@ -28,8 +28,8 @@ jobs:
           POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
           SKIP_AUTH: ${{ secrets.SKIP_AUTH }}
         run: |
-          # Create .env file with environment variables in ${{ env.PATH}}
-          bash -c 'cat << EOF > ${{ env.PATH}}/.env
+          # Create .env file with environment variables in ${{ env.PATH_FILE}}
+          bash -c 'cat << EOF > ${{ env.PATH_FILE}}/.env
           AUTH_SECRET=${AUTH_SECRET}
           AUTH_TRUST_HOST=${AUTH_TRUST_HOST}
           MS_CLIENT_ID=${MS_CLIENT_ID}
@@ -47,11 +47,11 @@ jobs:
 
       - name: Copy Docker Compose
         run: |
-          cp docker-compose.yml ${{ env.PATH}}/docker-compose.yml
+          cp docker-compose.yml ${{ env.PATH_FILE}}/docker-compose.yml
   
     
       - name: Pull latest Docker image
-        working-directory: ${{ env.PATH}}
+        working-directory: ${{ env.PATH_FILE}}
         run: |
           newgrp docker
           docker run hello-world
@@ -59,7 +59,7 @@ jobs:
           docker-compose pull
 
       - name: Restart Docker Compose services
-        working-directory: ${{ env.PATH}}
+        working-directory: ${{ env.PATH_FILE}}
         run: |
           docker-compose down
           docker-compose up -d
