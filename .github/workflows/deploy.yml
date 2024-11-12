@@ -38,6 +38,15 @@ jobs:
           echo "POSTGRES_PORT=${POSTGRES_PORT}" >> .env
           echo "POSTGRES_HOST=${POSTGRES_HOST}" >> .env
 
+    
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Pull latest Docker image
         run: |
           docker-compose pull
