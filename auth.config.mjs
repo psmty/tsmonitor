@@ -3,6 +3,31 @@ import MS from "@auth/core/providers/microsoft-entra-id";
 import Google from "@auth/core/providers/google";
 import { defineConfig } from "auth-astro";
 
+const providers = [];
+if (import.meta.env.GOOGLE_CLIENT_ID) {
+  providers.push(Google({
+    clientId: import.meta.env.GOOGLE_CLIENT_ID,
+    clientSecret: import.meta.env.GOOGLE_CLIENT_SECRET,
+  }));
+}
+if (import.meta.env.MS_CLIENT_ID) {
+  providers.push(MS({
+    clientId: import.meta.env.MS_CLIENT_ID,
+    clientSecret: import.meta.env.MS_CLIENT_SECRET,
+    tenantId: import.meta.env.MS_TENANT_ID,
+    authorization: {
+      params: {
+        scope: 'openid profile email',
+      },
+    },
+  }));
+}
+if (import.meta.env.GITHUB_CLIENT_ID) {
+  providers.push(GitHub({
+    clientId: import.meta.env.GITHUB_CLIENT_ID,
+    clientSecret: import.meta.env.GITHUB_CLIENT_SECRET,
+  }));
+}
 
 export default defineConfig({
   callbacks: {
@@ -19,24 +44,5 @@ export default defineConfig({
       }
     },
   },
-  providers: [
-    Google({
-      clientId: import.meta.env.GOOGLE_CLIENT_ID,
-      clientSecret: import.meta.env.GOOGLE_CLIENT_SECRET,
-    }),
-    GitHub({
-      clientId: import.meta.env.GITHUB_CLIENT_ID,
-      clientSecret: import.meta.env.GITHUB_CLIENT_SECRET,
-    }),
-    MS({
-      clientId: import.meta.env.MS_CLIENT_ID,
-      clientSecret: import.meta.env.MS_CLIENT_SECRET,
-      tenantId: import.meta.env.MS_TENANT_ID,
-      authorization: {
-        params: {
-          scope: 'openid profile email',
-        },
-      },
-    }),
-  ],
+  providers,
 });
