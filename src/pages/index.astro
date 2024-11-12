@@ -1,13 +1,15 @@
 ---
 import LayoutSidebar from "../layouts/LayoutSidebar.astro";
 import Dashboard from "../components/Dashboard.vue";
+import 'dotenv/config';
 
 let resources: string[] = []
 try {
-    resources = JSON.parse(import.meta.env.RESOURCES_CF_VALS);
+    resources = JSON.parse(process.env.RESOURCES_CF_VALS || '[]');
 } catch (e) {
     //
 }
+export const prerender = false
 ---
 
 <LayoutSidebar>

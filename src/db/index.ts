@@ -1,14 +1,15 @@
 import pg from 'pg';
+import 'dotenv/config';
 
 // Make sure we DO NOT "prerender" this function to allow the ENV variables to update on the fly
 export const prerender = false;
 
 const client = new pg.Client({
-  host: import.meta.env.POSTGRES_HOST,
-  port: import.meta.env.POSTGRES_PORT,
-  database: import.meta.env.POSTGRES_DB,
-  user: import.meta.env.POSTGRES_USER,
-  password: import.meta.env.POSTGRES_PASSWORD,
+  host: process.env.POSTGRES_HOST,
+  port: parseInt(process.env.POSTGRES_PORT || '5432'),
+  database: process.env.POSTGRES_DB,
+  user: process.env.POSTGRES_USER,
+  password: process.env.POSTGRES_PASSWORD,
 });
 
 try {
