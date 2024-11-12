@@ -5,7 +5,8 @@ on:
 
 jobs:
   deploy:
-    runs-on: self-hostedenv:
+    runs-on: self-hosted
+    env:
       REPO_NAME: ${{ github.repository }}
     steps:
       - name: Check out the code
