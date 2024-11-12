@@ -24,8 +24,7 @@ export async function setSites(sitesDataArray: SitesData[]) {
     VALUES ${sitesDataArray.map((_, i) => `($${i * 2 + 1}, $${i * 2 + 2}::json)`).join(", ")}
     ON CONFLICT (url)
     DO UPDATE SET settings = EXCLUDED.settings
-    RETURNING *
-    ORDER BY url;
+    RETURNING *;
   `;
 
   const values = sitesDataArray.flatMap(siteData => [siteData.url, JSON.stringify(siteData.settings)]);
