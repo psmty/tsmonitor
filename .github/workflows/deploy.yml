@@ -1,0 +1,20 @@
+name: Build, Push, and Deploy to Server
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Pull latest Docker image
+        run: |
+          docker-compose pull
+
+      - name: Restart Docker Compose services
+        run: |
+          docker-compose down
+          docker-compose up -d
