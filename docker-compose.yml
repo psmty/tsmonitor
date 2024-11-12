@@ -9,6 +9,8 @@ services:
       - .env
     depends_on:
       - db # Ensures db container starts before the app
+    volumes:
+    - ./sites:/app/cache/crawler
 
   db:
     image: postgres:latest # Use the official PostgreSQL image
