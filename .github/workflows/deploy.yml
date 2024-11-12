@@ -24,6 +24,7 @@ jobs:
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
           POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
           POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+          SKIP_AUTH: ${{ secrets.SKIP_AUTH }}
         run: |
           echo "AUTH_SECRET=${AUTH_SECRET}" >> .env
           echo "AUTH_TRUST_HOST=${AUTH_TRUST_HOST}" >> .env
@@ -37,7 +38,7 @@ jobs:
           echo "POSTGRES_DB=${POSTGRES_DB}" >> .env
           echo "POSTGRES_PORT=${POSTGRES_PORT}" >> .env
           echo "POSTGRES_HOST=${POSTGRES_HOST}" >> .env
-
+          echo "SKIP_AUTH=${SKIP_AUTH}" >> .env
     
       - name: Pull latest Docker image
         run: |
