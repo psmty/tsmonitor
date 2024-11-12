@@ -28,8 +28,6 @@ jobs:
           POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
           SKIP_AUTH: ${{ secrets.SKIP_AUTH }}
         run: |
-          mkdir -p /usr/local/$REPO_NAME
-
           # Create .env file with environment variables in /usr/local/$REPO_NAME
           bash -c 'cat << EOF > /usr/local/$REPO_NAME/.env
           AUTH_SECRET=${AUTH_SECRET}
