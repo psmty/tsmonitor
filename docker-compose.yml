@@ -1,18 +1,14 @@
 version: "3.8"
 
 services:
-  # app:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile # Assume your Dockerfile for the Node.js app is named 'Dockerfile' and located in the same directory
-  #   container_name: tsmonitor
-  #   image: tsmonitor
-  #   ports:
-  #     - 4322:4321
-  #   env_file:
-  #     - .env
-  #   depends_on:
-  #     - db # Ensures db container starts before the app
+  app:
+    image: ghcr.io/psmty/tsmonitor:latest
+    ports:
+      - 80:4321
+    env_file:
+      - .env
+    depends_on:
+      - db # Ensures db container starts before the app
 
   db:
     image: postgres:latest # Use the official PostgreSQL image
