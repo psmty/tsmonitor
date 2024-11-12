@@ -5,10 +5,17 @@ on:
 
 jobs:
   deploy:
-    runs-on: self-hosted
+    runs-on: self-hostedenv:
+      REPO_NAME: ${{ github.repository }}
     steps:
       - name: Check out the code
         uses: actions/checkout@v4
+
+      - name: Extract repository name
+        run: |
+          # Extract just the repo name (everything after the slash)
+          export REPO_NAME=${REPO_NAME##*/}
+          echo "Repository name is $REPO_NAME"
 
       - name: Set up environment variables
         env:
@@ -26,21 +33,32 @@ jobs:
           POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
           SKIP_AUTH: ${{ secrets.SKIP_AUTH }}
         run: |
-          echo "AUTH_SECRET=${AUTH_SECRET}" >> .env
-          echo "AUTH_TRUST_HOST=${AUTH_TRUST_HOST}" >> .env
-          echo "MS_CLIENT_ID=${MS_CLIENT_ID}" >> .env
-          echo "MS_CLIENT_SECRET=${MS_CLIENT_SECRET}" >> .env
-          echo "MS_TENANT_ID=${MS_TENANT_ID}" >> .env
-          echo "RESOURCES_CF_VALS=${RESOURCES_CF_VALS}" >> .env
-          echo "POSTGRES_USER=${POSTGRES_USER}" >> .env
-          echo "POSTGRES_USER_EMAIL=${POSTGRES_USER_EMAIL}" >> .env
-          echo "POSTGRES_PASSWORD=${POSTGRES_PASSWORD}" >> .env
-          echo "POSTGRES_DB=${POSTGRES_DB}" >> .env
-          echo "POSTGRES_PORT=${POSTGRES_PORT}" >> .env
-          echo "POSTGRES_HOST=${POSTGRES_HOST}" >> .env
-          echo "SKIP_AUTH=${SKIP_AUTH}" >> .env
+          mkdir -p /usr/local/$REPO_NAME
+
+          # Create .env file with environment variables in /usr/local/$REPO_NAME
+          bash -c 'cat << EOF > /usr/local/$REPO_NAME/.env
+          AUTH_SECRET=${AUTH_SECRET}
+          AUTH_TRUST_HOST=${AUTH_TRUST_HOST}
+          MS_CLIENT_ID=${MS_CLIENT_ID}
+          MS_CLIENT_SECRET=${MS_CLIENT_SECRET}
+          MS_TENANT_ID=${MS_TENANT_ID}
+          RESOURCES_CF_VALS=${RESOURCES_CF_VALS}
+          POSTGRES_USER=${POSTGRES_USER}
+          POSTGRES_USER_EMAIL=${POSTGRES_USER_EMAIL}
+          POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+          POSTGRES_DB=${POSTGRES_DB}
+          POSTGRES_PORT=${POSTGRES_PORT}
+          POSTGRES_HOST=${POSTGRES_HOST}
+          SKIP_AUTH=${SKIP_AUTH}
+          EOF'
+
+      - name: Copy Docker Compose file to /usr/local/$REPO_NAME
+        run: |
+          cp docker-compose.yml /usr/local/$REPO_NAME/docker-compose.yml
+  
     
       - name: Pull latest Docker image
+        working-directory: /usr/local/$REPO_NAME
         run: |
           newgrp docker
           docker run hello-world
@@ -48,6 +66,7 @@ jobs:
           docker-compose pull
 
       - name: Restart Docker Compose services
+        working-directory: /usr/local/$REPO_NAME
         run: |
           docker-compose down
           docker-compose up -d
