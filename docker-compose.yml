@@ -21,12 +21,12 @@ services:
       POSTGRES_DB: ${POSTGRES_DB} # Name of the database
     volumes:
       - pgdata:/var/lib/postgresql/data # Persist data in a Docker volume
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      # - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${POSTGRES_USER}       # Set pgAdmin default email
+      PGADMIN_DEFAULT_EMAIL: ${POSTGRES_USER_EMAIL}       # Set pgAdmin default email
       PGADMIN_DEFAULT_PASSWORD: ${POSTGRES_PASSWORD}               # Set pgAdmin default password
     ports:
       - 5050:80  # Expose pgAdmin on http://localhost:5050
