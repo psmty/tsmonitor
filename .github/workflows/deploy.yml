@@ -7,16 +7,10 @@ jobs:
   deploy:
     runs-on: self-hosted
     env:
-      REPO_NAME: ${{ github.repository }}
+      REPO_NAME: tsmonitor
     steps:
       - name: Check out the code
         uses: actions/checkout@v4
-
-      - name: Extract repository name
-        run: |
-          # Extract just the repo name (everything after the slash)
-          export REPO_NAME=${REPO_NAME##*/}
-          echo "Repository name is $REPO_NAME"
 
       - name: Set up environment variables
         env:
