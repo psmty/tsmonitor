@@ -48,6 +48,8 @@ jobs:
       - name: Copy Docker Compose
         run: |
           cp docker-compose.yml ${{ env.PATH_FILE}}/docker-compose.yml
+          cp .env ${{ env.PATH_FILE}}/.env
+          cp init.sql ${{ env.PATH_FILE}}/init.sql
   
     
       - name: Pull latest Docker image
