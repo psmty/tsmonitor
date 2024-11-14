@@ -19,7 +19,6 @@ if (process.env.MS_CLIENT_ID) {
     tenantId: process.env.MS_TENANT_ID,
     authorization: {
       params: {
-        redirect_uri: "https://monitor.rv-grid.com/api/auth/callback/microsoft-entra-id",
         scope: 'openid profile email',
       },
     },
@@ -47,5 +46,7 @@ export default defineConfig({
       }
     },
   },
+
+  baseUrl: 'https://monitor.rv-grid.com',
   providers,
 });
