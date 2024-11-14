@@ -9,7 +9,6 @@ import vue from '@astrojs/vue';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://monitor.rv-grid.com',
   integrations: [tailwind(), vue({ appEntrypoint: '/src/pages/_app' }), auth()],
   output: 'server',
   base: '/',

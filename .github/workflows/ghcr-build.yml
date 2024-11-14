@@ -3,7 +3,8 @@ name: Build and Push to GitHub Container Registry
 on:
   push:
     branches:
-      - main  # Adjust branch as needed
+      - main
+      - next
 
 jobs:
   build-and-push:
@@ -50,6 +51,7 @@ jobs:
           echo "POSTGRES_DB=${POSTGRES_DB}" >> .env
           echo "POSTGRES_PORT=${POSTGRES_PORT}" >> .env
           echo "POSTGRES_HOST=${POSTGRES_HOST}" >> .env
+          echo "NEXTAUTH_URL=https://monitor.rv-grid.com" >> .env
 
       - name: Build and push Docker image to GHCR
         uses: docker/build-push-action@v3
