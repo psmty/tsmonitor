@@ -13,18 +13,11 @@
     </div>
 
     <div>
-      <label for="csm" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">CSM</label>
-      <input v-model="editData.csm" type="text" name="title" id="csm"
-             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-             placeholder="Type CSM" />
-    </div>
-
-    <div>
       <Select v-model:value="hasIntegration" :source="booleanDataSource" label="Has integration" />
     </div>
 
     <div>
-      <Select v-model:value="editData.resource" :source="resourceSource" label="Resource" />
+      <Select v-model:value="editData.resource" :source="resourceSource" label="CSM" />
     </div>
 
     <br /> <br />
@@ -101,7 +94,6 @@ const initEdit = () => {
   editData.value = {
     customer: siteData.customer,
     environment: siteData.environment ?? Environment.Dev,
-    csm: siteData.csm,
     hasIntegration: siteData.hasIntegration,
     resource: siteData.resource
   };
