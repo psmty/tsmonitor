@@ -5,8 +5,8 @@ import 'dotenv/config';
 export const prerender = false;
 
 const client = new pg.Client({
-  host: process.env.POSTGRES_HOST,
-  port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
+  host: process.env.POSTGRES_HOST, // 'localhost' or 'db',
+  port: 5432,
   database: process.env.POSTGRES_DB,
   user: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,

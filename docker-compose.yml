@@ -5,7 +5,7 @@ services:
     image: ghcr.io/psmty/tsmonitor:latest
     restart: always
     ports:
-      - 8080:4321
+      - 80:4321
     env_file:
       - .env
     depends_on:
@@ -18,7 +18,7 @@ services:
     container_name: postgres-db
     restart: always
     ports:
-      - ${POSTGRES_PORT}:${POSTGRES_PORT} # Map PostgreSQL's default port
+      - ${POSTGRES_PORT}:5432 # Map PostgreSQL's default port
     environment:
       POSTGRES_USER: ${POSTGRES_USER} # PostgreSQL username
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD} # PostgreSQL password
