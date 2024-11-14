@@ -37,6 +37,8 @@ const NEGATIVE_CHECK = (h: HyperFunc<VNode>, { value }: { value?: number }) => {
   }
 }
 
+export const URL_PROP = 'url';
+
 export const GRID_COLUMNS: ColumnRegular[] = [
   {
     name: CustomFieldsName.Customer,

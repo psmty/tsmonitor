@@ -1,7 +1,8 @@
-import {onMounted, readonly, shallowRef} from 'vue';
+import {onMounted, readonly, type Ref, shallowRef} from 'vue';
 
 export interface MainGridPersonalization {
   groupBy: string;
+  selectedColumns: Array<string>;
 }
 
 type PersonalizationPages = 'mainGrid';
@@ -15,7 +16,7 @@ const STORE_NAME = 'personalization';
 export function usePersonalization<T extends Record<string, any>>(pageKey: PersonalizationPages) {
   let dbInstance: IDBDatabase | null = null;
 
-  const personalization = shallowRef<T>();
+  const personalization = shallowRef<Partial<T>>();
 
   // Open the IndexedDB instance if not already opened
   async function openDB() {
@@ -81,7 +82,7 @@ export function usePersonalization<T extends Record<string, any>>(pageKey: Perso
     const request = store.get(pageKey);
 
     request.onsuccess = () => {
-      personalization.value = request.result;
+      personalization.value = request.result ?? {};
     };
 
     request.onerror = (event) => {
@@ -109,7 +110,7 @@ export function usePersonalization<T extends Record<string, any>>(pageKey: Perso
   });
 
   return {
-    personalization: readonly(personalization),
+    personalization: readonly(personalization) as Readonly<Ref<T>>,
     setPersonalization,
     setPersonalizationValue,
     fetchPersonalization,
