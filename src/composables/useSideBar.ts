@@ -3,6 +3,7 @@ import {ref} from 'vue';
 export enum SideBarType {
   Edit = 'Edit',
   Delete = 'Delete',
+  ChooseColumn = 'ChooseColumn',
 }
 
 

@@ -4,6 +4,12 @@
     <div class="flex items-center justify-between my-5 mx-5">
       <ImportUrlsButton @saveUrls="addSites" />
       <div class="flex flex-row space-x-4">
+        <button
+          class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-gray-500 items-center bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-primary-300 rounded-lg border border-gray-200 text-sm font-medium hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600"
+          @click="startChoosingColumn"
+          >
+          Choose columns
+        </button>
         <Select :source="groupByOptions" v-model:value="groupBy" />
 
         <button
@@ -24,6 +30,8 @@
 
       <DeleteRowConfirmation v-else-if="sideBarType === SideBarType.Delete" :urls="deleteUrls" @close="hideSidebar"
                              @delete="deleteRow" />
+
+      <ChooseColumn v-else-if="sideBarType === SideBarType.ChooseColumn" v-model.selectedItems="selectedColumns" :source="columnSelectorSource" />
     </SideBar>
   </div>
 </template>
@@ -45,6 +53,8 @@ import {GRID_COLUMNS, YES_NO, YES_NO_OPT} from "./grid.columns.ts";
 import type {GroupingOptions} from "@revolist/vue3-datagrid";
 import {EMPTY_ID, type SelectSource} from './select/defaults.ts';
 import {type MainGridPersonalization, usePersonalization} from '../composables/usePersonalization.ts';
+import {useChooseColumn} from '../composables/useChooseColumn.ts';
+import ChooseColumn from './ChooseColumn.vue';
 
 const {personalization, setPersonalizationValue} = usePersonalization<MainGridPersonalization>('mainGrid');
 const {siteStatuses, deleteSites, addSites, updateSites} = useDashboardApi();
@@ -52,6 +62,7 @@ const {siteStatuses, deleteSites, addSites, updateSites} = useDashboardApi();
 const {visibleSideBar, sideBarType, sideBarTitle, hideSidebar, clearSideBarType} = useSideBar();
 const {editUrl, startEditRow, endEditRow} = useEditRow(visibleSideBar, sideBarType, sideBarTitle);
 const {deleteUrls, startDeleteRow, endDeleteRow} = useDeleteConfirmation(visibleSideBar, sideBarType, sideBarTitle);
+const {startChoosingColumn, columns, selectedColumns, gridColumnsSource, columnSelectorSource} = useChooseColumn<MainGridPersonalization>(visibleSideBar, sideBarType, sideBarTitle, personalization, setPersonalizationValue);
 
 const props = defineProps({
   resources: {
@@ -61,11 +72,10 @@ const props = defineProps({
 });
 
 const selectedRows = ref(new Set<string>());
-const columns = [...GRID_COLUMNS];
 const groupByOptions = computed<SelectSource[]>(() => {
   return [
     {value: 'Group by', id: EMPTY_ID},
-    ...columns.map((column) => ({value: column.name, id: column.name}))
+    ...gridColumnsSource.map((column) => ({value: column.name, id: column.name}))
   ];
 });
 const groupBy = computed({
@@ -75,7 +85,7 @@ const groupBy = computed({
 const grouping = computed((): GroupingOptions | undefined => {
   if (!groupBy.value) return;
 
-  const column = columns.find((column) => column.name === groupBy.value);
+  const column = gridColumnsSource.find((column) => column.name === groupBy.value);
   if (!column) {
     return;
   }
