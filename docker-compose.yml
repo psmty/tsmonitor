@@ -3,8 +3,9 @@ version: "3.8"
 services:
   app:
     image: ghcr.io/psmty/tsmonitor:latest
+    restart: always
     ports:
-      - 80:4321
+      - 8080:4321
     env_file:
       - .env
     depends_on:
@@ -15,6 +16,7 @@ services:
   db:
     image: postgres:latest # Use the official PostgreSQL image
     container_name: postgres-db
+    restart: always
     ports:
       - ${POSTGRES_PORT}:${POSTGRES_PORT} # Map PostgreSQL's default port
     environment:
@@ -22,10 +24,11 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD} # PostgreSQL password
       POSTGRES_DB: ${POSTGRES_DB} # Name of the database
     volumes:
-      - pgdata:/var/lib/postgresql/data # Persist data in a Docker volume
-      # - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./pgdata:/var/lib/postgresql/data # Persist data in a Docker volume
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
   pgadmin:
     image: dpage/pgadmin4
+    restart: always
     container_name: pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: ${POSTGRES_USER_EMAIL}       # Set pgAdmin default email
