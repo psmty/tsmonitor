@@ -71,19 +71,13 @@ export const GRID_COLUMNS: ColumnRegular[] = [
   },
   {
     name: CustomFieldsName.Csm,
-    prop: 'csm',
+    prop: 'resource',
     size: 150,
     sortable: true,
   },
   {
     name: 'Version',
     prop: 'sgt5PublicVersion',
-    size: 150,
-    sortable: true,
-  },
-  {
-    name: 'Resource',
-    prop: 'resource',
     size: 150,
     sortable: true,
   },

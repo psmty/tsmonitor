@@ -1,7 +1,7 @@
 <template>
   <span>
     <label for="import-urls" data-tooltip-target="import-urls"
-           class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+           class="inline-flex items-center px-3 py-1.5 text-sm font-sm text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
     >Import from CSV</label>
     <input type="file" accept=".csv" class="hidden" id="import-urls" @change="parseCsv" />
   </span>

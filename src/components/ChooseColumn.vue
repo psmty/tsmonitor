@@ -1,5 +1,5 @@
 <template>
-  <div class="p-2">
+  <div class="p-2 flex flex-col grow overflow-hidden">
     <input
       type="text"
       v-model="searchQuery"
@@ -18,7 +18,7 @@
       <label for="select-all" class="font-medium cursor-pointer text-black hover:text-gray-500 dark:text-gray-300 dark:hover:text-gray-400">Select All</label>
     </div>
 
-    <ul class="overflow-y-auto">
+    <ul class="grow overflow-y-auto">
       <li v-for="item in filteredList" :key="item.id" class="flex items-center mb-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 text-black dark:text-gray-300" @click="toggleItemSelection(item.id)">
         <input
           type="checkbox"
