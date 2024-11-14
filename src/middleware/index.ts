@@ -9,8 +9,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
         return next();
     }
     const loggedin = await getSession(context.request);
-    if (!loggedin && !context.url.pathname.includes("/api/auth")) {
-        return context.redirect("/api/auth/signin");
+    if (!loggedin && !context.url.pathname.includes("/login") && !context.url.pathname.includes("/api/auth")) {
+        return context.redirect("/login");
     }
     const response = await next();
     return response;
