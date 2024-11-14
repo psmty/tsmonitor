@@ -19,6 +19,7 @@ if (process.env.MS_CLIENT_ID) {
     tenantId: process.env.MS_TENANT_ID,
     authorization: {
       params: {
+        redirect_uri: process.env.MS_REDIRECT_URI,
         scope: 'openid profile email',
       },
     },
