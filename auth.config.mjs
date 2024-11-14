@@ -45,6 +45,10 @@ export default defineConfig({
         return true;
       }
     },
+    async redirect({ url, baseUrl }) {
+      const origin = url.replace(/^http:/, 'https:'); // Force HTTPS
+      return origin;
+    }
   },
 
   baseUrl: 'https://monitor.rv-grid.com',
