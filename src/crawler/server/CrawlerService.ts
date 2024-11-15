@@ -132,7 +132,7 @@ export class CrawlerService {
         const text = await response.text();
         await saveToFile(url, text);
       } catch (e) {
-        console.error(e);
+        console.error(`Failed to fetch data for ${url}: ${e}`);
       }
     }
   }
