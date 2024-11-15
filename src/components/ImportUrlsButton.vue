@@ -40,11 +40,13 @@ import {
   addHttpsProtocol,
   type SitesData,
   type SiteSettings,
-  validateUrl
+  validateUrl,
+  omit
 } from '../services';
 import { DEFAULT_SETTINGS } from '../services/edit.defaults.ts';
 import { CustomFieldsName, Environment } from '../services/consts.ts';
 import { ref } from 'vue';
+import {AlertType, showAlert} from '../composables/useAlert.ts';
 
 const busy = ref(false);
 
@@ -55,7 +57,7 @@ const emits = defineEmits<{
 const getColumns = (data: Array<string>) => {
   const cols: Partial<Record<CustomFieldsName, number>> = {};
 
-  for (const fieldName of Object.values(CustomFieldsName)) {
+  for (const fieldName of Object.values(omit(CustomFieldsName, ['Csm']))) {
     const colIndex = data.findIndex((colName) => colName?.toLowerCase() === fieldName?.toLowerCase());
     if (colIndex >= 0) {
       cols[fieldName] = colIndex;
@@ -175,13 +177,19 @@ const parseCsv = (e: Event & { target: HTMLInputElement }) => {
 
   Papa.parse<string[], File>(file, {
     complete(results) {
-      const urls = parseUrls(results.data);
-      busy.value = false;
-      if (!urls) {
-        return;
-      }
+      try {
+        const urls = parseUrls(results.data);
+        busy.value = false;
+        if (!urls) {
+          return;
+        }
 
-      emits('saveUrls', urls);
+        emits('saveUrls', urls);
+      } catch (e) {
+        console.error(e);
+        busy.value = false;
+        showAlert('Error occurred while importing the CSV file. Please ensure that the CSM file is in the correct format.', AlertType.Warning);
+      }
     },
     error(res) {
       busy.value = false;
