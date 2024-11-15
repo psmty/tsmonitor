@@ -15,7 +15,7 @@
         id="select-all"
         class="mr-2 hidden"
       />
-      <label for="select-all" class="font-medium cursor-pointer text-black hover:text-gray-500 dark:text-gray-300 dark:hover:text-gray-400">Select All</label>
+      <label for="select-all" class="font-medium cursor-pointer text-black hover:text-gray-500 dark:text-gray-300 dark:hover:text-gray-400">{{ areAllSelected ? 'Deselect All' : 'Select All' }}</label>
     </div>
 
     <ul class="grow overflow-y-auto">
