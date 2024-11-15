@@ -6,6 +6,7 @@ import {
 } from "../../services";
 import {deleteFile, fileExists, getFromFile, getLastEditTime, saveToFile} from "./fileService";
 import { chunkArray } from "./helpers";
+import {getRealURL} from '../../services/api/server/list/helpers.ts';
 
 export class CrawlerService {
   private interval?: NodeJS.Timeout;
@@ -128,7 +129,7 @@ export class CrawlerService {
     for (const site of sites) {
       const { url } = site;
       try {
-        const response = await fetch(url + this.config.actionUrl);
+        const response = await fetch(getRealURL(url) + this.config.actionUrl);
         const text = await response.text();
         await saveToFile(url, text);
       } catch (e) {
