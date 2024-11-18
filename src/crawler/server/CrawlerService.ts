@@ -132,7 +132,7 @@ export class CrawlerService {
         const text = await response.text();
         await saveToFile(url, text);
       } catch (e) {
-        console.error(e);
+        console.error(`Failed to fetch data for ${url}: ${e}`);
       }
     }
   }
@@ -164,9 +164,7 @@ export class CrawlerService {
       await Promise.all(urls.map(async (url) => {
         await deleteFile(url);
       }));
-    } catch (e) {
-      console.error("Deletion failed:", e);
-    }
+    } catch {}
   }
 
   private static async getVersions(
@@ -184,7 +182,6 @@ export class CrawlerService {
       const isOnline = timeDiff.minutes < timeout * 5;
       return { parsedData: parsed, url, online: isOnline, settings };
     } catch (e) {
-      console.error(e);
       return { url, online: false, settings, parsedData: null };
     }
   }
