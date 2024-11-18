@@ -6,7 +6,7 @@ import {
 } from '../../db/DBQueries.ts';
 import {getUpdatedSites, getSitesMap} from '../../services/api/server/list/helpers.ts';
 import { getInstance } from "../../crawler/server/index.ts";
-import { deleteFile } from "../../crawler/server/fileService.ts";
+
 export const GET: APIRoute = async ({ locals, request }) => {
   try {
     // Start the crawler if it's not already running
