@@ -26,7 +26,6 @@ jobs:
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
           POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
           POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
-          SKIP_AUTH: ${{ secrets.SKIP_AUTH }}
         run: |
           # Create .env file with environment variables in ${{ env.PATH_FILE}}
           bash -c 'cat << EOF > ${{ env.PATH_FILE}}/.env
@@ -42,7 +41,6 @@ jobs:
           POSTGRES_DB=${POSTGRES_DB}
           POSTGRES_PORT=${POSTGRES_PORT}
           POSTGRES_HOST=${POSTGRES_HOST}
-          SKIP_AUTH=${SKIP_AUTH}
           EOF'
 
       - name: Copy Docker Compose
