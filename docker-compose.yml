@@ -6,6 +6,8 @@ services:
     restart: always
     ports:
       - 8080:4321
+    networks:
+      - internal
     env_file:
       - .env
     depends_on:
@@ -17,8 +19,8 @@ services:
     image: postgres:latest # Use the official PostgreSQL image
     container_name: postgres-db
     restart: always
-    ports:
-      - ${POSTGRES_PORT}:5432 # Map PostgreSQL's default port
+    networks:
+      - internal
     environment:
       POSTGRES_USER: ${POSTGRES_USER} # PostgreSQL username
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD} # PostgreSQL password
@@ -26,6 +28,10 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data # Persist data in a Docker volume
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+networks:
+  internal:
+    driver: bridge
 
 volumes:
   pgdata:
