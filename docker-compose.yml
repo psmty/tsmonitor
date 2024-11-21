@@ -2,7 +2,16 @@ version: "3.8"
 
 services:
   app:
+    # Uncomment for production
     image: ghcr.io/psmty/tsmonitor:latest
+
+    # Uncomment for local development
+    # build:
+    #     context: .
+    #     dockerfile: Dockerfile # Assume your Dockerfile for the Node.js app is named 'Dockerfile' and located in the same directory
+    # container_name: tsmonitor
+    # image: tsmonitor
+  
     restart: always
     ports:
       - 8080:4321
@@ -19,6 +28,9 @@ services:
     image: postgres:latest # Use the official PostgreSQL image
     container_name: postgres-db
     restart: always
+    # Uncomment for local development
+    # ports:
+    #   - ${POSTGRES_PORT}:5432
     networks:
       - internal
     environment:
