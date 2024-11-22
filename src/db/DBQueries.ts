@@ -10,7 +10,7 @@ export async function setUrlOnline(url: string, online: boolean) {
   const sql = `
       UPDATE sites
       SET online = $1,
-          pingAt = $2
+          pingat = $2
       WHERE url = $3
       RETURNING *;
     `;
