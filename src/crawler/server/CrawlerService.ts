@@ -128,6 +128,11 @@ export class CrawlerService {
       const site = { ...s };
       try {
         const response = await fetch(site.url + this.config.actionUrl);
+
+        if (!response.ok) {
+          throw new Error(`Response is failed with status code: ${response.status}`)
+        }
+
         const text = await response.text();
         await saveToFile(site.url, text);
         await this.config.setOnline(site.url, true);
