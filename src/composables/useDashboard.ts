@@ -90,8 +90,8 @@ export const useDashboardApi = () => {
   const initSites = (sites: SitesData[]) => {
     sites.forEach((site) => {
       siteStatuses.value.set(site.url, {
-        ...site,
         online: false,
+        ...site,
         ...DEFAULT_SETTINGS,
       });
     });
