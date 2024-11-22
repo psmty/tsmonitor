@@ -46,20 +46,14 @@ jobs:
       - name: Copy Docker Compose
         run: |
           cp docker-compose.yml ${{ env.PATH_FILE}}/docker-compose.yml
-          cp -R migrations ${{ env.PATH_FILE }}/migrations
-  
-    
-      - name: Pull latest Docker image
-        working-directory: ${{ env.PATH_FILE}}
-        run: |
-          newgrp docker
-          docker run hello-world
-          echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker-compose pull
+          cp -R migrations ${{ env.PATH_FILE }}
 
       - name: Restart Docker Compose services
         working-directory: ${{ env.PATH_FILE}}
         run: |
+          newgrp docker
+          echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker-compose pull
           docker-compose down
           docker-compose up -d
           docker image prune -f
