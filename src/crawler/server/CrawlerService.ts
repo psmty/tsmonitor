@@ -57,9 +57,9 @@ export class CrawlerService {
         // Run again after all checks completed
         runSiteCheckInterval();
       }, this.config.timeout);
-
-      runSiteCheckInterval();
     };
+
+    runSiteCheckInterval();
   }
 
   stop() {
