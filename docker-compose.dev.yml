@@ -1,0 +1,64 @@
+# docker-compose -f docker-compose.dev.yml up -d 
+# docker-compose -f docker-compose.dev.yml down
+
+version: "3.8"
+
+services:
+  # app:
+  #   # Uncomment for production
+  #   # image: ghcr.io/psmty/tsmonitor:latest
+
+  #   # Uncomment for local development
+  #   build:
+  #       context: .
+  #       dockerfile: Dockerfile # Assume your Dockerfile for the Node.js app is named 'Dockerfile' and located in the same directory
+  #   container_name: tsmonitor
+  #   image: tsmonitor
+
+  #   restart: always
+  #   ports:
+  #     - 8080:4321
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - db # Ensures db container starts before the app
+  #   volumes:
+  #   - ./sites:/app/cache/crawler
+
+  db:
+    image: postgres:latest # Use the official PostgreSQL image
+    container_name: postgres-db
+    restart: always
+    # Uncomment for local development
+    ports:
+      - ${POSTGRES_PORT}:5432
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER} # PostgreSQL username
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD} # PostgreSQL password
+      POSTGRES_DB: ${POSTGRES_DB} # Name of the database
+    volumes:
+      - pgdata:/var/lib/postgresql/data # Persist data in a Docker volume
+      - ./migrations/V1__init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./migrations:/flyway/sql
+
+  flyway:
+    image: flyway/flyway:latest
+    container_name: migration
+    command: -url=jdbc:postgresql://db:5432/${POSTGRES_DB} -user=${POSTGRES_USER} -password=${POSTGRES_PASSWORD} -baselineOnMigrate=true migrate
+    volumes:
+      - ./migrations:/flyway/sql
+    depends_on:
+      - db
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${POSTGRES_USER_EMAIL} # Set pgAdmin default email
+      PGADMIN_DEFAULT_PASSWORD: ${POSTGRES_PASSWORD} # Set pgAdmin default password
+    ports:
+      - 5050:80 # Expose pgAdmin on http://localhost:5050
+
+volumes:
+  pgdata:

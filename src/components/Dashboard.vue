@@ -51,7 +51,7 @@ import DeleteRowConfirmation from './DeleteRowConfirmation.vue';
 import {SideBarType, useSideBar} from '../composables/useSideBar.ts';
 import {useEditRow} from '../composables/useEditRow.ts';
 import {useDeleteConfirmation} from '../composables/useDeleteConfirmation.ts';
-import {GRID_COLUMNS, YES_NO, YES_NO_OPT} from "./grid.columns.ts";
+import {YES_NO, YES_NO_OPT} from "./grid.columns.ts";
 import type {GroupingOptions} from "@revolist/vue3-datagrid";
 import {EMPTY_ID, type SelectSource} from './select/defaults.ts';
 import {type MainGridPersonalization, usePersonalization} from '../composables/usePersonalization.ts';

@@ -1,6 +1,7 @@
 import zlib from 'zlib';
 import fs from 'fs';
 import * as crypto from 'node:crypto';
+import { parseHtmlString, type ParsedData } from '../../services';
 
 const STATIC_PATH = 'cache/crawler/';
 
@@ -30,19 +31,28 @@ export const saveToFile = (url: string, text: string): Promise<void> => {
   });
 }
 
-export const getFromFile = (url: string): Promise<string>  => {
+export const getFromFile = (url: string): Promise<ParsedData|null>  => {
+  const filePath = getFilePath(url);
   return new Promise((resolve, reject) => {
-    fs.readFile(getFilePath(url), (readErr, compressedData) => {
+    fs.readFile(filePath, (readErr, compressedData) => {
       if (readErr) {
         reject(readErr); // Handle file read error
         return;
       }
 
-      zlib.gunzip(compressedData, (unzipErr, buffer) => {
+      zlib.gunzip(compressedData, async (unzipErr, buffer) => {
         if (unzipErr) {
           reject(unzipErr); // Handle decompression error
         } else {
-          resolve(buffer.toString()); // Resolve with decompressed data
+          const text = buffer.toString();
+          const data = parseHtmlString(text);
+          try {
+            const lastEditedSite = await getLastEditTime(filePath);
+            data.updatedAt = lastEditedSite.toISOString();
+          } catch (e) {
+            //
+          }
+          resolve(data); // Resolve with decompressed data
         }
       });
     });
@@ -58,8 +68,7 @@ export const fileExists = (url: string): Promise<boolean>  => {
   });
 }
 
-export const getLastEditTime = (url: string): Promise<Date>  => {
-  const filePath = getFilePath(url);
+const getLastEditTime = (filePath: string): Promise<Date>  => {
   return new Promise((resolve, reject) => {
     fs.stat(filePath, (err, stats) => {
       if (err) {

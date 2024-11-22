@@ -6,6 +6,19 @@ export async function getSites(): Promise<SitesData[]>  {
   return rows;
 }
 
+export async function setUrlOnline(url: string, online: boolean) {
+  const sql = `
+      UPDATE sites
+      SET online = $1,
+          pingat = $2
+      WHERE url = $3
+      RETURNING *;
+    `;
+
+  const values = [online, new Date(), url];
+  return await db.query(sql, values);
+}
+
 export async function updateSiteSettings(siteData: SitesData) {
   const sql = `
       UPDATE sites

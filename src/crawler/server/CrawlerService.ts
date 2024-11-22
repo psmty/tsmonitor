@@ -1,11 +1,15 @@
-import {
-  type CrawlerParsed,
-  type SitesData,
-  parseHtmlString,
-  getTimeDifference,
-} from "../../services";
-import {deleteFile, fileExists, getFromFile, getLastEditTime, saveToFile} from "./fileService";
+import { type CrawlerParsed, type SitesData } from "../../services";
+import { deleteFile, getFromFile, saveToFile } from "./fileService";
 import { chunkArray } from "./helpers";
+
+async function getVersionFromFile(site: SitesData): Promise<CrawlerParsed> {
+  try {
+    const parsedData = await getFromFile(site.url);
+    return { ...site, parsedData, };
+  } catch (e) {
+    return { ...site, parsedData: null };
+  }
+}
 
 export class CrawlerService {
   private interval?: NodeJS.Timeout;
@@ -23,6 +27,7 @@ export class CrawlerService {
       concurrency: number;
       actionUrl: string;
       getSites: () => Promise<Array<SitesData>>;
+      setOnline: (url: string, isOffline: boolean) => Promise<void>;
     },
   ) {}
 
@@ -32,24 +37,34 @@ export class CrawlerService {
     }
   }
 
-  start() {
+  async start() {
     console.log("START CrawlerService");
     if (this.isWorking) {
       this.stop();
     }
 
     this.isWorking = true;
-    // Send a new event every timeout minutes
-    this.interval = setInterval(async () => {
-      await this.checkSites();
-    }, this.config.timeout);
+    // Check sites on start
+    await this.checkSites();
 
-    this.checkSites();
+    const runSiteCheckInterval = () => {
+      clearTimeout(this.interval);
+      // Send a new event every timeout minutes
+      this.interval = setTimeout(async () => {
+        // Check all sites
+        await this.checkSites();
+
+        // Run again after all checks completed
+        runSiteCheckInterval();
+      }, this.config.timeout);
+    };
+
+    runSiteCheckInterval();
   }
 
   stop() {
     if (this.interval) {
-      clearInterval(this.interval);
+      clearTimeout(this.interval);
     }
     this.isWorking = false;
   }
@@ -63,7 +78,10 @@ export class CrawlerService {
     // Initial connection message
     sendEvent([]);
 
-    const siteChunks = await this.getSiteChunks();
+    const siteChunks = chunkArray(
+      await this.config.getSites(),
+      this.config.concurrency,
+    );
 
     // Check if we didn't ping some site before
     for (const chunk of siteChunks) {
@@ -71,25 +89,7 @@ export class CrawlerService {
         break;
       }
 
-      const sitesToLoad: SitesData[] = [];
-      await Promise.all(
-        chunk.map(async (site) => {
-          const isFileExists = await fileExists(site.url);
-          if (!isFileExists) {
-            sitesToLoad.push(site);
-          }
-        }),
-      );
-
-      if (sitesToLoad.length !== 0) {
-        await this.loadData(sitesToLoad);
-      }
-
-      const parsed = await Promise.all(
-        chunk.map((site) =>
-          CrawlerService.getVersions(site, this.config.timeout),
-        ),
-      );
+      const parsed = await Promise.all(chunk.map(getVersionFromFile));
       // Load saved data
       sendEvent(parsed);
     }
@@ -99,42 +99,46 @@ export class CrawlerService {
     this.clientsSender.delete(id);
   }
 
-  private async getSiteChunks() {
-    // Chunk the site list for limited concurrency (optional)
-    return chunkArray(await this.config.getSites(), this.config.concurrency);
-  }
-
-  async checkSites() {
-    const siteChunks = await this.getSiteChunks();
+  private async checkSites() {
+    const siteChunks = chunkArray(
+      await this.config.getSites(),
+      this.config.concurrency,
+    );
 
     for (const chunk of siteChunks) {
       if (!this.isWorking) {
         break;
       }
 
-      const actualChunk = chunk.filter((item) => !this.recentlyDeletedUrls.has(item.url))
-
-      await this.loadData(actualChunk);
+      const actualChunk = chunk.filter(
+        (item) => !this.recentlyDeletedUrls.has(item.url),
+      );
+      const sites = await this.fetchAndSaveToFile(actualChunk);
 
       if (this.clientsSender.size > 0) {
-        await this.notifyClients(actualChunk);
+        await this.notifyClients(sites);
       }
     }
 
     this.recentlyDeletedUrls.clear();
   }
 
-  async loadData(sites: SitesData[]) {
-    for (const site of sites) {
-      const { url } = site;
+  fetchAndSaveToFile(sites: SitesData[]): Promise<SitesData[]> {
+    return Promise.all(sites.map(async (s) => {
+      const site = { ...s };
       try {
-        const response = await fetch(url + this.config.actionUrl);
+        const response = await fetch(site.url + this.config.actionUrl);
         const text = await response.text();
-        await saveToFile(url, text);
+        await saveToFile(site.url, text);
+        await this.config.setOnline(site.url, true);
+        site.online = true;
       } catch (e) {
-        console.error(`Failed to fetch data for ${url}: ${e}`);
+        await this.config.setOnline(site.url, false);
+        site.online = false;
+      } finally {
+        return { ...site, pingat: new Date() };
       }
-    }
+    }));
   }
 
   async notifyClients(sites: SitesData[]) {
@@ -142,11 +146,7 @@ export class CrawlerService {
       throw new Error("No saving event!");
     }
     try {
-      const data = await Promise.all(
-        sites.map((site) =>
-          CrawlerService.getVersions(site, this.config.timeout),
-        ),
-      );
+      const data = await Promise.all(sites.map(getVersionFromFile));
 
       for (const event of this.clientsSender.values()) {
         event(data);
@@ -157,32 +157,15 @@ export class CrawlerService {
   }
 
   async deleteSites(urls: string[]) {
-     try {
-       urls.forEach((url) => {
-         this.recentlyDeletedUrls.add(url);
-       })
-      await Promise.all(urls.map(async (url) => {
-        await deleteFile(url);
-      }));
-    } catch {}
-  }
-
-  private static async getVersions(
-    site: SitesData,
-    timeout: number,
-  ): Promise<CrawlerParsed> {
-    const { url, settings } = site;
     try {
-      const text = await getFromFile(url);
-      const parsed = parseHtmlString(text);
-
-      const lastEditedSite = await getLastEditTime(url);
-      const timeDiff = getTimeDifference(lastEditedSite, new Date());
-      // If the site was last updated more than 5 timeouts ago, the server is considered offline.
-      const isOnline = timeDiff.minutes < timeout * 5;
-      return { parsedData: parsed, url, online: isOnline, settings };
-    } catch (e) {
-      return { url, online: false, settings, parsedData: null };
-    }
+      urls.forEach((url) => {
+        this.recentlyDeletedUrls.add(url);
+      });
+      await Promise.all(
+        urls.map(async (url) => {
+          await deleteFile(url);
+        }),
+      );
+    } catch {}
   }
 }
