@@ -13,9 +13,9 @@ export const useDashboardApi = () => {
       const site = siteStatuses.value.get(newSite.url);
       siteStatuses.value.set(newSite.url, {
         ...(site ?? {}),
-        lastChecked: new Date(),
-        url: newSite.url,
+        pingat: new Date(),
         online: newSite.online,
+        url: newSite.url,
         ...{ ...DEFAULT_SETTINGS, ...(newSite.settings ?? {}) },
         ...(newSite.parsedData ?? {}),
       });
@@ -90,9 +90,8 @@ export const useDashboardApi = () => {
   const initSites = (sites: SitesData[]) => {
     sites.forEach((site) => {
       siteStatuses.value.set(site.url, {
-        url: site.url,
+        ...site,
         online: false,
-        lastChecked: null,
         ...DEFAULT_SETTINGS,
       });
     });

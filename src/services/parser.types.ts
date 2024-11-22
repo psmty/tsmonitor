@@ -1,4 +1,4 @@
-import type {SiteSettings} from './site.types.ts';
+import type {SitesData, SiteSettings} from './site.types.ts';
 
 export interface VersionInfo {
   name: string;
@@ -41,11 +41,9 @@ export interface ParsedData {
   licenseInfo?: LicenseInfo;
   documentInfo: DocumentInfo;
   sgt5PublicVersion: string;
+  updatedAt?: string;
 }
 
-export interface CrawlerParsed {
-  url: string;
-  settings: SiteSettings|null;
-  online: boolean;
+export interface CrawlerParsed extends SitesData{
   parsedData: ParsedData|null
 }

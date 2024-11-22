@@ -15,7 +15,7 @@ const NO = (h: HyperFunc<VNode>, optional?: boolean) => {
   } }, 'No');
 }
 
-export const YES_NO = (h: HyperFunc<VNode>, { value, type }: ColumnDataSchemaModel) => {
+export const YES_NO = (h: HyperFunc<VNode>, { value, type }: Pick<ColumnDataSchemaModel, 'value'|'type'>) => {
   if (type === 'rowPinStart') {
     return '';
   }
@@ -142,8 +142,8 @@ export const GRID_COLUMNS: ColumnRegular[] = [
   //   }
   // },
   {
-    name: 'Backend date',
-    prop: 'date',
+    name: 'Last ping',
+    prop: 'pingat',
     size: 350,
     sortable: true,
   },

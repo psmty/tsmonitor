@@ -52,8 +52,8 @@ export const POST: APIRoute = async ({ request }) => {
 
     for (const chunk of siteChunks) {
       // Send events with updated data
-      await crawler.loadData(chunk);
-      await crawler.notifyClients(chunk);
+      const parsedChunk = await crawler.fetchAndSaveToFile(chunk);
+      await crawler.notifyClients(parsedChunk);
     }
 
     return new Response(null, { status: 200 });

@@ -6,6 +6,19 @@ export async function getSites(): Promise<SitesData[]>  {
   return rows;
 }
 
+export async function setUrlOnline(url: string, online: boolean) {
+  const sql = `
+      UPDATE sites
+      SET online = $1,
+          pingAt = $2
+      WHERE url = $3
+      RETURNING *;
+    `;
+
+  const values = [online, new Date(), url];
+  return await db.query(sql, values);
+}
+
 export async function updateSiteSettings(siteData: SitesData) {
   const sql = `
       UPDATE sites
@@ -21,7 +34,7 @@ export async function updateSiteSettings(siteData: SitesData) {
 export async function setSites(sitesDataArray: SitesData[]) {
   const sql = `
     INSERT INTO sites (url, settings)
-    VALUES ${sitesDataArray.map((_, i) => `($${i * 2 + 1}, $${i * 2 + 2}::json)`).join(", ")}
+    VALUES ${sitesDataArray.map((_, i) => `($${i * 2 + 1}, $${i * 2 + 2}::jsonb)`).join(", ")}
     ON CONFLICT (url)
     DO UPDATE SET settings = EXCLUDED.settings
     RETURNING *;
