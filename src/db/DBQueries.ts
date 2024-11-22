@@ -34,7 +34,7 @@ export async function updateSiteSettings(siteData: SitesData) {
 export async function setSites(sitesDataArray: SitesData[]) {
   const sql = `
     INSERT INTO sites (url, settings)
-    VALUES ${sitesDataArray.map((_, i) => `($${i * 2 + 1}, $${i * 2 + 2}::jsonb)`).join(", ")}
+    VALUES ${sitesDataArray.map((_, i) => `($${i * 2 + 1}, $${i * 2 + 2}::json)`).join(", ")}
     ON CONFLICT (url)
     DO UPDATE SET settings = EXCLUDED.settings
     RETURNING *;
