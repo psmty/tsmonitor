@@ -52,6 +52,12 @@ export const GRID_COLUMNS: ColumnRegular[] = [
     size: 300,
     sortable: true,
     order: 'asc',
+    cellCompare: (prop, a, b) => { // Custom sorting logic
+      const av = a[prop]?.replace('https://', '').toString().toLowerCase();
+      const bv = b[prop]?.replace('https://', '').toString().toLowerCase() || '';
+      return av?.localeCompare(bv);
+    },
+    
     cellTemplate: (h, { value }) => {
       return h('a', { class: 'font-medium hover:underline text-primary-600 dark:text-primary-500', href: value, target: '_blank' }, value?.replace('https://', ''));
     }
@@ -79,21 +85,66 @@ export const GRID_COLUMNS: ColumnRegular[] = [
     name: 'Version',
     prop: 'sgt5PublicVersion',
     size: 150,
-    sortable: true,
+    // sortable: true,
   },
   {
-    name: 'SG Users',
+    name: 'SG Total Resources',
+    prop: 'sgTotalResource',
+    size: 150,
+    sortable: true,
+    cellTemplate: (_, { model }) => {
+      return model.licenseInfo?.sg?.[0] || 0;
+    },
+  },
+  {
+    name: 'SG Enabled Resources',
+    prop: 'sgEnabledResource',
+    size: 150,
+    sortable: true,
+    cellTemplate: (_, { model }) => {
+      return model.licenseInfo?.sg?.[1] || 0;
+    },
+  },
+  {
+    name: 'SG Delta Resources',
     prop: 'sgUsers',
     size: 150,
     sortable: true,
-    cellTemplate: NEGATIVE_CHECK
+    cellTemplate: (h, { model }) => {
+      const licenseInfo = model.licenseInfo || {};
+      const users = (model.licenseInfo?.sg?.[1] || 0) - (licenseInfo.sg?.[0] || 0);
+      return NEGATIVE_CHECK(h, { value: users });
+    },
+  },
+  
+  {
+    name: 'TS Total Resources',
+    prop: 'tsTotalResource',
+    size: 150,
+    sortable: true,
+    cellTemplate: (_, { model }) => {
+      return model.licenseInfo?.ts?.[0] || 0;
+    },
   },
   {
-    name: 'TS Users',
+    name: 'TS Enabled Resources',
+    prop: 'tsEnabledResource',
+    size: 150,
+    sortable: true,
+    cellTemplate: (_, { model }) => {
+      return model.licenseInfo?.ts?.[1] || 0;
+    },
+  },
+  {
+    name: 'TS Delta Resources',
     prop: 'tsUsers',
     size: 150,
     sortable: true,
-    cellTemplate: NEGATIVE_CHECK
+    cellTemplate: (h, { model }) => {
+      const licenseInfo = model.licenseInfo || {};
+      const users = (licenseInfo.ts?.[1] || 0) - (licenseInfo.ts?.[0] || 0);
+      return NEGATIVE_CHECK(h, { value: users });
+    },
   },
   {
     name: 'Online',
@@ -146,6 +197,12 @@ export const GRID_COLUMNS: ColumnRegular[] = [
     prop: 'pingat',
     size: 350,
     sortable: true,
+    cellTemplate: (h, { value }) => {
+      if (!value) {
+        return '';
+      }
+      return new Date(value).toLocaleString();
+    }
   },
 ];
 
