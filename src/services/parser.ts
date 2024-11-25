@@ -134,17 +134,12 @@ export function parseHtmlString(htmlString: string): ParsedData {
   }
 
   return {
-    htmlString,
     modules,
     uiVersions,
     servers,
     documentInfo,
     sgt5PublicVersion,
     licenseInfo,
-    ...(licenseInfo ? {
-      sgUsers: (licenseInfo.sg?.[licenseInfo.sg.length - 1] || 0) - (licenseInfo.sg?.[0] || 0),
-      tsUsers: (licenseInfo.ts?.[licenseInfo.ts.length - 1] || 0) - (licenseInfo.ts?.[0] || 0),
-    } : {}),
     ...services(htmlString),
   };
 }

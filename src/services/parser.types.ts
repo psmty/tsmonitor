@@ -34,7 +34,6 @@ export interface DocumentInfo {
 }
 
 export interface ParsedData {
-  htmlString: string,
   modules: VersionInfo[];
   uiVersions: { sgUI: string; tempusUI: string };
   servers: ServerInfo[];
