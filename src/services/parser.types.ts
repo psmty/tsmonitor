@@ -43,6 +43,6 @@ export interface ParsedData {
   updatedAt?: string;
 }
 
-export interface CrawlerParsed extends SitesData{
-  parsedData: ParsedData|null
+export interface CrawlerParsed extends SitesData {
+  parsedData?: ParsedData|null
 }

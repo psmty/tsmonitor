@@ -3,6 +3,7 @@
     class="flex flex-col grow bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 dark:bg-gray-800">
     <div class="flex items-center justify-between my-5 mx-5">
       <div class="flex flex-row space-x-4">
+        <SelectionCount :max="source.length" :selected="selectedRows.size" />
         <button
           class="inline-flex items-center px-3 py-1.5 text-sm font-sm text-center text-gray-900 items-center bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-primary-300 rounded-lg border border-gray-300 hover:text-gray-1000 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600"
           @click="startChoosingColumn"
@@ -57,6 +58,7 @@ import {EMPTY_ID, type SelectSource} from './select/defaults.ts';
 import {type MainGridPersonalization, usePersonalization} from '../composables/usePersonalization.ts';
 import {useChooseColumn} from '../composables/useChooseColumn.ts';
 import ChooseColumn from './ChooseColumn.vue';
+import SelectionCount from './SelectionCount.vue';
 
 const props = defineProps({
   resources: {
