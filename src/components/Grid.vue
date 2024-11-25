@@ -19,6 +19,8 @@
     @on-delete-row="onDeleteRow"
     @beforeedit="onCellEdit"
     @beforeautofill="onAutofill"
+    @afterfocus="selectCurrentRow"
+    @setrange="onShiftSelect"
   />
 </template>
 <script lang="ts" setup>
@@ -32,7 +34,7 @@ import {
 } from "@revolist/vue3-datagrid";
 // import ExportFilePlugin from '@revolist/revogrid/dist/types/plugins/export/export.plugin';
 import {computed, onMounted, ref, toRef} from "vue";
-import {localJsDateToDateString, type Site, type SitesData, type SiteSettings} from "../services";
+import {keyBy, localJsDateToDateString, type Site, type SitesData, type SiteSettings} from "../services";
 import {CHECKBOX_COLUMN} from "./grid.columns";
 import ActionsRenderer from "./gridRenderers/ActionsRenderer.vue";
 import {AdvanceFilterPlugin} from './gridPlugins/advanceFilterPlugin/AdvanceFilterPlugin.ts';
@@ -108,6 +110,10 @@ const source = computed(() => {
   return props.data;
 });
 
+const sourceLookup = computed(() => {
+  return keyBy(source.value, (item) => item.url);
+})
+
 const onEditRow = (e: CustomEvent) => {
   const {url} = e.detail;
   emits("editRow", url);
@@ -181,13 +187,17 @@ const updateRow = (rows: Array<UpdateRow>) => {
 
 const onCellEdit = (e: CustomEvent) => {
   e.preventDefault();
-  const {val, prop, model} = e.detail;
+  const {val, prop} = e.detail;
+  const toUpdate = Array.from(props.selectedRows).map((url) => {
+    return {
+      prop,
+      model: sourceLookup.value[url],
+      newValue: val
+    }
+  });
 
-  updateRow([{
-    prop,
-    model,
-    newValue: val
-  }]);
+  console.log(toUpdate, 'toUpdate');
+  updateRow(toUpdate);
 };
 
 const onAutofill = async (e: CustomEvent) => {
@@ -225,6 +235,33 @@ const onAutofill = async (e: CustomEvent) => {
 
   updateRow(updatedCells);
 };
+
+// Set checkbox on cell focus
+const selectCurrentRow = (e: CustomEvent) => {
+  const {column, model} = e.detail;
+  if (column.prop === 'checkbox' || column.prop === 'edit') {
+    return;
+  }
+
+  props.selectedRows.clear();
+  props.selectedRows.add(model.url);
+}
+
+// Set multiple checkboxes on range selection
+const onShiftSelect = async (e: CustomEvent) => {
+  const {y, y1} = e.detail;
+
+  if (y !== y1) {
+    const source = await grid.value?.$el.getVisibleSource();
+
+    if (!source) { return; }
+
+    const selectedSource = source.slice(y, y1 + 1);
+    selectedSource.forEach(({url}) => {
+      props.selectedRows.add(url);
+    })
+  }
+}
 
 defineExpose({
   exportToCSV

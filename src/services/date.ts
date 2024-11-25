@@ -29,3 +29,16 @@ export function dateStringToLocalJsDate(dateString: string | null | undefined): 
 
   return localJsDate;
 }
+
+export function getTimeDifference(date1: Date, date2: Date) {
+  const diffInMilliseconds = Math.abs(date2.getTime() - date1.getTime());
+  const diffInMinutes = Math.floor(diffInMilliseconds / (1000 * 60));
+
+  if (diffInMinutes < 60) {
+    return `${diffInMinutes}m`;
+  } else {
+    const hours = Math.floor(diffInMinutes / 60);
+    const minutes = diffInMinutes % 60;
+    return `${hours}h:${minutes}m`;
+  }
+}

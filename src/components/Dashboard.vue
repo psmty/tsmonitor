@@ -7,10 +7,14 @@
         <button
           class="inline-flex items-center px-3 py-1.5 text-sm font-sm text-center text-gray-900 items-center bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-primary-300 rounded-lg border border-gray-300 hover:text-gray-1000 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600"
           @click="startChoosingColumn"
-          >
+        >
           Choose columns
         </button>
         <Select :source="groupByOptions" v-model:value="groupBy" />
+        <input type="text"
+               class="h-8 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+               v-model="search"
+               placeholder="Search...">
       </div>
       <div class="flex flex-row space-x-4">
 
@@ -34,7 +38,8 @@
       <DeleteRowConfirmation v-else-if="sideBarType === SideBarType.Delete" :urls="deleteUrls" @close="hideSidebar"
                              @delete="deleteRow" />
 
-      <ChooseColumn v-else-if="sideBarType === SideBarType.ChooseColumn" v-model.selectedItems="selectedColumns" :source="columnSelectorSource" />
+      <ChooseColumn v-else-if="sideBarType === SideBarType.ChooseColumn" v-model.selectedItems="selectedColumns"
+                    :source="columnSelectorSource" />
     </SideBar>
   </div>
 </template>
@@ -67,13 +72,21 @@ const props = defineProps({
   }
 });
 
+const search = ref('');
+
 const {personalization, setPersonalizationValue} = usePersonalization<MainGridPersonalization>('mainGrid');
 const {siteStatuses, deleteSites, addSites, updateSites} = useDashboardApi();
 
 const {visibleSideBar, sideBarType, sideBarTitle, hideSidebar, clearSideBarType} = useSideBar();
 const {editUrl, startEditRow, endEditRow} = useEditRow(visibleSideBar, sideBarType, sideBarTitle);
 const {deleteUrls, startDeleteRow, endDeleteRow} = useDeleteConfirmation(visibleSideBar, sideBarType, sideBarTitle);
-const {startChoosingColumn, columns, selectedColumns, gridColumnsSource, columnSelectorSource} = useChooseColumn<MainGridPersonalization>(visibleSideBar, sideBarType, sideBarTitle, personalization, setPersonalizationValue, props.resources);
+const {
+  startChoosingColumn,
+  columns,
+  selectedColumns,
+  gridColumnsSource,
+  columnSelectorSource
+} = useChooseColumn<MainGridPersonalization>(visibleSideBar, sideBarType, sideBarTitle, personalization, setPersonalizationValue, props.resources);
 
 const selectedRows = ref(new Set<string>());
 const groupByOptions = computed<SelectSource[]>(() => {
@@ -84,8 +97,8 @@ const groupByOptions = computed<SelectSource[]>(() => {
 });
 const groupBy = computed({
   get: () => personalization.value?.groupBy ?? EMPTY_ID,
-  set: (value) => setPersonalizationValue('groupBy',value)
-})
+  set: (value) => setPersonalizationValue('groupBy', value)
+});
 const grouping = computed((): GroupingOptions | undefined => {
   if (!groupBy.value) return;
 
@@ -94,17 +107,19 @@ const grouping = computed((): GroupingOptions | undefined => {
     return;
   }
 
-  return {props: [column.prop], groupLabelTemplate: (h, props) => {
-    const attributes = {class: 'ml-2 flex items-center gap-4 h-full'};
-    const expanded = props.expanded;
-    const chevron = h('div', {class: `chevron ${expanded ? 'chevron-down' : 'chevron-right'}`}, '');
+  return {
+    props: [column.prop], groupLabelTemplate: (h, props) => {
+      const attributes = {class: 'ml-2 flex items-center gap-4 h-full'};
+      const expanded = props.expanded;
+      const chevron = h('div', {class: `chevron ${expanded ? 'chevron-down' : 'chevron-right'}`}, '');
 
       if (column.cellTemplate === YES_NO_OPT || column.cellTemplate === YES_NO) {
         return h('div', attributes, [chevron, YES_NO_OPT(h, {value: props.name, type: 'rgRow'}) || null]);
       }
 
       return h('div', attributes, [chevron, h('span', {}, props.name ?? 'EMPTY')]);
-    }};
+    }
+  };
 });
 
 const onHideSidebar = () => {
@@ -120,7 +135,17 @@ const onHideSidebar = () => {
 };
 
 const source = computed(() => {
-  return [...siteStatuses.value.values()];
+  const options = [...siteStatuses.value.values()];
+
+  if (!search.value) {
+    return options;
+  }
+
+  return [...siteStatuses.value.values()].filter((item) => {
+    const predicate = search.value.toLowerCase();
+
+    return item.url.toLowerCase().includes(predicate) || item.customer.toLowerCase().includes(predicate);
+  });
 });
 
 const editRow = async (editFields: SitesData[]) => {

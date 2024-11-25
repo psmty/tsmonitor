@@ -36,3 +36,13 @@ export function debounce<T extends (...args: any[]) => any>(
     if (callNow) func.apply(context, args);
   };
 }
+
+type KeyByCallback<T> = (item: T) => string | number;
+
+export function keyBy<T>(array: T[], keyGetter: KeyByCallback<T>): Record<string | number, T> {
+  return array.reduce((result, item) => {
+    const key = keyGetter(item);
+    result[key] = item;
+    return result;
+  }, {} as Record<string | number, T>);
+}

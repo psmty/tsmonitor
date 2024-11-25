@@ -13,7 +13,7 @@ export const useDashboardApi = () => {
       const site = siteStatuses.value.get(newSite.url);
       siteStatuses.value.set(newSite.url, {
         ...(site ?? {}),
-        pingat: new Date(),
+        pingat: newSite.pingat ?? new Date(),
         online: newSite.online,
         url: newSite.url,
         ...{ ...DEFAULT_SETTINGS, ...(newSite.settings ?? {}) },
