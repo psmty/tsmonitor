@@ -65,7 +65,7 @@ export const useDashboardApi = () => {
     }
 
     try {
-      initSites(sites);
+      saveSiteStatuses(sites);
       const response = await fetch("/api/crawler", {
         method: "POST",
         body: JSON.stringify(sites),
@@ -88,16 +88,6 @@ export const useDashboardApi = () => {
     updateSiteSettings(sitesData);
     // TODO: Probably we don't need to load data on update sites, and only update changed data
     // await loadSites(sitesData);
-  };
-
-  const initSites = (sites: SitesData[]) => {
-    sites.forEach((site) => {
-      siteStatuses.value.set(site.url, {
-        online: false,
-        ...site,
-        ...DEFAULT_SETTINGS,
-      });
-    });
   };
 
   const startCrawler = () => {
@@ -127,7 +117,7 @@ export const useDashboardApi = () => {
   onMounted(async () => {
     const response = await fetch("/api/list");
     const sites: SitesData[] = await response.json();
-    initSites(sites);
+    saveSiteStatuses(sites);
     startCrawler();
   });
 
