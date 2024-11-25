@@ -1,5 +1,5 @@
 import type { ColumnDataSchemaModel, ColumnRegular, HyperFunc, VNode } from '@revolist/vue3-datagrid';
-import {CustomFieldsName, Environment} from '../services/consts';
+import {CustomFieldsName} from '../services/consts';
 import type { Ref } from 'vue';
 import {booleanDataSource, environmentDataSource, getResourceDataSource} from './select/defaults.ts';
 import {BooleanEditor, SelectEditor} from './gridEditors/editors.ts';
@@ -238,6 +238,7 @@ export const CHECKBOX_COLUMN = (selectedRows: Ref<Set<string>>, source: Ref<any[
   prop: "checkbox",
   size: 50,
   sortable: false,
+  readonly: true,
   filter: false,
   // pin: "colPinStart", // doesn't look good with grouping
   columnTemplate: (h, p) => {
@@ -265,6 +266,7 @@ export const CHECKBOX_COLUMN = (selectedRows: Ref<Set<string>>, source: Ref<any[
       type: "checkbox",
       class: CHECKBOX_CLASS,
       checked: selected,
+      key: url,
       onChange: (e: Event & { target: HTMLInputElement }) => {
         e.preventDefault();
         e.stopPropagation();
