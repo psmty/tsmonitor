@@ -10,12 +10,15 @@
     :exporting="true"
     :grouping="grouping"
     hide-attribution
+    range
     :theme="theme"
-    :plugins="[AdvanceFilterPlugin]"
+    :plugins="[AdvanceFilterPlugin, RangePlugin]"
     :editors="gridEditors"
+    :rangePluginEditableColumns.prop="rangePluginEditableColumns"
     @on-edit-row="onEditRow"
     @on-delete-row="onDeleteRow"
     @beforeedit="onCellEdit"
+    @beforeautofill="onAutofill"
   />
 </template>
 <script lang="ts" setup>
@@ -36,6 +39,9 @@ import {AdvanceFilterPlugin} from './gridPlugins/advanceFilterPlugin/AdvanceFilt
 import {DEFAULT_SETTINGS} from '../services/edit.defaults.ts';
 import {isCustomField} from '../services/edit.helpers.ts';
 import {GRID_EDITORS} from './gridEditors/editors.ts';
+import {RangePlugin} from './gridPlugins/rangePlugin.ts';
+
+type UpdateRow = { settingsKey: keyof SiteSettings, model: Site, newValue: any };
 
 const grid = ref<{ $el: HTMLRevoGridElement } | null>(null);
 const gridEditors = GRID_EDITORS;
@@ -57,9 +63,11 @@ const emits = defineEmits<{
 const filters: ColumnFilterConfig = {
   multiFilterItems: {
     customer: [{id: 0, type: "contains", value: "", relation: "or"}],
-    url: [{id: 1, type: "contains", value: "", relation: "or"}],
+    url: [{id: 1, type: "contains", value: "", relation: "or"}]
   }
 };
+
+const rangePluginEditableColumns = ['customer', 'hasIntegration', 'resource', 'environment'];
 
 const checkboxCell = computed<ColumnRegular>(() => (CHECKBOX_COLUMN(toRef(props.selectedRows), source)));
 
@@ -72,14 +80,14 @@ const actionsCell = computed<ColumnRegular>(() => ({
   // pin: "colPinStart",  // doesn't look good with grouping
   cellProperties: () => ({class: {"edit-cell": true}}),
   cellTemplate: VGridVueTemplate(ActionsRenderer, {
-  selectedFewRows: props.selectedRows.size > 1
+    selectedFewRows: props.selectedRows.size > 1
   })
 }));
 
 const columns = computed<ColumnRegular[]>(() => [
   checkboxCell.value,
   actionsCell.value,
-  ...props.columns,
+  ...props.columns
 ]);
 const theme = ref("compact");
 
@@ -134,37 +142,85 @@ const exportToCSV = async () => {
   await exportPlugin.exportFile({filename: `Tempus monitor - ${localJsDateToDateString(new Date())}`});
 };
 
+const updateRow = (rows: Array<UpdateRow>) => {
+  const updatedRows: SitesData[] = [];
+
+  rows.forEach(({settingsKey, model, newValue}) => {
+    const settings: SitesData['settings'] = {...DEFAULT_SETTINGS};
+
+    if (!isCustomField(settingsKey)) {
+      // User should be able to edit only custom field columns.
+      throw new Error(`${settingsKey} is not a setting value`);
+    }
+
+    Object.keys(settings).forEach(key => {
+      const settingsKey = key as keyof SiteSettings;
+
+      if (key === settingsKey) {
+        settings[settingsKey] = newValue;
+        return;
+      }
+
+      if (model[settingsKey] !== undefined) {
+        settings[settingsKey] = model[settingsKey] as any;
+      }
+    });
+
+    updatedRows.push({
+      url: model.url,
+      settings: settings
+    });
+  });
+
+  if (updatedRows.length === 0) {
+    return;
+  }
+
+  emits('updateRow', updatedRows);
+};
+
 const onCellEdit = (e: CustomEvent) => {
   e.preventDefault();
   const {val, prop, model} = e.detail;
 
-  const settings: SitesData['settings'] = {...DEFAULT_SETTINGS};
+  updateRow([{
+    settingsKey: prop,
+    model,
+    newValue: val
+  }]);
+};
 
-  if (!isCustomField(prop)) {
-    // User should be able to edit only custom field columns.
-    throw new Error(`${prop} is not a setting value`);
+const onAutofill = async (e: CustomEvent) => {
+  const {mapping, newData} = e.detail;
+
+  if (!Object.keys(mapping).length) {
+    return;
   }
 
-  Object.keys(settings).forEach(key => {
-    const settingsKey = key as keyof SiteSettings;
-
-    if (key === prop) {
-      settings[settingsKey] = val;
-      return;
-    }
-
-    if (model[settingsKey] !== undefined) {
-      settings[settingsKey] = model[settingsKey] as any;
-    }
-  })
-
-  const siteData: SitesData = {
-    url: model.url,
-    settings: settings
+  const source = await grid.value?.$el.getVisibleSource();
+  if (!source) {
+    return;
   }
 
-  emits('updateRow', [siteData])
-}
+  const updatedCells: UpdateRow[] = [];
+
+  Object.keys(mapping).forEach(row => {
+    const mappingData = mapping[row as unknown as number];
+    const newValue = newData[row as unknown as number];
+    const mappedKeys = Object.keys(mappingData);
+    const key = mappingData[mappedKeys[0]].colProp;
+
+    if (newValue[key] !== undefined) {
+      updatedCells.push({
+        settingsKey: key,
+        model: source[Number(row)],
+        newValue: newValue[key]
+      });
+    }
+  });
+
+  updateRow(updatedCells);
+};
 
 defineExpose({
   exportToCSV
