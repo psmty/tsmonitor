@@ -41,7 +41,7 @@ import {isCustomField} from '../services/edit.helpers.ts';
 import {GRID_EDITORS} from './gridEditors/editors.ts';
 import {RangePlugin} from './gridPlugins/rangePlugin.ts';
 
-type UpdateRow = { settingsKey: keyof SiteSettings, model: Site, newValue: any };
+type UpdateRow = { prop: keyof SiteSettings, model: Site, newValue: any };
 
 const grid = ref<{ $el: HTMLRevoGridElement } | null>(null);
 const gridEditors = GRID_EDITORS;
@@ -145,18 +145,18 @@ const exportToCSV = async () => {
 const updateRow = (rows: Array<UpdateRow>) => {
   const updatedRows: SitesData[] = [];
 
-  rows.forEach(({settingsKey, model, newValue}) => {
+  rows.forEach(({prop, model, newValue}) => {
     const settings: SitesData['settings'] = {...DEFAULT_SETTINGS};
 
-    if (!isCustomField(settingsKey)) {
+    if (!isCustomField(prop)) {
       // User should be able to edit only custom field columns.
-      throw new Error(`${settingsKey} is not a setting value`);
+      throw new Error(`${prop} is not a setting value`);
     }
 
     Object.keys(settings).forEach(key => {
       const settingsKey = key as keyof SiteSettings;
 
-      if (key === settingsKey) {
+      if (prop === settingsKey) {
         settings[settingsKey] = newValue;
         return;
       }
@@ -184,7 +184,7 @@ const onCellEdit = (e: CustomEvent) => {
   const {val, prop, model} = e.detail;
 
   updateRow([{
-    settingsKey: prop,
+    prop,
     model,
     newValue: val
   }]);
@@ -208,11 +208,15 @@ const onAutofill = async (e: CustomEvent) => {
     const mappingData = mapping[row as unknown as number];
     const newValue = newData[row as unknown as number];
     const mappedKeys = Object.keys(mappingData);
+    if (mappedKeys.length === 0) {
+      return;
+    }
+
     const key = mappingData[mappedKeys[0]].colProp;
 
     if (newValue[key] !== undefined) {
       updatedCells.push({
-        settingsKey: key,
+        prop: key,
         model: source[Number(row)],
         newValue: newValue[key]
       });

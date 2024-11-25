@@ -86,7 +86,8 @@ export const useDashboardApi = () => {
     });
     const sitesData = await response.json();
     updateSiteSettings(sitesData);
-    await loadSites(sitesData);
+    // TODO: Probably we don't need to load data on update sites, and only update changed data
+    // await loadSites(sitesData);
   };
 
   const initSites = (sites: SitesData[]) => {
