@@ -133,6 +133,26 @@ export const getGridColumns = ({resources}: {resources: string[]}):ColumnRegular
       return NEGATIVE_CHECK(h, { value: users });
     },
   },
+  {
+    name: 'SG Enabled With Credentials',
+    prop: 'sgEnabledResourceWithCredentials',
+    size: 150,
+    sortable: true,
+    readonly: true,
+    cellTemplate: (_, { model }) => {
+      return model.licenseInfo?.sg?.[2] || 0;
+    },
+  },
+  {
+    name: 'License Limit',
+    prop: 'licenseLimit',
+    size: 150,
+    sortable: true,
+    readonly: true,
+    cellTemplate: (_, { model }) => {
+      return model.licenseInfo?.sg?.[3] || 0;
+    },
+  },
 
   {
     name: 'TS Total Resources',
