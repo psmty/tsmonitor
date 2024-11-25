@@ -22,7 +22,7 @@
       </div>
     </div>
     <Grid ref="grid" :columns="columns" :data="source" :selected-rows="selectedRows" :grouping="grouping"
-          @editRow="startEditRow" @delete-row="startDeleteRow" />
+          @editRow="startEditRow" @delete-row="startDeleteRow" @update-row="editRow" />
 
     <SideBar v-model="visibleSideBar" @onHide="onHideSidebar">
       <template #title>{{ sideBarTitle }}</template>
@@ -121,9 +121,9 @@ const source = computed(() => {
   return [...siteStatuses.value.values()];
 });
 
-const editRow = async (editFields: SitesData) => {
+const editRow = async (editFields: SitesData[]) => {
   hideSidebar();
-  updateSites(editFields);
+  await updateSites(editFields);
 };
 
 const deleteRow = async (urls: string[]) => {

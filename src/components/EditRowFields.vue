@@ -63,7 +63,7 @@ interface Props {
 const props = defineProps<Props>();
 const emits = defineEmits<{
   (e: 'closePopup'): void
-  (e: 'update', row: SitesData): void
+  (e: 'update', row: SitesData[]): void
 }>();
 
 const editData = ref<SiteSettings>(DEFAULT_SETTINGS);
@@ -110,7 +110,7 @@ const updateRow = () => {
     url: props.editUrl,
     settings: editData.value
   };
-  emits('update', siteData);
+  emits('update', [siteData]);
 };
 
 onMounted(() => {

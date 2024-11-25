@@ -31,6 +31,24 @@ export async function updateSiteSettings(siteData: SitesData) {
   return await db.query(sql, values);
 }
 
+export async function updateMultipleSiteSettings(sitesData: SitesData[]) {
+  const sql = `
+    UPDATE sites
+    SET settings = data.settings
+    FROM (
+      VALUES
+      ${sitesData
+        .map((_, index) => `($${index * 2 + 1}::json, $${index * 2 + 2}::text)`)
+        .join(",\n")}
+    ) AS data(settings, url)
+    WHERE sites.url = data.url
+    RETURNING *;
+  `;
+
+  const values = sitesData.flatMap((site) => [site.settings, site.url]);
+  return await db.query(sql, values);
+}
+
 export async function setSites(sitesDataArray: SitesData[]) {
   const sql = `
     INSERT INTO sites (url, settings)

@@ -22,14 +22,16 @@ export const useDashboardApi = () => {
     });
   };
 
-  const updateSiteSettings = ({ settings, url }: SitesData) => {
-    if (!siteStatuses.value.has(url)) {
-      console.error(`${url} is not exists`);
-      return;
-    }
+  const updateSiteSettings = (sites: SitesData[]) => {
+    sites.forEach(({url, settings}) => {
+      if (!siteStatuses.value.has(url)) {
+        console.error(`${url} is not exists`);
+        return;
+      }
 
-    const currentData = siteStatuses.value.get(url)!;
-    siteStatuses.value.set(url, { ...currentData, ...settings });
+      const currentData = siteStatuses.value.get(url)!;
+      siteStatuses.value.set(url, { ...currentData, ...settings });
+    })
   };
 
   const addSites = async (urls: SitesData[]) => {
@@ -77,14 +79,14 @@ export const useDashboardApi = () => {
     }
   };
 
-  const updateSites = async (editFields: SitesData) => {
+  const updateSites = async (editFields: SitesData[]) => {
     const response = await fetch("/api/list", {
       method: "PUT",
       body: JSON.stringify(editFields),
     });
-    const siteData = await response.json();
-    updateSiteSettings(siteData);
-    await loadSites([siteData]);
+    const sitesData = await response.json();
+    updateSiteSettings(sitesData);
+    await loadSites(sitesData);
   };
 
   const initSites = (sites: SitesData[]) => {

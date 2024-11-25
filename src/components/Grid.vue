@@ -3,7 +3,6 @@
     class="grow rv-grid"
     ref="grid"
     resize
-    readonly
     :filter="filters"
     can-move-columns
     :columns="columns"
@@ -15,6 +14,7 @@
     :plugins="[AdvanceFilterPlugin]"
     @on-edit-row="onEditRow"
     @on-delete-row="onDeleteRow"
+    @beforeedit="onCellEdit"
   />
 </template>
 <script lang="ts" setup>
@@ -28,10 +28,12 @@ import {
 } from "@revolist/vue3-datagrid";
 // import ExportFilePlugin from '@revolist/revogrid/dist/types/plugins/export/export.plugin';
 import {computed, onMounted, ref, toRef} from "vue";
-import {localJsDateToDateString, type Site} from "../services";
+import {localJsDateToDateString, type Site, type SitesData, type SiteSettings} from "../services";
 import {CHECKBOX_COLUMN, GRID_COLUMNS} from "./grid.columns";
 import ActionsRenderer from "./gridRenderers/ActionsRenderer.vue";
 import {AdvanceFilterPlugin} from './gridPlugins/advanceFilterPlugin/AdvanceFilterPlugin.ts';
+import {DEFAULT_SETTINGS} from '../services/edit.defaults.ts';
+import {isCustomField} from '../services/edit.helpers.ts';
 
 const grid = ref<{ $el: HTMLRevoGridElement } | null>(null);
 
@@ -47,6 +49,7 @@ const props = defineProps<Props>();
 const emits = defineEmits<{
   (e: "editRow", url: string): void;
   (e: "deleteRow", url: string[]): void;
+  (e: 'updateRow', sites: Array<SitesData>): void;
 }>();
 
 const filters: ColumnFilterConfig = {
@@ -129,6 +132,38 @@ const exportToCSV = async () => {
   await exportPlugin.exportFile({filename: `Tempus monitor - ${localJsDateToDateString(new Date())}`});
 };
 
+const onCellEdit = (e: CustomEvent) => {
+  e.preventDefault();
+  const {val, prop, model} = e.detail;
+
+  const settings: SitesData['settings'] = {...DEFAULT_SETTINGS};
+
+  if (!isCustomField(prop)) {
+    // User should be able to edit only custom field columns.
+    throw new Error(`${prop} is not a setting value`);
+  }
+
+  Object.keys(settings).forEach(key => {
+    const settingsKey = key as keyof SiteSettings;
+
+    if (key === prop) {
+      settings[settingsKey] = val;
+      return;
+    }
+
+    if (model[settingsKey] !== undefined) {
+      settings[settingsKey] = model[settingsKey] as any;
+    }
+  })
+
+  const siteData: SitesData = {
+    url: model.url,
+    settings: settings
+  }
+
+  emits('updateRow', [siteData])
+}
+
 defineExpose({
   exportToCSV
 });
@@ -168,6 +203,12 @@ defineExpose({
         border-width: 5px 0 5px 8px;
         border-color: transparent transparent transparent black;
       }
+    }
+  }
+
+  :deep(revogr-edit) {
+    input {
+      background-color: transparent;
     }
   }
 }
