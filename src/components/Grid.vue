@@ -12,6 +12,7 @@
     hide-attribution
     :theme="theme"
     :plugins="[AdvanceFilterPlugin]"
+    :editors="gridEditors"
     @on-edit-row="onEditRow"
     @on-delete-row="onDeleteRow"
     @beforeedit="onCellEdit"
@@ -29,14 +30,15 @@ import {
 // import ExportFilePlugin from '@revolist/revogrid/dist/types/plugins/export/export.plugin';
 import {computed, onMounted, ref, toRef} from "vue";
 import {localJsDateToDateString, type Site, type SitesData, type SiteSettings} from "../services";
-import {CHECKBOX_COLUMN, GRID_COLUMNS} from "./grid.columns";
+import {CHECKBOX_COLUMN} from "./grid.columns";
 import ActionsRenderer from "./gridRenderers/ActionsRenderer.vue";
 import {AdvanceFilterPlugin} from './gridPlugins/advanceFilterPlugin/AdvanceFilterPlugin.ts';
 import {DEFAULT_SETTINGS} from '../services/edit.defaults.ts';
 import {isCustomField} from '../services/edit.helpers.ts';
+import {GRID_EDITORS} from './gridEditors/editors.ts';
 
 const grid = ref<{ $el: HTMLRevoGridElement } | null>(null);
-
+const gridEditors = GRID_EDITORS;
 
 interface Props {
   data: Array<Site>;

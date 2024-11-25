@@ -49,7 +49,7 @@ import {computed, onMounted, ref} from 'vue';
 import {DEFAULT_SETTINGS} from '../services/edit.defaults.ts';
 import {Environment} from '../services/consts.ts';
 import Select from './select/Select.vue';
-import {type SelectSource, booleanDataSource} from './select/defaults.ts';
+import {type SelectSource, booleanDataSource, environmentDataSource, getResourceDataSource} from './select/defaults.ts';
 import {createStringDataSource, setBooleanValue} from './select/helpers.ts';
 
 interface Props {
@@ -68,10 +68,8 @@ const emits = defineEmits<{
 
 const editData = ref<SiteSettings>(DEFAULT_SETTINGS);
 
-const environmentDataSource: Array<SelectSource> = createStringDataSource([Environment.Dev, Environment.Prod, Environment.Trial]);
-
 const resourceSource = computed<Array<SelectSource>>(() => {
-  return props.resources ? createStringDataSource(props.resources) : [];
+  return props.resources ? getResourceDataSource(props.resources) : [];
 })
 
 const hasIntegration = computed({
