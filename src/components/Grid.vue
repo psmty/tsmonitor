@@ -32,7 +32,6 @@ import {
   VGrid,
   VGridVueTemplate
 } from "@revolist/vue3-datagrid";
-// import ExportFilePlugin from '@revolist/revogrid/dist/types/plugins/export/export.plugin';
 import {computed, onMounted, ref, toRef} from "vue";
 import {keyBy, localJsDateToDateString, type Site, type SitesData, type SiteSettings} from "../services";
 import {CHECKBOX_COLUMN} from "./grid.columns";
@@ -71,26 +70,26 @@ const filters: ColumnFilterConfig = {
 
 const rangePluginEditableColumns = ['customer', 'hasIntegration', 'resource', 'environment'];
 
-const checkboxCell = computed<ColumnRegular>(() => (CHECKBOX_COLUMN(toRef(props.selectedRows), source)));
+const source = computed(() => {
+  return props.data;
+});
 
-const actionsCell = computed<ColumnRegular>(() => ({
-  name: "",
-  prop: "edit",
-  size: 70,
-  sortable: false,
-  filter: false,
-  // pin: "colPinStart",  // doesn't look good with grouping
-  cellProperties: () => ({class: {"edit-cell": true}}),
-  cellTemplate: VGridVueTemplate(ActionsRenderer, {
-    selectedFewRows: props.selectedRows.size > 1
-  })
-}));
-
-const columns = computed<ColumnRegular[]>(() => [
-  checkboxCell.value,
-  actionsCell.value,
+const columns = computed((): ColumnRegular[] => ([
+  CHECKBOX_COLUMN(toRef(props.selectedRows), source),
+  {
+    name: "",
+    prop: "edit",
+    size: 70,
+    sortable: false,
+    filter: false,
+    // pin: "colPinStart",  // doesn't look good with grouping
+    cellProperties: () => ({class: {"edit-cell": true}}),
+    cellTemplate: VGridVueTemplate(ActionsRenderer, {
+      selectedFewRows: props.selectedRows.size > 1
+    })
+  },
   ...props.columns
-]);
+]));
 const theme = ref("compact");
 
 const checkTheme = () => {
@@ -105,9 +104,6 @@ onMounted(() => {
   document.addEventListener("dark-mode", () => {
     checkTheme();
   });
-});
-const source = computed(() => {
-  return props.data;
 });
 
 const sourceLookup = computed(() => {
