@@ -23,7 +23,7 @@
       </div>
     </div>
     <Grid ref="grid" :columns="columns" :data="source" :selected-rows="selectedRows" :grouping="grouping"
-          @editRow="startEditRow" @delete-row="startDeleteRow" />
+          @editRow="startEditRow" @delete-row="startDeleteRow" @update-row="editRow" />
 
     <SideBar v-model="visibleSideBar" @onHide="onHideSidebar">
       <template #title>{{ sideBarTitle }}</template>
@@ -60,20 +60,20 @@ import {useChooseColumn} from '../composables/useChooseColumn.ts';
 import ChooseColumn from './ChooseColumn.vue';
 import SelectionCount from './SelectionCount.vue';
 
-const {personalization, setPersonalizationValue} = usePersonalization<MainGridPersonalization>('mainGrid');
-const {siteStatuses, deleteSites, addSites, updateSites} = useDashboardApi();
-
-const {visibleSideBar, sideBarType, sideBarTitle, hideSidebar, clearSideBarType} = useSideBar();
-const {editUrl, startEditRow, endEditRow} = useEditRow(visibleSideBar, sideBarType, sideBarTitle);
-const {deleteUrls, startDeleteRow, endDeleteRow} = useDeleteConfirmation(visibleSideBar, sideBarType, sideBarTitle);
-const {startChoosingColumn, columns, selectedColumns, gridColumnsSource, columnSelectorSource} = useChooseColumn<MainGridPersonalization>(visibleSideBar, sideBarType, sideBarTitle, personalization, setPersonalizationValue);
-
 const props = defineProps({
   resources: {
     type: Array as () => string[],
     default: () => []
   }
 });
+
+const {personalization, setPersonalizationValue} = usePersonalization<MainGridPersonalization>('mainGrid');
+const {siteStatuses, deleteSites, addSites, updateSites} = useDashboardApi();
+
+const {visibleSideBar, sideBarType, sideBarTitle, hideSidebar, clearSideBarType} = useSideBar();
+const {editUrl, startEditRow, endEditRow} = useEditRow(visibleSideBar, sideBarType, sideBarTitle);
+const {deleteUrls, startDeleteRow, endDeleteRow} = useDeleteConfirmation(visibleSideBar, sideBarType, sideBarTitle);
+const {startChoosingColumn, columns, selectedColumns, gridColumnsSource, columnSelectorSource} = useChooseColumn<MainGridPersonalization>(visibleSideBar, sideBarType, sideBarTitle, personalization, setPersonalizationValue, props.resources);
 
 const selectedRows = ref(new Set<string>());
 const groupByOptions = computed<SelectSource[]>(() => {
@@ -123,9 +123,9 @@ const source = computed(() => {
   return [...siteStatuses.value.values()];
 });
 
-const editRow = async (editFields: SitesData) => {
+const editRow = async (editFields: SitesData[]) => {
   hideSidebar();
-  updateSites(editFields);
+  await updateSites(editFields);
 };
 
 const deleteRow = async (urls: string[]) => {

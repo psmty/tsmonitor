@@ -2,7 +2,7 @@ import type { APIRoute } from "astro";
 import type {SitesData} from '../../services';
 import {
   getSites,
-  updateSiteSettings, setSites, deleteSites
+  updateSiteSettings, setSites, deleteSites, updateMultipleSiteSettings
 } from '../../db/DBQueries.ts';
 import {getUpdatedSites, getSitesMap} from '../../services/api/server/list/helpers.ts';
 import { getInstance } from "../../crawler/server/index.ts";
@@ -52,10 +52,10 @@ export const POST: APIRoute = async ({ props, locals, request }) => {
 
 export const PUT: APIRoute = async ({ props, locals, request }) => {
   try {
-    const siteData: SitesData = await request.json();
-    await updateSiteSettings(siteData);
+    const sitesData: SitesData[] = await request.json();
+    await updateMultipleSiteSettings(sitesData);
 
-    return new Response(JSON.stringify(siteData));
+    return new Response(JSON.stringify(sitesData));
   } catch (error) {
     console.error("Database connection error:", error);
     return new Response("Failed to fetch data from PostgreSQL", {

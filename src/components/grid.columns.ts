@@ -1,6 +1,8 @@
 import type { ColumnDataSchemaModel, ColumnRegular, HyperFunc, VNode } from '@revolist/vue3-datagrid';
-import { CustomFieldsName } from '../services/consts';
+import {CustomFieldsName, Environment} from '../services/consts';
 import type { Ref } from 'vue';
+import {booleanDataSource, environmentDataSource, getResourceDataSource} from './select/defaults.ts';
+import {BooleanEditor, SelectEditor} from './gridEditors/editors.ts';
 const YES_CLASS = 'bg-green-100 text-green-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-md dark:bg-gray-700 dark:text-green-400 border border-green-100 dark:border-green-500';
 const NO_CLASS = 'bg-red-100 text-red-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-md border border-red-100 dark:border-red-400 dark:bg-gray-700 dark:text-red-400';
 const NO_OPT_CLASS = 'bg-purple-100 text-purple-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-md border border-purple-100 dark:bg-gray-700 dark:border-purple-500 dark:text-purple-400';
@@ -39,25 +41,27 @@ const NEGATIVE_CHECK = (h: HyperFunc<VNode>, { value }: { value?: number }) => {
 
 export const URL_PROP = 'url';
 
-export const GRID_COLUMNS: ColumnRegular[] = [
+export const getGridColumns = ({resources}: {resources: string[]}):ColumnRegular[] => [
   {
     name: CustomFieldsName.Customer,
     prop: 'customer',
     size: 300,
     sortable: true,
+    readonly: false,
   },
   {
     name: CustomFieldsName.URL,
     prop: 'url',
     size: 300,
     sortable: true,
+    readonly: true,
     order: 'asc',
     cellCompare: (prop, a, b) => { // Custom sorting logic
       const av = a[prop]?.replace('https://', '').toString().toLowerCase();
       const bv = b[prop]?.replace('https://', '').toString().toLowerCase() || '';
       return av?.localeCompare(bv);
     },
-    
+
     cellTemplate: (h, { value }) => {
       return h('a', { class: 'font-medium hover:underline text-primary-600 dark:text-primary-500', href: value, target: '_blank' }, value?.replace('https://', ''));
     }
@@ -67,6 +71,9 @@ export const GRID_COLUMNS: ColumnRegular[] = [
     prop: 'hasIntegration',
     size: 250,
     sortable: true,
+    readonly: false,
+    editor: BooleanEditor,
+    getOptions: () => booleanDataSource,
     cellTemplate: YES_NO_OPT
   },
   {
@@ -74,24 +81,32 @@ export const GRID_COLUMNS: ColumnRegular[] = [
     prop: 'environment',
     size: 150,
     sortable: true,
+    readonly: false,
+    editor: SelectEditor,
+    getOptions: () => environmentDataSource
   },
   {
     name: CustomFieldsName.Csm,
     prop: 'resource',
     size: 150,
     sortable: true,
+    readonly: false,
+    editor: SelectEditor,
+    getOptions: () => getResourceDataSource(resources)
   },
   {
     name: 'Version',
     prop: 'sgt5PublicVersion',
     size: 150,
     // sortable: true,
+    readonly: true,
   },
   {
     name: 'SG Total Resources',
     prop: 'sgTotalResource',
     size: 150,
     sortable: true,
+    readonly: true,
     cellTemplate: (_, { model }) => {
       return model.licenseInfo?.sg?.[0] || 0;
     },
@@ -101,6 +116,7 @@ export const GRID_COLUMNS: ColumnRegular[] = [
     prop: 'sgEnabledResource',
     size: 150,
     sortable: true,
+    readonly: true,
     cellTemplate: (_, { model }) => {
       return model.licenseInfo?.sg?.[1] || 0;
     },
@@ -110,18 +126,20 @@ export const GRID_COLUMNS: ColumnRegular[] = [
     prop: 'sgUsers',
     size: 150,
     sortable: true,
+    readonly: true,
     cellTemplate: (h, { model }) => {
       const licenseInfo = model.licenseInfo || {};
       const users = (model.licenseInfo?.sg?.[1] || 0) - (licenseInfo.sg?.[0] || 0);
       return NEGATIVE_CHECK(h, { value: users });
     },
   },
-  
+
   {
     name: 'TS Total Resources',
     prop: 'tsTotalResource',
     size: 150,
     sortable: true,
+    readonly: true,
     cellTemplate: (_, { model }) => {
       return model.licenseInfo?.ts?.[0] || 0;
     },
@@ -131,6 +149,7 @@ export const GRID_COLUMNS: ColumnRegular[] = [
     prop: 'tsEnabledResource',
     size: 150,
     sortable: true,
+    readonly: true,
     cellTemplate: (_, { model }) => {
       return model.licenseInfo?.ts?.[1] || 0;
     },
@@ -140,6 +159,7 @@ export const GRID_COLUMNS: ColumnRegular[] = [
     prop: 'tsUsers',
     size: 150,
     sortable: true,
+    readonly: true,
     cellTemplate: (h, { model }) => {
       const licenseInfo = model.licenseInfo || {};
       const users = (licenseInfo.ts?.[1] || 0) - (licenseInfo.ts?.[0] || 0);
@@ -151,6 +171,7 @@ export const GRID_COLUMNS: ColumnRegular[] = [
     prop: 'online',
     size: 150,
     sortable: true,
+    readonly: true,
     cellTemplate: YES_NO
   },
   {
@@ -158,6 +179,7 @@ export const GRID_COLUMNS: ColumnRegular[] = [
     prop: 'syncRunning',
     size: 150,
     sortable: true,
+    readonly: true,
     cellTemplate: YES_NO_OPT
   },
   {
@@ -165,6 +187,7 @@ export const GRID_COLUMNS: ColumnRegular[] = [
     prop: 'insightsRunning',
     size: 150,
     sortable: true,
+    readonly: true,
     cellTemplate: YES_NO_OPT
   },
   {
@@ -172,6 +195,7 @@ export const GRID_COLUMNS: ColumnRegular[] = [
     prop: 'cleanupRunning',
     size: 150,
     sortable: true,
+    readonly: true,
     cellTemplate: YES_NO_OPT
   },
   {
@@ -179,6 +203,7 @@ export const GRID_COLUMNS: ColumnRegular[] = [
     prop: 'apinotificationRunning',
     size: 150,
     sortable: true,
+    readonly: true,
     cellTemplate: YES_NO_OPT
   },
   // {
@@ -197,6 +222,7 @@ export const GRID_COLUMNS: ColumnRegular[] = [
     prop: 'pingat',
     size: 350,
     sortable: true,
+    readonly: true,
     cellTemplate: (h, { value }) => {
       if (!value) {
         return '';

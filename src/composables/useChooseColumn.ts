@@ -1,15 +1,16 @@
 import {computed, type Ref, ref} from 'vue';
 import {SideBarType} from './useSideBar.ts';
-import {GRID_COLUMNS, URL_PROP} from '../components/grid.columns.ts';
+import {getGridColumns, URL_PROP} from '../components/grid.columns.ts';
 
 export const useChooseColumn = <T extends { selectedColumns: Array<string | number> }>(
   visibleSideBar: Ref<boolean>,
   sideBarType: Ref<SideBarType | null>,
   sideBarTitle: Ref<string>,
   personalization: Readonly<Ref<T>>,
-  setPersonalizationValue: (key: keyof T, value: T[keyof T]) => Promise<void>
+  setPersonalizationValue: (key: keyof T, value: T[keyof T]) => Promise<void>,
+  resources: string[]
 ) => {
-  const gridColumnsSource = [...GRID_COLUMNS];
+  const gridColumnsSource = [...getGridColumns({resources})];
   const title = 'Choose Column';
 
   const selectedColumns = computed<Set<string | number>>({
