@@ -56,13 +56,6 @@ export const getGridColumns = ({resources}: {resources: string[]}):ColumnRegular
     size: 300,
     sortable: true,
     readonly: true,
-    order: 'asc',
-    cellCompare: (prop, a, b) => { // Custom sorting logic
-      const av = a[prop]?.replace('https://', '').toString().toLowerCase();
-      const bv = b[prop]?.replace('https://', '').toString().toLowerCase() || '';
-      return av?.localeCompare(bv);
-    },
-
     cellTemplate: (h, { value }) => {
       return h('a', { class: 'font-medium hover:underline text-primary-600 dark:text-primary-500', href: value, target: '_blank' }, value?.replace('https://', ''));
     }
