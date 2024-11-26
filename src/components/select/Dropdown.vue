@@ -38,10 +38,29 @@ const modal = ref<HTMLElement | null>(null);
 const unsubOutsideClick: Array<Function> = [];
 
 const calculatePosition = () => {
-  if (!triggerButton.value) return;
+  if (!triggerButton.value || !modal.value) return;
+
   const rect = triggerButton.value.getBoundingClientRect();
-  modalPosition.top = `${rect.bottom + window.scrollY}px`;
-  modalPosition.left = `${rect.left + window.scrollX}px`;
+  const modalRect = modal.value.getBoundingClientRect();
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+
+  // Default position
+  let top = rect.bottom + window.scrollY;
+  let left = rect.left + window.scrollX;
+
+  // Adjust for right overflow
+  if (rect.left + modalRect.width > viewportWidth) {
+    left = Math.max(0, rect.right - modalRect.width + window.scrollX);
+  }
+
+  // Adjust for bottom overflow
+  if (rect.bottom + modalRect.height > viewportHeight) {
+    top = Math.max(0, rect.top - modalRect.height + window.scrollY);
+  }
+
+  modalPosition.top = `${top}px`;
+  modalPosition.left = `${left}px`;
 };
 
 const debouncedCalculatePosition = debounce(calculatePosition, 100);
@@ -52,7 +71,6 @@ const onButtonClick = () => {
     return;
   }
   visible.value = true;
-  calculatePosition();
 };
 
 // Close modal when clicking outside
@@ -66,8 +84,10 @@ const handleOutsideClick = (event: MouseEvent) => {
 };
 
 // Recalculate position if visibility changes
-watch(visible, (newVisible) => {
+watch(visible, async (newVisible) => {
+  console.log('newVisible');
   if (newVisible) {
+    await nextTick();
     calculatePosition();
     document.addEventListener('mousedown', handleOutsideClick);
     unsubOutsideClick.push(() => document.removeEventListener('mousedown', handleOutsideClick));
