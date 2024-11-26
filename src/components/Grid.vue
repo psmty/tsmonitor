@@ -71,7 +71,7 @@ const filters: ColumnFilterConfig = {
 const rangePluginEditableColumns = ['customer', 'hasIntegration', 'resource', 'environment'];
 
 const source = computed(() => {
-  return props.data;
+  return props.data.sort((a, b) => a.url.localeCompare(b.url));
 });
 
 const columns = computed((): ColumnRegular[] => ([
