@@ -85,7 +85,6 @@ const handleOutsideClick = (event: MouseEvent) => {
 
 // Recalculate position if visibility changes
 watch(visible, async (newVisible) => {
-  console.log('newVisible');
   if (newVisible) {
     await nextTick();
     calculatePosition();
