@@ -4,13 +4,8 @@
     <div class="flex items-center justify-between my-5 mx-5">
       <div class="flex flex-row space-x-4">
         <SelectionCount :max="source.length" :selected="selectedRows.size" />
-        <button
-          class="inline-flex items-center px-3 py-1.5 text-sm font-sm text-center text-gray-900 items-center bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-primary-300 rounded-lg border border-gray-300 hover:text-gray-1000 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600"
-          @click="startChoosingColumn"
-        >
-          Choose columns
-        </button>
-        <Select :source="groupByOptions" v-model:value="groupBy" />
+        <TsButton @click="startChoosingColumn">Choose columns</TsButton>
+        <Select :source="groupByOptions" v-model:value="groupBy" prefix="Group by" />
         <input type="text"
                class="h-8 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                v-model="search"
@@ -18,6 +13,7 @@
       </div>
       <div class="flex flex-row space-x-4">
 
+        <TsButton color="yellow" @click="addNewUrl">Add Url</TsButton>
         <ImportUrlsButton @saveUrls="addSites" />
         <button
           class="inline-flex items-center px-3 py-1.5 text-sm font-sm text-center text-gray-500 items-center bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-primary-300 rounded-lg border border-gray-200 text-sm font-medium hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600"
@@ -33,7 +29,8 @@
       <template #title>{{ sideBarTitle }}</template>
 
       <EditRowFields v-if="sideBarType === SideBarType.Edit" :visible="visibleSideBar" :editUrl="editUrl"
-                     :source="siteStatuses" @update="editRow" @closePopup="hideSidebar" :resources="props.resources" />
+                     :source="siteStatuses" @create="createRow" @update="editRow" @closePopup="hideSidebar"
+                     :resources="props.resources" />
 
       <DeleteRowConfirmation v-else-if="sideBarType === SideBarType.Delete" :urls="deleteUrls" @close="hideSidebar"
                              @delete="deleteRow" />
@@ -64,6 +61,7 @@ import {type MainGridPersonalization, usePersonalization} from '../composables/u
 import {useChooseColumn} from '../composables/useChooseColumn.ts';
 import ChooseColumn from './ChooseColumn.vue';
 import SelectionCount from './SelectionCount.vue';
+import TsButton from './TsButton.vue';
 
 const props = defineProps({
   resources: {
@@ -148,6 +146,11 @@ const source = computed(() => {
   });
 });
 
+const createRow = async (sites: SitesData[]) => {
+  hideSidebar();
+  await addSites(sites);
+};
+
 const editRow = async (editFields: SitesData[]) => {
   hideSidebar();
   await updateSites(editFields);
@@ -158,6 +161,8 @@ const deleteRow = async (urls: string[]) => {
   selectedRows.value.clear();
   hideSidebar();
 };
+
+const addNewUrl = () => startEditRow();
 
 const grid = ref<(typeof Grid | null)>(null);
 const exportToCsv = () => {

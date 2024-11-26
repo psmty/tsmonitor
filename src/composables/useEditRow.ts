@@ -1,13 +1,13 @@
-import { ref, type Ref} from 'vue';
+import {computed, ref, type Ref} from 'vue';
 import {SideBarType} from './useSideBar.ts';
 
 export function useEditRow(visibleSideBar: Ref<boolean>, sideBarType: Ref<SideBarType | null>, sideBarTitle: Ref<string>) {
-  const title = 'Update row';
   const editUrl = ref<string | null>(null);
-  const startEditRow = (url: string) => {
+  const title = computed(() => editUrl.value === null ? 'Add url' : 'Update row')
+  const startEditRow = (url?: string) => {
     sideBarType.value = SideBarType.Edit;
-    sideBarTitle.value = title;
-    editUrl.value = url;
+    editUrl.value = url ?? null;
+    sideBarTitle.value = title.value;
     visibleSideBar.value = true;
   };
 
