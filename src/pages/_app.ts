@@ -1,5 +1,6 @@
 import type {App} from 'vue';
 import {AlertType, showAlert} from '../composables/useAlert.ts';
+import '../lib/logger.ts';
 
 export default (app: App) => {
   // Set up global error handling

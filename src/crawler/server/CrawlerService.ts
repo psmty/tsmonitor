@@ -18,7 +18,7 @@ limiter.on('failed', async (error, jobInfo) => {
   console.error(`Job for ${jobInfo.args[0]} failed:`, error.message);
 
   if (jobInfo.retryCount < 3) { // Retry up to 3 times
-    return 10000; // Retry after 10 second
+    return 1000; // Retry after 1 second
   }
 });
 

@@ -11,7 +11,7 @@ export const getInstance = (): CrawlerService => {
   // Check if the instance already exists; if not, create it
   if (!instance) {
     instance = new CrawlerService({
-      timeout: 3 * 60 * 1000, // 3 min,
+      timeout: 1 * 60 * 1000, // 1 min wait to repeat the crawl, usually it takes 2 mins to crawl 300 sites
       actionUrl: ACTION,
       getSites: () => getSites(),
       setOnline: async (url, isOffline) => {

@@ -28,3 +28,4 @@ sites/
 
 # crawler cache
 *.gz
+logs/
