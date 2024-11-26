@@ -73,6 +73,26 @@ function services(htmlString: string) {
   };
 }
 
+function parsePatchedVersion(htmlString: string) {
+  const patchedVersionRegex = /(?:^\s*|\n\s*\n)Version:\s(\d+\.\d+\.\d+\.\d+)[\s\S]*?Date:\s([^\n]+)/g;
+  let match;
+  let latestPatch = null;
+
+  while ((match = patchedVersionRegex.exec(htmlString)) !== null) {
+    const version = match[1];
+    const dateStr = match[2].trim();
+
+    // Parse date string into a Date object
+    const parsedDate = new Date(dateStr);
+
+    if (!latestPatch || parsedDate > latestPatch.date) {
+      latestPatch = { version, date: parsedDate };
+    }
+  }
+
+  return latestPatch?.version ?? null;
+}
+
 export function parseHtmlString(htmlString: string): ParsedData {
   const modules: VersionInfo[] = [];
   const servers: ServerInfo[] = [];
@@ -129,7 +149,10 @@ export function parseHtmlString(htmlString: string): ParsedData {
   }
 
   // Parse SGT5 Public Version
-  if ((match = publicVersionRegex.exec(htmlString)) !== null) {
+  const patchedVersion = parsePatchedVersion(htmlString);
+  if (patchedVersion) {
+    sgt5PublicVersion = patchedVersion;
+  } else if ((match = publicVersionRegex.exec(htmlString)) !== null) {
     sgt5PublicVersion = match[1]?.trim();
   }
 
