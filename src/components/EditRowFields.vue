@@ -1,6 +1,13 @@
 <template>
   <div class="space-y-4 h-full overflow-y-auto px-4">
 
+    <div v-if="isCreationMode">
+      <label for="url" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">URL</label>
+      <input v-model.trim.lazy="newUrl" type="text" name="title" id="url"
+             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+             placeholder="Type URL" />
+    </div>
+
     <div>
       <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Customer</label>
       <input v-model="editData.customer" type="text" name="title" id="name"
@@ -13,18 +20,11 @@
     </div>
 
     <div>
-      <label for="csm" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">CSM</label>
-      <input v-model="editData.csm" type="text" name="title" id="csm"
-             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-             placeholder="Type CSM" />
-    </div>
-
-    <div>
       <Select v-model:value="hasIntegration" :source="booleanDataSource" label="Has integration" />
     </div>
 
     <div>
-      <Select v-model:value="editData.resource" :source="resourceSource" label="Resource" />
+      <Select v-model:value="editData.resource" :source="resourceSource" label="CSM" />
     </div>
 
     <br /> <br />
@@ -35,7 +35,7 @@
       <button
         class="text-white w-full justify-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
         @click="updateRow">
-        Update
+        {{ isCreationMode ? 'Add' : 'Update' }}
       </button>
       <button
         class="inline-flex w-full justify-center text-gray-500 items-center bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-primary-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600"
@@ -51,13 +51,14 @@
 </template>
 
 <script setup lang="ts">
-import {type Site, type SitesData, type SiteSettings} from '../services';
+import {type Site, type SitesData, type SiteSettings, validateUrl} from '../services';
 import {computed, onMounted, ref} from 'vue';
 import {DEFAULT_SETTINGS} from '../services/edit.defaults.ts';
 import {Environment} from '../services/consts.ts';
 import Select from './select/Select.vue';
-import {type SelectSource, booleanDataSource} from './select/defaults.ts';
+import {type SelectSource, booleanDataSource, environmentDataSource, getResourceDataSource} from './select/defaults.ts';
 import {createStringDataSource, setBooleanValue} from './select/helpers.ts';
+import {AlertType, useAlert} from '../composables/useAlert.ts';
 
 interface Props {
   visible: boolean;
@@ -66,30 +67,33 @@ interface Props {
   resources: string[] | null;
 }
 
+const {showAlert} = useAlert();
 
 const props = defineProps<Props>();
 const emits = defineEmits<{
   (e: 'closePopup'): void
-  (e: 'update', row: SitesData): void
+  (e: 'update', row: SitesData[]): void
+  (e: 'create', row: SitesData[]): void
 }>();
 
-const editData = ref<SiteSettings>(DEFAULT_SETTINGS);
+const editData = ref<SiteSettings>({...DEFAULT_SETTINGS});
 
-const environmentDataSource: Array<SelectSource> = createStringDataSource([Environment.Dev, Environment.Prod, Environment.Trial]);
+const newUrl = ref('');
 
+const isCreationMode = computed(() => props.editUrl === null);
 const resourceSource = computed<Array<SelectSource>>(() => {
-  return props.resources ? createStringDataSource(props.resources) : [];
-})
+  return props.resources ? getResourceDataSource(props.resources) : [];
+});
 
 const hasIntegration = computed({
   get: () => String(editData.value.hasIntegration),
-  set: (value: string) => editData.value.hasIntegration = setBooleanValue(value),
-})
+  set: (value: string) => editData.value.hasIntegration = setBooleanValue(value)
+});
 const initEdit = () => {
   if (!props.editUrl) {
-    emits('closePopup');
     return;
   }
+
   const siteData = props.source.get(props.editUrl);
 
   if (!siteData) {
@@ -101,24 +105,36 @@ const initEdit = () => {
   editData.value = {
     customer: siteData.customer,
     environment: siteData.environment ?? Environment.Dev,
-    csm: siteData.csm,
     hasIntegration: siteData.hasIntegration,
     resource: siteData.resource
   };
 };
 
+const isValidUrl = (url: string | null) => {
+  if (url === null) {
+    return false;
+  }
+
+  return validateUrl(url);
+};
+
 const updateRow = () => {
-  if (!props.editUrl) {
-    console.warn(`No site data found for ${props.editUrl}`);
-    emits('closePopup');
+  const url = isCreationMode.value ? newUrl.value : props.editUrl;
+  if (!isValidUrl(url)) {
+    showAlert('Invalid URL', AlertType.Warning);
     return;
   }
 
   const siteData: SitesData = {
-    url: props.editUrl,
+    url: url!,
     settings: editData.value
   };
-  emits('update', siteData);
+
+  if (isCreationMode.value) {
+    emits('create', [siteData]);
+  } else {
+    emits('update', [siteData]);
+  }
 };
 
 onMounted(() => {

@@ -13,23 +13,25 @@ export const useDashboardApi = () => {
       const site = siteStatuses.value.get(newSite.url);
       siteStatuses.value.set(newSite.url, {
         ...(site ?? {}),
-        lastChecked: new Date(),
-        url: newSite.url,
+        pingat: newSite.pingat ?? new Date(),
         online: newSite.online,
+        url: newSite.url,
         ...{ ...DEFAULT_SETTINGS, ...(newSite.settings ?? {}) },
         ...(newSite.parsedData ?? {}),
       });
     });
   };
 
-  const updateSiteSettings = ({ settings, url }: SitesData) => {
-    if (!siteStatuses.value.has(url)) {
-      console.error(`${url} is not exists`);
-      return;
-    }
+  const updateSiteSettings = (sites: SitesData[]) => {
+    sites.forEach(({url, settings}) => {
+      if (!siteStatuses.value.has(url)) {
+        console.error(`${url} is not exists`);
+        return;
+      }
 
-    const currentData = siteStatuses.value.get(url)!;
-    siteStatuses.value.set(url, { ...currentData, ...settings });
+      const currentData = siteStatuses.value.get(url)!;
+      siteStatuses.value.set(url, { ...currentData, ...settings });
+    })
   };
 
   const addSites = async (urls: SitesData[]) => {
@@ -63,7 +65,7 @@ export const useDashboardApi = () => {
     }
 
     try {
-      initSites(sites);
+      saveSiteStatuses(sites);
       const response = await fetch("/api/crawler", {
         method: "POST",
         body: JSON.stringify(sites),
@@ -77,25 +79,15 @@ export const useDashboardApi = () => {
     }
   };
 
-  const updateSites = async (editFields: SitesData) => {
+  const updateSites = async (editFields: SitesData[]) => {
     const response = await fetch("/api/list", {
       method: "PUT",
       body: JSON.stringify(editFields),
     });
-    const siteData = await response.json();
-    updateSiteSettings(siteData);
-    await loadSites([siteData]);
-  };
-
-  const initSites = (sites: SitesData[]) => {
-    sites.forEach((site) => {
-      siteStatuses.value.set(site.url, {
-        url: site.url,
-        online: false,
-        lastChecked: null,
-        ...DEFAULT_SETTINGS,
-      });
-    });
+    const sitesData = await response.json();
+    updateSiteSettings(sitesData);
+    // TODO: Probably we don't need to load data on update sites, and only update changed data
+    // await loadSites(sitesData);
   };
 
   const startCrawler = () => {
@@ -125,7 +117,7 @@ export const useDashboardApi = () => {
   onMounted(async () => {
     const response = await fetch("/api/list");
     const sites: SitesData[] = await response.json();
-    initSites(sites);
+    saveSiteStatuses(sites);
     startCrawler();
   });
 

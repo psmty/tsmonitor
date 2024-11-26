@@ -1,6 +1,6 @@
 <template>
   <div
-    class="fixed top-0 right-0 z-40 w-full h-screen max-w-xs py-4 transition-transform translate-x-full bg-white dark:bg-gray-800"
+    class="flex flex-col fixed top-0 right-0 z-40 w-full h-screen max-w-xs py-4 transition-transform translate-x-full bg-white dark:bg-gray-800"
     tabindex="-1"
     aria-labelledby="drawer-label"
     aria-hidden="true"

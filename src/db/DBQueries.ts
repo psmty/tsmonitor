@@ -6,6 +6,19 @@ export async function getSites(): Promise<SitesData[]>  {
   return rows;
 }
 
+export async function setUrlOnline(url: string, online: boolean) {
+  const sql = `
+      UPDATE sites
+      SET online = $1,
+          pingat = $2
+      WHERE url = $3
+      RETURNING *;
+    `;
+
+  const values = [online, new Date(), url];
+  return await db.query(sql, values);
+}
+
 export async function updateSiteSettings(siteData: SitesData) {
   const sql = `
       UPDATE sites
@@ -15,6 +28,24 @@ export async function updateSiteSettings(siteData: SitesData) {
     `;
 
   const values = [siteData.settings, siteData.url];
+  return await db.query(sql, values);
+}
+
+export async function updateMultipleSiteSettings(sitesData: SitesData[]) {
+  const sql = `
+    UPDATE sites
+    SET settings = data.settings
+    FROM (
+      VALUES
+      ${sitesData
+        .map((_, index) => `($${index * 2 + 1}::json, $${index * 2 + 2}::text)`)
+        .join(",\n")}
+    ) AS data(settings, url)
+    WHERE sites.url = data.url
+    RETURNING *;
+  `;
+
+  const values = sitesData.flatMap((site) => [site.settings, site.url]);
   return await db.query(sql, values);
 }
 

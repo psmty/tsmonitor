@@ -31,7 +31,7 @@ jobs:
           MS_CLIENT_ID: ${{ secrets.MS_CLIENT_ID }}
           MS_CLIENT_SECRET: ${{ secrets.MS_CLIENT_SECRET }}
           MS_TENANT_ID: ${{ secrets.MS_TENANT_ID }}
-          RESOURCES_CF_VALS: ${{ secrets.RESOURCES_CF_VALS }}
+          RESOURCES_CF_VALS: ${{ vars.RESOURCES_CF_VALS }}
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_USER_EMAIL: ${{ secrets.POSTGRES_USER_EMAIL }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}

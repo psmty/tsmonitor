@@ -1,14 +1,37 @@
-import {
-  type CrawlerParsed,
-  type SitesData,
-  parseHtmlString,
-  getTimeDifference,
-} from "../../services";
-import {deleteFile, fileExists, getFromFile, getLastEditTime, saveToFile} from "./fileService";
-import { chunkArray } from "./helpers";
+import { type CrawlerParsed, type SitesData } from "../../services";
+import { deleteFile, getFromFile, saveToFile } from "./fileService";
+import axios from "axios";
+
+import Bottleneck from "bottleneck";
+
+const JOB_TIMEOUT = 10000;
+
+// Configure Bottleneck
+const limiter = new Bottleneck({
+  minTime: 300, // 300ms between jobs
+  maxConcurrent: 20, // Adjust based on your system and network capacity
+  timeout: JOB_TIMEOUT, // Cancel jobs that take longer than 10 seconds
+});
+
+// Configure retries for failed jobs
+limiter.on('failed', async (error, jobInfo) => {
+  console.error(`Job for ${jobInfo.args[0]} failed:`, error.message);
+
+  if (jobInfo.retryCount < 3) { // Retry up to 3 times
+    return 10000; // Retry after 10 second
+  }
+});
+
+async function getVersionFromFile(site: SitesData): Promise<CrawlerParsed> {
+  try {
+    const parsedData = await getFromFile(site.url);
+    return { ...site, parsedData };
+  } catch (e) {
+    return { ...site, parsedData: null };
+  }
+}
 
 export class CrawlerService {
-  private interval?: NodeJS.Timeout;
   private isWorking = false;
   private recentlyDeletedUrls = new Set<string>();
 
@@ -20,39 +43,54 @@ export class CrawlerService {
   constructor(
     private config: {
       timeout: number;
-      concurrency: number;
       actionUrl: string;
       getSites: () => Promise<Array<SitesData>>;
+      setOnline: (url: string, isOffline: boolean) => Promise<void>;
     },
   ) {}
 
-  startIfNotWorking() {
-    if (!this.isWorking) {
-      this.start();
-    }
-  }
-
-  start() {
-    console.log("START CrawlerService");
+  async startIfNotWorking() {
     if (this.isWorking) {
-      this.stop();
+      return;
     }
+    console.log("START CrawlerService");
 
     this.isWorking = true;
-    // Send a new event every timeout minutes
-    this.interval = setInterval(async () => {
-      await this.checkSites();
-    }, this.config.timeout);
 
-    this.checkSites();
+    const runCrawler = async () => {
+      const startTime = Date.now(); // Record start time
+      try {
+        await this.crawlAllSites(await this.config.getSites());
+      } catch (error) {
+        console.error("Error during crawl:", error);
+      }
+    
+      // Calculate elapsed time
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(0, this.config.timeout - elapsedTime);
+  
+      console.log(`Crawl completed in ${elapsedTime}ms. Next crawl in ${remainingTime}ms.`);
+      setTimeout(runCrawler, remainingTime);
+    };
+
+    return runCrawler();
   }
 
-  stop() {
-    if (this.interval) {
-      clearInterval(this.interval);
+  async crawlAllSites(data: SitesData[]) {
+    const crawlPromises: Promise<SitesData | null>[] = (data).map((site) =>
+      limiter.schedule(async () =>
+        !this.recentlyDeletedUrls.has(site.url)
+          ? await this.fetchAndSaveToFile(site)
+          : null,
+      ),
+    );
+    await Promise.all(crawlPromises);
+    this.recentlyDeletedUrls.clear();
+    if (this.clientsSender.size > 0) {
+      const parsed = await Promise.all((await this.config.getSites()).map(getVersionFromFile));
+      await this.notifyClients(parsed);
     }
-    this.isWorking = false;
-  }
+  };
 
   async connectClient(
     id: string,
@@ -63,77 +101,32 @@ export class CrawlerService {
     // Initial connection message
     sendEvent([]);
 
-    const siteChunks = await this.getSiteChunks();
-
-    // Check if we didn't ping some site before
-    for (const chunk of siteChunks) {
-      if (!this.isWorking) {
-        break;
-      }
-
-      const sitesToLoad: SitesData[] = [];
-      await Promise.all(
-        chunk.map(async (site) => {
-          const isFileExists = await fileExists(site.url);
-          if (!isFileExists) {
-            sitesToLoad.push(site);
-          }
-        }),
-      );
-
-      if (sitesToLoad.length !== 0) {
-        await this.loadData(sitesToLoad);
-      }
-
-      const parsed = await Promise.all(
-        chunk.map((site) =>
-          CrawlerService.getVersions(site, this.config.timeout),
-        ),
-      );
-      // Load saved data
-      sendEvent(parsed);
+    if (!this.isWorking) {
+      return;
     }
+    const parsed = await Promise.all((await this.config.getSites()).map(getVersionFromFile));
+    // Load saved data
+    sendEvent(parsed);
   }
 
   disconnectClient(id: string) {
     this.clientsSender.delete(id);
   }
 
-  private async getSiteChunks() {
-    // Chunk the site list for limited concurrency (optional)
-    return chunkArray(await this.config.getSites(), this.config.concurrency);
-  }
-
-  async checkSites() {
-    const siteChunks = await this.getSiteChunks();
-
-    for (const chunk of siteChunks) {
-      if (!this.isWorking) {
-        break;
-      }
-
-      const actualChunk = chunk.filter((item) => !this.recentlyDeletedUrls.has(item.url))
-
-      await this.loadData(actualChunk);
-
-      if (this.clientsSender.size > 0) {
-        await this.notifyClients(actualChunk);
-      }
-    }
-
-    this.recentlyDeletedUrls.clear();
-  }
-
-  async loadData(sites: SitesData[]) {
-    for (const site of sites) {
-      const { url } = site;
-      try {
-        const response = await fetch(url + this.config.actionUrl);
-        const text = await response.text();
-        await saveToFile(url, text);
-      } catch (e) {
-        console.error(e);
-      }
+  async fetchAndSaveToFile(s: SitesData): Promise<SitesData> {
+    const site = { ...s };
+    try {
+      const { data } = await axios.get(site.url + this.config.actionUrl, {
+        timeout: JOB_TIMEOUT - 1000,
+      });
+      await saveToFile(site.url, data);
+      await this.config.setOnline(site.url, true);
+      site.online = true;
+    } catch (e) {
+      await this.config.setOnline(site.url, false);
+      site.online = false;
+    } finally {
+      return { ...site, pingat: new Date() };
     }
   }
 
@@ -142,11 +135,7 @@ export class CrawlerService {
       throw new Error("No saving event!");
     }
     try {
-      const data = await Promise.all(
-        sites.map((site) =>
-          CrawlerService.getVersions(site, this.config.timeout),
-        ),
-      );
+      const data = await Promise.all(sites.map(getVersionFromFile));
 
       for (const event of this.clientsSender.values()) {
         event(data);
@@ -157,35 +146,15 @@ export class CrawlerService {
   }
 
   async deleteSites(urls: string[]) {
-     try {
-       urls.forEach((url) => {
-         this.recentlyDeletedUrls.add(url);
-       })
-      await Promise.all(urls.map(async (url) => {
-        await deleteFile(url);
-      }));
-    } catch (e) {
-      console.error("Deletion failed:", e);
-    }
-  }
-
-  private static async getVersions(
-    site: SitesData,
-    timeout: number,
-  ): Promise<CrawlerParsed> {
-    const { url, settings } = site;
     try {
-      const text = await getFromFile(url);
-      const parsed = parseHtmlString(text);
-
-      const lastEditedSite = await getLastEditTime(url);
-      const timeDiff = getTimeDifference(lastEditedSite, new Date());
-      // If the site was last updated more than 5 timeouts ago, the server is considered offline.
-      const isOnline = timeDiff.minutes < timeout * 5;
-      return { parsedData: parsed, url, online: isOnline, settings };
-    } catch (e) {
-      console.error(e);
-      return { url, online: false, settings, parsedData: null };
-    }
+      urls.forEach((url) => {
+        this.recentlyDeletedUrls.add(url);
+      });
+      await Promise.all(
+        urls.map(async (url) => {
+          await deleteFile(url);
+        }),
+      );
+    } catch {}
   }
 }

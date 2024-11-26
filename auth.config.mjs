@@ -33,6 +33,9 @@ if (process.env.GITHUB_CLIENT_ID) {
 }
 
 export default defineConfig({
+  session: {
+    maxAge: 60 * 60 * 24 * 30, // 30 days
+  },
   callbacks: {
     signIn: ({ user, profile }) => {
       try {

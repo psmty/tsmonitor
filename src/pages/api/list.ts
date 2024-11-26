@@ -2,11 +2,11 @@ import type { APIRoute } from "astro";
 import type {SitesData} from '../../services';
 import {
   getSites,
-  updateSiteSettings, setSites, deleteSites
+  setSites, deleteSites, updateMultipleSiteSettings
 } from '../../db/DBQueries.ts';
 import {getUpdatedSites, getSitesMap} from '../../services/api/server/list/helpers.ts';
 import { getInstance } from "../../crawler/server/index.ts";
-import { deleteFile } from "../../crawler/server/fileService.ts";
+
 export const GET: APIRoute = async ({ locals, request }) => {
   try {
     // Start the crawler if it's not already running
@@ -29,8 +29,7 @@ export const POST: APIRoute = async ({ props, locals, request }) => {
     const savedRows = await getSites();
 
     const existingSitesMap = getSitesMap(savedRows);
-    const addedSites = getUpdatedSites(sites, existingSitesMap)
-
+    const addedSites = getUpdatedSites(sites, existingSitesMap);
     if (!addedSites.length) {
       return new Response(JSON.stringify(null), {
         status: 200,
@@ -52,10 +51,10 @@ export const POST: APIRoute = async ({ props, locals, request }) => {
 
 export const PUT: APIRoute = async ({ props, locals, request }) => {
   try {
-    const siteData: SitesData = await request.json();
-    await updateSiteSettings(siteData);
+    const sitesData: SitesData[] = await request.json();
+    await updateMultipleSiteSettings(sitesData);
 
-    return new Response(JSON.stringify(siteData));
+    return new Response(JSON.stringify(sitesData));
   } catch (error) {
     console.error("Database connection error:", error);
     return new Response("Failed to fetch data from PostgreSQL", {
