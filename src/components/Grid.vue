@@ -3,7 +3,6 @@
     class="grow rv-grid"
     ref="grid"
     resize
-    :filter="filters"
     can-move-columns
     :columns="columns"
     :source="source"
@@ -25,7 +24,6 @@
 </template>
 <script lang="ts" setup>
 import {
-  type ColumnFilterConfig,
   type ColumnProp,
   type ColumnRegular,
   type ExportFilePlugin,
@@ -61,12 +59,6 @@ const emits = defineEmits<{
   (e: 'updateRow', sites: Array<SitesData>): void;
 }>();
 
-const filters: ColumnFilterConfig = {
-  multiFilterItems: {
-    customer: [{id: 0, type: "contains", value: "", relation: "or"}],
-    url: [{id: 1, type: "contains", value: "", relation: "or"}]
-  }
-};
 
 const rangePluginEditableColumns = ['customer', 'hasIntegration', 'resource', 'environment'];
 
