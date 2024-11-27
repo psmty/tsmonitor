@@ -142,6 +142,7 @@ const updateRow = (rows: Array<UpdateRow>) => {
   const updatedRows: SitesData[] = [];
 
   rows.forEach(({prop, model, newValue}) => {
+    if (!model) { return; }
     const settings: SitesData['settings'] = {...DEFAULT_SETTINGS};
 
     if (!isCustomField(prop)) {
