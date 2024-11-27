@@ -4,13 +4,14 @@
     <div class="flex items-center justify-between my-5 mx-5">
       <div class="flex flex-row space-x-4">
         <SelectionCount :max="source.length" :selected="selectedRows.size" />
+        <TsButton @click="expandAll"><ExpandIcon :is-collapse="isExpanded" style="width: 10px;" /></TsButton>
         <TsButton @click="startChoosingColumn">Choose columns</TsButton>
         <Select :source="groupByOptions" v-model:value="groupBy" prefix="Group by" />
         <Search v-model="search" />
       </div>
       <div class="flex flex-row space-x-4">
 
-        <TsButton color="yellow" @click="addNewUrl">Add Url</TsButton>
+        <TsButton color="green" @click="addNewUrl">Add Url</TsButton>
         <ImportUrlsButton @saveUrls="addSites" />
         <button
           class="inline-flex items-center px-3 py-1.5 text-sm font-sm text-center text-gray-500 items-center bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-primary-300 rounded-lg border border-gray-200 text-sm font-medium hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600"
@@ -39,6 +40,7 @@
 </template>
 
 <script setup lang="ts">
+import ExpandIcon from "./icons/ExpandIcon.vue";
 import Grid from "./Grid.vue";
 import ImportUrlsButton from "./ImportUrlsButton.vue";
 import Select from './select/Select.vue';
@@ -127,6 +129,17 @@ const selectedGroupedRowsCount = computed(() => {
 
   return counts;
 })
+
+const isExpanded = ref(false);
+let collapseAll = false;
+
+const expandAll = () => {
+  if (isExpanded.value) {
+    collapseAll = true;
+  }
+  isExpanded.value = !isExpanded.value;
+}
+
 const grouping = computed((): GroupingOptions | undefined => {
   if (!groupBy.value) return;
 
@@ -136,7 +149,10 @@ const grouping = computed((): GroupingOptions | undefined => {
   }
 
   return {
-    props: [column.prop], groupLabelTemplate: (h, props) => {
+    props: [column.prop],
+    prevExpanded: collapseAll ? {} : undefined,
+    expandedAll: isExpanded.value,
+    groupLabelTemplate: (h, props) => {
       const attributes = {class: 'ml-2 flex items-center gap-4 h-full'};
       const expanded = props.expanded;
       const chevron = h('div', {class: `chevron ${expanded ? 'chevron-down' : 'chevron-right'}`}, '');
