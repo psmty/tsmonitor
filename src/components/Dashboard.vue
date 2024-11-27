@@ -28,7 +28,7 @@
     <SideBar v-model="visibleSideBar" @onHide="onHideSidebar">
       <template #title>{{ sideBarTitle }}</template>
 
-      <EditRowFields v-if="sideBarType === SideBarType.Edit" :visible="visibleSideBar" :editUrl="editUrl"
+      <EditRowFields v-if="sideBarType === SideBarType.Edit" :visible="visibleSideBar" :editUrls="editUrls"
                      :source="siteStatuses" @create="createRow" @update="editRow" @closePopup="hideSidebar"
                      :resources="props.resources" />
 
@@ -76,7 +76,7 @@ const {personalization, setPersonalizationValue} = usePersonalization<MainGridPe
 const {siteStatuses, deleteSites, addSites, updateSites} = useDashboardApi();
 
 const {visibleSideBar, sideBarType, sideBarTitle, hideSidebar, clearSideBarType} = useSideBar();
-const {editUrl, startEditRow, endEditRow} = useEditRow(visibleSideBar, sideBarType, sideBarTitle);
+const {editUrls, startEditRow, endEditRow} = useEditRow(visibleSideBar, sideBarType, sideBarTitle);
 const {deleteUrls, startDeleteRow, endDeleteRow} = useDeleteConfirmation(visibleSideBar, sideBarType, sideBarTitle);
 const {
   startChoosingColumn,
