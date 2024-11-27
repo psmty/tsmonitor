@@ -42,7 +42,7 @@ const NEGATIVE_CHECK = (h: HyperFunc<VNode>, { value }: { value?: number }) => {
 
 export const URL_PROP = 'url';
 
-export const getGridColumns = ({resources}: {resources: string[]}):ColumnRegular[] => [
+export const getGridColumns = ({resources, highlightVersion}: {resources: string[], highlightVersion?: Ref<string>}):ColumnRegular[] => [
   {
     name: CustomFieldsName.Customer,
     prop: 'customer',
@@ -94,6 +94,7 @@ export const getGridColumns = ({resources}: {resources: string[]}):ColumnRegular
     size: 150,
     sortable: true,
     readonly: true,
+    cellProperties: ({ value }) => ({class: {"font-medium !bg-green-300 text-primary-600 dark:text-primary-500": highlightVersion?.value === value}}),
   },
   {
     name: 'SG Total Resources',

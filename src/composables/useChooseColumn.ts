@@ -1,6 +1,7 @@
 import {computed, type Ref, ref} from 'vue';
 import {SideBarType} from './useSideBar.ts';
 import {getGridColumns, URL_PROP} from '../components/grid.columns.ts';
+import { EMPTY_ID } from '../components/select/defaults.ts';
 
 export const useChooseColumn = <T extends { selectedColumns: Array<string | number> }>(
   visibleSideBar: Ref<boolean>,
@@ -10,8 +11,10 @@ export const useChooseColumn = <T extends { selectedColumns: Array<string | numb
   setPersonalizationValue: (key: keyof T, value: T[keyof T]) => Promise<void>,
   resources: string[]
 ) => {
-  const gridColumnsSource = [...getGridColumns({resources})];
+  const highlightVersion = ref(EMPTY_ID);
+  const gridColumnsSource = [...getGridColumns({ resources , highlightVersion })];
   const title = 'Choose Column';
+
 
   const selectedColumns = computed<Set<string | number>>({
     get: () => {
@@ -46,6 +49,7 @@ export const useChooseColumn = <T extends { selectedColumns: Array<string | numb
     selectedColumns,
     gridColumnsSource,
     columnSelectorSource,
+    highlightVersion,
     startChoosingColumn
   };
 };
