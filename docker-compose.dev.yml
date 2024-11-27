@@ -23,6 +23,7 @@ services:
   #   depends_on:
   #     - db # Ensures db container starts before the app
   #   volumes:
+  #   - ./logs:/logs
   #   - ./sites:/app/cache/crawler
 
   db:

@@ -2,7 +2,7 @@ import type { APIRoute } from "astro";
 import type {SitesData} from '../../services';
 import {
   getSites,
-  updateSiteSettings, setSites, deleteSites, updateMultipleSiteSettings
+  setSites, deleteSites, updateMultipleSiteSettings
 } from '../../db/DBQueries.ts';
 import {getUpdatedSites, getSitesMap} from '../../services/api/server/list/helpers.ts';
 import { getInstance } from "../../crawler/server/index.ts";
@@ -29,8 +29,7 @@ export const POST: APIRoute = async ({ props, locals, request }) => {
     const savedRows = await getSites();
 
     const existingSitesMap = getSitesMap(savedRows);
-    const addedSites = getUpdatedSites(sites, existingSitesMap)
-
+    const addedSites = getUpdatedSites(sites, existingSitesMap);
     if (!addedSites.length) {
       return new Response(JSON.stringify(null), {
         status: 200,
