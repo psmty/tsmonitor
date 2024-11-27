@@ -49,7 +49,7 @@ import {computed, ref} from "vue";
 import {useDashboardApi} from '../composables/useDashboard.ts';
 import SideBar from './SideBar.vue';
 import EditRowFields from './EditRowFields.vue';
-import type {SitesData} from '../services';
+import {type SitesData, groupBy as groupByKey, type Site} from '../services';
 import DeleteRowConfirmation from './DeleteRowConfirmation.vue';
 import {SideBarType, useSideBar} from '../composables/useSideBar.ts';
 import {useEditRow} from '../composables/useEditRow.ts';
@@ -97,6 +97,38 @@ const groupBy = computed({
   get: () => personalization.value?.groupBy ?? EMPTY_ID,
   set: (value) => setPersonalizationValue('groupBy', value)
 });
+const selectedGroupedRows = computed(() => {
+  if (!groupBy.value || groupBy.value === EMPTY_ID) {
+    return null;
+  }
+
+  const column = gridColumnsSource.find((column) => column.name === groupBy.value);
+  if (!column) {
+    return null;
+  }
+
+  const prop = column.prop as keyof Site;
+  return groupByKey(source.value, (item) => String(item[prop] ?? ''), (item) => item.url);
+});
+const selectedGroupedRowsCount = computed(() => {
+  if (selectedGroupedRows.value === null) {
+    return null;
+  }
+
+  let counts: Record<string, { selected: number, length: number }> = {};
+
+  Object.keys(selectedGroupedRows.value).forEach(key => {
+    const values = selectedGroupedRows.value![key];
+    const length = values.length;
+    const selected = values.reduce((count, val) => {
+      return count + (selectedRows.value.has(val) ? 1 : 0);
+    }, 0);
+
+    counts[key] = { selected, length}
+  })
+
+  return counts;
+})
 const grouping = computed((): GroupingOptions | undefined => {
   if (!groupBy.value) return;
 
@@ -111,11 +143,14 @@ const grouping = computed((): GroupingOptions | undefined => {
       const expanded = props.expanded;
       const chevron = h('div', {class: `chevron ${expanded ? 'chevron-down' : 'chevron-right'}`}, '');
 
+      const selectedGroupCounts = selectedGroupedRowsCount.value?.[props.name ?? ''];
+      const groupLabel = h('div', {class: `bg-gray-100 text-gray-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 flex items-center`}, `${selectedGroupCounts?.selected ?? 0} / ${selectedGroupCounts?.length ?? 0}`);
+
       if (column.cellTemplate === YES_NO_OPT || column.cellTemplate === YES_NO) {
         return h('div', attributes, [chevron, YES_NO_OPT(h, {value: props.name, type: 'rgRow'}) || null]);
       }
 
-      return h('div', attributes, [chevron, h('span', {}, props.name ?? 'EMPTY')]);
+      return h('div', attributes, [chevron, h('span', {}, props.name ?? 'EMPTY'), groupLabel]);
     }
   };
 });

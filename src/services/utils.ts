@@ -46,3 +46,19 @@ export function keyBy<T>(array: T[], keyGetter: KeyByCallback<T>): Record<string
     return result;
   }, {} as Record<string | number, T>);
 }
+
+export function groupBy<T, K extends keyof any, V>(
+  array: T[],
+  keyFn: (item: T) => K,
+  valueFn: (item: T) => V
+): Record<K, Array<V>> {
+  return array.reduce((result, item) => {
+    const key = keyFn(item);
+    const value = valueFn(item);
+    if (!result[key]) {
+      result[key] = [];
+    }
+    result[key].push(value);
+    return result;
+  }, {} as Record<K, Array<V>>);
+}

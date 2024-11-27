@@ -30,7 +30,7 @@ import {
   VGrid,
   VGridVueTemplate
 } from "@revolist/vue3-datagrid";
-import {computed, onMounted, ref, toRef} from "vue";
+import {computed, onMounted, ref, toRef, watch} from "vue";
 import {keyBy, localJsDateToDateString, type Site, type SitesData, type SiteSettings} from "../services";
 import {CHECKBOX_COLUMN} from "./grid.columns";
 import ActionsRenderer from "./gridRenderers/ActionsRenderer.vue";
@@ -252,6 +252,11 @@ const onShiftSelect = async (e: CustomEvent) => {
     })
   }
 }
+
+// Needs to update checkboxes and group aggregation
+watch(() => props.selectedRows, () => {
+  grid.value?.$el.refresh();
+}, {deep: true})
 
 defineExpose({
   exportToCSV
