@@ -1,6 +1,6 @@
 <template>
   <div v-if="props.type !== 'rowPinStart'" ref="cell" class="h-full flex align-items-center gap-3">
-    <button v-if="!selectedFewRows" class="opacity-90" @click="onEditRow">
+    <button class="opacity-90" @click="onEditRow">
       <EditIcon />
     </button>
 
@@ -16,10 +16,7 @@ import EditIcon from '../icons/EditIcon.vue';
 import type {ColumnDataSchemaModel} from '@revolist/vue3-datagrid';
 import DeleteIcon from '../icons/DeleteIcon.vue';
 
-interface Props extends ColumnDataSchemaModel {
-  selectedFewRows: boolean
-}
-const props = defineProps<Props>();
+const props = defineProps<ColumnDataSchemaModel>();
 const cell = ref<HTMLElement>();
 
 const url = computed(() => props.model.url);

@@ -10,21 +10,21 @@
 
     <div>
       <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Customer</label>
-      <input v-model="editData.customer" type="text" name="title" id="name"
+      <input v-model="customer" type="text" name="title" id="name"
              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
              placeholder="Type customer name" />
     </div>
 
     <div>
-      <Select v-model:value="editData.environment" :source="environmentDataSource" label="Environment" />
+      <Select v-model:value="environment" :source="environmentDataSource" label="Environment" />
     </div>
 
     <div>
-      <Select v-model:value="hasIntegration" :source="booleanDataSource" label="Has integration" />
+      <Select v-model:value="hasIntegrationValue" :source="booleanDataSource" label="Has integration" />
     </div>
 
     <div>
-      <Select v-model:value="editData.resource" :source="resourceSource" label="CSM" />
+      <Select v-model:value="resource" :source="resourceSource" label="CSM" />
     </div>
 
     <br /> <br />
@@ -34,7 +34,7 @@
     <div class="bottom-0 left-0 flex justify-center w-full pb-4 space-x-4 md:px-4 md:absolute">
       <button
         class="text-white w-full justify-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-        @click="updateRow">
+        @click="saveRow">
         {{ isCreationMode ? 'Add' : 'Update' }}
       </button>
       <button
@@ -62,7 +62,7 @@ import {AlertType, useAlert} from '../composables/useAlert.ts';
 
 interface Props {
   visible: boolean;
-  editUrl: string | null;
+  editUrls: Array<string> | null;
   source: Map<string, Site>;
   resources: string[] | null;
 }
@@ -76,38 +76,60 @@ const emits = defineEmits<{
   (e: 'create', row: SitesData[]): void
 }>();
 
-const editData = ref<SiteSettings>({...DEFAULT_SETTINGS});
-
 const newUrl = ref('');
+const customer = ref<SiteSettings['customer']|null>(null);
+const environment = ref<SiteSettings['environment']>(null);
+const hasIntegration = ref<SiteSettings['hasIntegration']|null>(null);
+const resource = ref<SiteSettings['resource']|null>(null)
 
-const isCreationMode = computed(() => props.editUrl === null);
+const isCreationMode = computed(() => props.editUrls === null);
 const resourceSource = computed<Array<SelectSource>>(() => {
   return props.resources ? getResourceDataSource(props.resources) : [];
 });
 
-const hasIntegration = computed({
-  get: () => String(editData.value.hasIntegration),
-  set: (value: string) => editData.value.hasIntegration = setBooleanValue(value)
+const hasIntegrationValue = computed({
+  get: () => String(hasIntegration.value ?? ''),
+  set: (value: string) => hasIntegration.value = setBooleanValue(value)
 });
+
+const setSiteDataSettings = (siteData: SiteSettings) => {
+  customer.value = siteData.customer;
+  environment.value = siteData.environment;
+  hasIntegration.value = siteData.hasIntegration;
+  resource.value = siteData.resource;
+};
+
+const getSiteSettings = (defaultValues: SiteSettings) => {
+  return {
+        customer: customer.value ?? defaultValues.customer,
+        environment: environment.value ?? defaultValues.environment,
+        hasIntegration: hasIntegration.value ?? defaultValues.hasIntegration,
+        resource: resource.value ?? defaultValues.resource
+      }
+};
+
 const initEdit = () => {
-  if (!props.editUrl) {
+  // Creation
+  if (props.editUrls === null) {
+    setSiteDataSettings(DEFAULT_SETTINGS);
     return;
   }
 
-  const siteData = props.source.get(props.editUrl);
+  // Multiple edit
+  if (props.editUrls?.length > 1) {
+    return;
+  }
+
+  // Single edit
+  const siteData = props.source.get(props.editUrls[0]);
 
   if (!siteData) {
-    console.warn(`No site data found for ${props.editUrl}`);
+    console.warn(`No site data found for ${props.editUrls[0]}`);
     emits('closePopup');
     return;
   }
 
-  editData.value = {
-    customer: siteData.customer,
-    environment: siteData.environment ?? Environment.Dev,
-    hasIntegration: siteData.hasIntegration,
-    resource: siteData.resource
-  };
+  setSiteDataSettings(siteData);
 };
 
 const isValidUrl = (url: string | null) => {
@@ -118,8 +140,17 @@ const isValidUrl = (url: string | null) => {
   return validateUrl(url);
 };
 
-const updateRow = () => {
-  const url = isCreationMode.value ? newUrl.value : props.editUrl;
+const saveRow = () => {
+  if (isCreationMode.value) {
+    createRow();
+  } else {
+    updateRow();
+  }
+};
+
+const createRow = () => {
+  const url = newUrl.value;
+
   if (!isValidUrl(url)) {
     showAlert('Invalid URL', AlertType.Warning);
     return;
@@ -127,14 +158,33 @@ const updateRow = () => {
 
   const siteData: SitesData = {
     url: url!,
-    settings: editData.value
+    settings: getSiteSettings({
+      ...DEFAULT_SETTINGS,
+      environment: Environment.Dev,
+    })
   };
 
-  if (isCreationMode.value) {
-    emits('create', [siteData]);
-  } else {
-    emits('update', [siteData]);
+  emits('create', [siteData]);
+};
+
+const updateRow = () => {
+  if (props.editUrls === null) {
+    throw new Error(`editUrl can't be null for updating row`);
   }
+
+  const siteData: SitesData[] = props.editUrls.map((url) => {
+    const existingSite = props.source.get(url);
+
+    if (!existingSite) {
+      throw new Error(`${url} hasn't been found`);
+    }
+
+    return {
+      url: url!,
+      settings: getSiteSettings(existingSite)
+    };
+  });
+  emits('update', siteData);
 };
 
 onMounted(() => {

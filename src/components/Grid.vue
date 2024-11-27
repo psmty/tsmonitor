@@ -30,7 +30,7 @@ import {
   VGrid,
   VGridVueTemplate
 } from "@revolist/vue3-datagrid";
-import {computed, onMounted, ref, toRef} from "vue";
+import {computed, onMounted, ref, toRef, watch} from "vue";
 import {keyBy, localJsDateToDateString, type Site, type SitesData, type SiteSettings} from "../services";
 import {CHECKBOX_COLUMN} from "./grid.columns";
 import ActionsRenderer from "./gridRenderers/ActionsRenderer.vue";
@@ -54,7 +54,7 @@ interface Props {
 
 const props = defineProps<Props>();
 const emits = defineEmits<{
-  (e: "editRow", url: string): void;
+  (e: "editRow", url: string[]): void;
   (e: "deleteRow", url: string[]): void;
   (e: 'updateRow', sites: Array<SitesData>): void;
 }>();
@@ -76,9 +76,7 @@ const columns = computed((): ColumnRegular[] => ([
     filter: false,
     // pin: "colPinStart",  // doesn't look good with grouping
     cellProperties: () => ({class: {"edit-cell": true}}),
-    cellTemplate: VGridVueTemplate(ActionsRenderer, {
-      selectedFewRows: props.selectedRows.size > 1
-    })
+    cellTemplate: VGridVueTemplate(ActionsRenderer)
   },
   ...props.columns
 ]));
@@ -104,7 +102,11 @@ const sourceLookup = computed(() => {
 
 const onEditRow = (e: CustomEvent) => {
   const {url} = e.detail;
-  emits("editRow", url);
+  const editUrls = new Set([url]);
+  if (props.selectedRows.size > 0) {
+    props.selectedRows.forEach((item) => editUrls.add(item));
+  }
+  emits("editRow", Array.from(editUrls));
 };
 
 const onDeleteRow = (e: CustomEvent) => {
@@ -140,6 +142,7 @@ const updateRow = (rows: Array<UpdateRow>) => {
   const updatedRows: SitesData[] = [];
 
   rows.forEach(({prop, model, newValue}) => {
+    if (!model) { return; }
     const settings: SitesData['settings'] = {...DEFAULT_SETTINGS};
 
     if (!isCustomField(prop)) {
@@ -184,7 +187,7 @@ const onCellEdit = (e: CustomEvent) => {
     }
   });
 
-  console.log(toUpdate, 'toUpdate');
+
   updateRow(toUpdate);
 };
 
@@ -250,6 +253,11 @@ const onShiftSelect = async (e: CustomEvent) => {
     })
   }
 }
+
+// Needs to update checkboxes and group aggregation
+watch(() => props.selectedRows, () => {
+  grid.value?.$el.refresh();
+}, {deep: true})
 
 defineExpose({
   exportToCSV
