@@ -1,7 +1,6 @@
 import type { APIRoute } from "astro";
-import type { CrawlerParsed, SitesData } from "../../services";
-import { chunkArray } from "../../crawler/server/helpers";
-import { CONCURRENCY_LIMIT, getInstance } from "../../crawler/server";
+import type { CrawlerParsed } from "../../services";
+import { getInstance } from "../../crawler/server";
 
 export const GET: APIRoute = async ({ request }) => {
   const connectionID = crypto.randomUUID();
@@ -29,7 +28,7 @@ export const GET: APIRoute = async ({ request }) => {
     },
     cancel: (controller) => {
       getInstance().disconnectClient(connectionID);
-      controller.close();
+      controller?.close();
     },
   });
 
@@ -45,17 +44,7 @@ export const GET: APIRoute = async ({ request }) => {
 
 export const POST: APIRoute = async ({ request }) => {
   try {
-    const sites: SitesData[] = await request.json();
-
-    const siteChunks = chunkArray(sites, CONCURRENCY_LIMIT);
-    const crawler = getInstance();
-
-    for (const chunk of siteChunks) {
-      // Send events with updated data
-      const parsedChunk = await crawler.fetchAndSaveToFile(chunk);
-      await crawler.notifyClients(parsedChunk);
-    }
-
+    await getInstance().crawlAllSites(await request.json());
     return new Response(null, { status: 200 });
   } catch (error) {
     console.error(error);

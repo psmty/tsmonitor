@@ -3,7 +3,8 @@ name: Build and Push to GitHub Container Registry
 on:
   push:
     branches:
-      - main  # Adjust branch as needed
+      - main
+      - next
 
 jobs:
   build-and-push:
