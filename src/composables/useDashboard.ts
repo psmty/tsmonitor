@@ -1,4 +1,4 @@
-import { nextTick, onMounted, onUnmounted, ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 import type { CrawlerParsed } from "../services/parser.types.ts";
 import type { Site, SitesData } from "../services/site.types.ts";
 import { DEFAULT_SETTINGS } from "../services/edit.defaults.ts";
@@ -118,7 +118,6 @@ export const useDashboardApi = () => {
     const response = await fetch("/api/list");
     const sites: SitesData[] = await response.json();
     saveSiteStatuses(sites);
-    await nextTick();
     startCrawler();
   });
 
