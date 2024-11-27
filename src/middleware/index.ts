@@ -1,14 +1,15 @@
 import { defineMiddleware } from "astro:middleware";
 import { getSession } from "auth-astro/server";
 import 'dotenv/config';
-import { getInstance } from "../crawler/server";
 import '../lib/logger.ts';
 
-
+export const prerender = false;
 // `context` and `next` are automatically typed
 export const onRequest = defineMiddleware(async (context, next) => {
-    // Start the crawler if it's not already running
-    getInstance()?.startIfNotWorking();
+    if (!process.env.BUILD_TIME) {
+        // Start the crawler if it's not already running
+        import('../crawler/server').then(({ getInstance }) => getInstance()?.startIfNotWorking());
+    }
 
     if (process.env.SKIP_AUTH) {
         return next();
