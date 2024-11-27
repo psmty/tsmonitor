@@ -18,3 +18,15 @@ export interface SitesData {
 export interface Site extends SiteSettings, Pick<SitesData, 'online' | 'pingat'> {
   url: string;
 }
+
+
+export type LicenseInfo = {
+  sgTotalResource: number | string;
+  sgEnabledResource: number | string;
+  sgUsers: number | string;
+  sgEnabledResourceWithCredentials: number | string;
+  licenseLimit: number | string;
+  tsTotalResource: number | string;
+  tsEnabledResource: number | string;
+  tsUsers: number | string;
+};

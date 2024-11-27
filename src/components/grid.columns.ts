@@ -92,7 +92,7 @@ export const getGridColumns = ({resources}: {resources: string[]}):ColumnRegular
     name: 'Version',
     prop: 'sgt5PublicVersion',
     size: 150,
-    // sortable: true,
+    sortable: true,
     readonly: true,
   },
   {
@@ -101,9 +101,6 @@ export const getGridColumns = ({resources}: {resources: string[]}):ColumnRegular
     size: 150,
     sortable: true,
     readonly: true,
-    cellTemplate: (_, { model }) => {
-      return model.licenseInfo?.sg?.[0] || 0;
-    },
   },
   {
     name: 'SG Enabled Resources',
@@ -111,9 +108,6 @@ export const getGridColumns = ({resources}: {resources: string[]}):ColumnRegular
     size: 150,
     sortable: true,
     readonly: true,
-    cellTemplate: (_, { model }) => {
-      return model.licenseInfo?.sg?.[1] || 0;
-    },
   },
   {
     name: 'SG Delta Resources',
@@ -121,11 +115,7 @@ export const getGridColumns = ({resources}: {resources: string[]}):ColumnRegular
     size: 150,
     sortable: true,
     readonly: true,
-    cellTemplate: (h, { model }) => {
-      const licenseInfo = model.licenseInfo || {};
-      const users = (model.licenseInfo?.sg?.[1] || 0) - (licenseInfo.sg?.[0] || 0);
-      return NEGATIVE_CHECK(h, { value: users });
-    },
+    cellTemplate: NEGATIVE_CHECK,
   },
   {
     name: 'SG Enabled With Credentials',
@@ -133,9 +123,6 @@ export const getGridColumns = ({resources}: {resources: string[]}):ColumnRegular
     size: 150,
     sortable: true,
     readonly: true,
-    cellTemplate: (_, { model }) => {
-      return model.licenseInfo?.sg?.[2] || 0;
-    },
   },
   {
     name: 'License Limit',
@@ -143,9 +130,6 @@ export const getGridColumns = ({resources}: {resources: string[]}):ColumnRegular
     size: 150,
     sortable: true,
     readonly: true,
-    cellTemplate: (_, { model }) => {
-      return model.licenseInfo?.sg?.[3] || 0;
-    },
   },
 
   {
@@ -154,9 +138,6 @@ export const getGridColumns = ({resources}: {resources: string[]}):ColumnRegular
     size: 150,
     sortable: true,
     readonly: true,
-    cellTemplate: (_, { model }) => {
-      return model.licenseInfo?.ts?.[0] || 0;
-    },
   },
   {
     name: 'TS Enabled Resources',
@@ -164,9 +145,6 @@ export const getGridColumns = ({resources}: {resources: string[]}):ColumnRegular
     size: 150,
     sortable: true,
     readonly: true,
-    cellTemplate: (_, { model }) => {
-      return model.licenseInfo?.ts?.[1] || 0;
-    },
   },
   {
     name: 'TS Delta Resources',
@@ -174,11 +152,7 @@ export const getGridColumns = ({resources}: {resources: string[]}):ColumnRegular
     size: 150,
     sortable: true,
     readonly: true,
-    cellTemplate: (h, { model }) => {
-      const licenseInfo = model.licenseInfo || {};
-      const users = (licenseInfo.ts?.[1] || 0) - (licenseInfo.ts?.[0] || 0);
-      return NEGATIVE_CHECK(h, { value: users });
-    },
+    cellTemplate: NEGATIVE_CHECK,
   },
   {
     name: 'Online',
