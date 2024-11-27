@@ -35,10 +35,6 @@ export class CrawlerService {
   private isWorking = false;
   private recentlyDeletedUrls = new Set<string>();
 
-  private clientsSender = new Map<
-    string,
-    (data: Array<CrawlerParsed>) => void
-  >();
 
   constructor(
     private config: {
@@ -46,6 +42,7 @@ export class CrawlerService {
       actionUrl: string;
       getSites: () => Promise<Array<SitesData>>;
       setOnline: (url: string, isOffline: boolean) => Promise<void>;
+      notifyClients: () => void;
     },
   ) {}
 
@@ -86,31 +83,11 @@ export class CrawlerService {
     );
     await Promise.all(crawlPromises);
     this.recentlyDeletedUrls.clear();
-    if (this.clientsSender.size > 0) {
-      const parsed = await Promise.all((await this.config.getSites()).map(getVersionFromFile));
-      await this.notifyClients(parsed);
-    }
+    this.config.notifyClients();
   };
 
-  async connectClient(
-    id: string,
-    sendEvent: (data: Array<CrawlerParsed>) => void,
-  ) {
-    this.clientsSender.set(id, sendEvent);
-
-    // Initial connection message
-    sendEvent([]);
-
-    if (!this.isWorking) {
-      return;
-    }
-    const parsed = await Promise.all((await this.config.getSites()).map(getVersionFromFile));
-    // Load saved data
-    sendEvent(parsed);
-  }
-
-  disconnectClient(id: string) {
-    this.clientsSender.delete(id);
+  async getSites() {
+    return Promise.all((await this.config.getSites()).map(getVersionFromFile));
   }
 
   async fetchAndSaveToFile(s: SitesData): Promise<SitesData> {
@@ -130,20 +107,7 @@ export class CrawlerService {
     }
   }
 
-  async notifyClients(sites: SitesData[]) {
-    if (this.clientsSender.size === 0) {
-      throw new Error("No saving event!");
-    }
-    try {
-      const data = await Promise.all(sites.map(getVersionFromFile));
 
-      for (const event of this.clientsSender.values()) {
-        event(data);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }
 
   async deleteSites(urls: string[]) {
     try {
