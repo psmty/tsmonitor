@@ -6,10 +6,7 @@
         <SelectionCount :max="source.length" :selected="selectedRows.size" />
         <TsButton @click="startChoosingColumn">Choose columns</TsButton>
         <Select :source="groupByOptions" v-model:value="groupBy" prefix="Group by" />
-        <input type="text"
-               class="h-8 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-               v-model="search"
-               placeholder="Search...">
+        <Search v-model="search" />
       </div>
       <div class="flex flex-row space-x-4">
 
@@ -62,6 +59,7 @@ import {useChooseColumn} from '../composables/useChooseColumn.ts';
 import ChooseColumn from './ChooseColumn.vue';
 import SelectionCount from './SelectionCount.vue';
 import TsButton from './TsButton.vue';
+import Search from './Search.vue';
 
 const props = defineProps({
   resources: {
