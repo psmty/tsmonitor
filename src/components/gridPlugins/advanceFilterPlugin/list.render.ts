@@ -8,6 +8,8 @@ type RowDataSources = {
   [T in DimensionRows]: DataStore<DataType, DimensionRows>;
 };
 
+const CHECKBOX_TAILWIND_CLASSES = 'w-4 h-4 border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600'
+
 
 function renderSearch({
   search,
@@ -26,6 +28,7 @@ function renderSearch({
   input.oninput = () => search(input.value.trim());
   const selectAllCheck = document.createElement('input');
   selectAllCheck.type = 'checkbox';
+  selectAllCheck.className = CHECKBOX_TAILWIND_CLASSES;
   selectAllCheck.onchange = () => {
     selectAll(selectAllCheck.checked);
   };
@@ -92,6 +95,7 @@ export function renderList(
       // Create the input element
       const input = document.createElement('input');
       input.type = 'checkbox';
+      input.className = CHECKBOX_TAILWIND_CLASSES;
       input.id = value;
       input.checked = !exlude.has(value);
       input.onchange = () => {
