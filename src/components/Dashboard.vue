@@ -21,8 +21,8 @@
         </button>
       </div>
     </div>
-    <Grid ref="grid" :columns="columns" :data="source" :selected-rows="selectedRows" :grouping="grouping"
-          @editRow="startEditRow" @delete-row="startDeleteRow" @update-row="editRow" />
+    <Grid ref="grid" :columns="columns" :data="source" :selected-rows="selectedRows" :grouping="grouping" :loading-urls="loadingUrls"
+          @editRow="startEditRow" @delete-row="startDeleteRow" @update-row="editRow" @reload-row="callReloadUrl" />
 
     <SideBar v-model="visibleSideBar" @onHide="onHideSidebar">
       <template #title>{{ sideBarTitle }}</template>
@@ -63,6 +63,7 @@ import ChooseColumn from './ChooseColumn.vue';
 import SelectionCount from './SelectionCount.vue';
 import TsButton from './TsButton.vue';
 import Search from './Search.vue';
+import {convertGridSiteToServerSiteData} from '../services/edit.helpers.ts';
 
 const props = defineProps({
   resources: {
@@ -74,7 +75,7 @@ const props = defineProps({
 const search = ref('');
 
 const {personalization, setPersonalizationValue} = usePersonalization<MainGridPersonalization>('mainGrid');
-const {siteStatuses, deleteSites, addSites, updateSites} = useDashboardApi();
+const {siteStatuses, loadingUrls, deleteSites, addSites, updateSites, loadSites} = useDashboardApi();
 
 const {visibleSideBar, sideBarType, sideBarTitle, hideSidebar, clearSideBarType} = useSideBar();
 const {editUrls, startEditRow, endEditRow} = useEditRow(visibleSideBar, sideBarType, sideBarTitle);
@@ -226,6 +227,17 @@ const deleteRow = async (urls: string[]) => {
 };
 
 const addNewUrl = () => startEditRow();
+
+const callReloadUrl = async (url: string) => {
+  const site = siteStatuses.value.get(url);
+
+  if (!site) {
+    throw new Error(`Site ${url} does not exist!`);
+  }
+
+  await loadSites([convertGridSiteToServerSiteData(site)], false)
+}
+
 
 const grid = ref<(typeof Grid | null)>(null);
 const exportToCsv = () => {

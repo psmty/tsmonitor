@@ -17,6 +17,7 @@
     :rangePluginEditableColumns.prop="rangePluginEditableColumns"
     @on-edit-row="onEditRow"
     @on-delete-row="onDeleteRow"
+    @on-reload-row="onReloadRow"
     @beforeedit="onCellEdit"
     @beforeautofill="onAutofill"
     @afterfocus="selectCurrentRow"
@@ -51,6 +52,7 @@ interface Props {
   columns: ColumnRegular[];
   grouping?: { props: [ColumnProp] };
   selectedRows: Set<string>;
+  loadingUrls: Set<string>;
 }
 
 const props = defineProps<Props>();
@@ -58,6 +60,7 @@ const emits = defineEmits<{
   (e: "editRow", url: string[]): void;
   (e: "deleteRow", url: string[]): void;
   (e: 'updateRow', sites: Array<SitesData>): void;
+  (e: 'reloadRow', site: string): void;
 }>();
 
 
@@ -72,12 +75,13 @@ const columns = computed((): ColumnRegular[] => ([
   {
     name: "",
     prop: "edit",
-    size: 70,
+    size: 100,
     sortable: false,
     filter: false,
+    readonly: true,
     // pin: "colPinStart",  // doesn't look good with grouping
     cellProperties: () => ({class: {"edit-cell": true}}),
-    cellTemplate: VGridVueTemplate(ActionsRenderer)
+    cellTemplate: VGridVueTemplate(ActionsRenderer, {loadingUrls: props.loadingUrls})
   },
   ...props.columns
 ]));
@@ -121,6 +125,11 @@ const onDeleteRow = (e: CustomEvent) => {
   }
   emits("deleteRow", urls);
 };
+
+const onReloadRow = (e: CustomEvent) => {
+  const {url} = e.detail;
+  emits('reloadRow', url);
+}
 
 const getExportingPlugin = async () => {
   const plugins = await grid.value?.$el.getPlugins() as ExportFilePlugin[];
