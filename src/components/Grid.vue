@@ -99,7 +99,7 @@ onMounted(() => {
 
 const sourceLookup = computed(() => {
   return keyBy(source.value, (item) => item.url);
-})
+});
 
 const onEditRow = (e: CustomEvent) => {
   const {url} = e.detail;
@@ -143,7 +143,9 @@ const updateRow = (rows: Array<UpdateRow>) => {
   const updatedRows: SitesData[] = [];
 
   rows.forEach(({prop, model, newValue}) => {
-    if (!model) { return; }
+    if (!model) {
+      return;
+    }
     const settings: SitesData['settings'] = {...DEFAULT_SETTINGS};
 
     if (!isCustomField(prop)) {
@@ -185,7 +187,7 @@ const onCellEdit = (e: CustomEvent) => {
       prop,
       model: sourceLookup.value[url],
       newValue: val
-    }
+    };
   });
 
 
@@ -237,7 +239,7 @@ const selectCurrentRow = (e: CustomEvent) => {
 
   props.selectedRows.clear();
   props.selectedRows.add(model.url);
-}
+};
 
 // Set multiple checkboxes on range selection
 const onShiftSelect = async (e: CustomEvent) => {
@@ -246,19 +248,21 @@ const onShiftSelect = async (e: CustomEvent) => {
   if (y !== y1) {
     const source = await grid.value?.$el.getVisibleSource();
 
-    if (!source) { return; }
+    if (!source) {
+      return;
+    }
 
     const selectedSource = source.slice(y, y1 + 1);
     selectedSource.forEach(({url}) => {
       props.selectedRows.add(url);
-    })
+    });
   }
-}
+};
 
 // Needs to update checkboxes and group aggregation
 watch(() => props.selectedRows, () => {
   grid.value?.$el.refresh();
-}, {deep: true})
+}, {deep: true});
 
 defineExpose({
   exportToCSV
@@ -305,6 +309,37 @@ defineExpose({
   :deep(revogr-edit) {
     input {
       background-color: transparent;
+    }
+  }
+}
+</style>
+
+<style lang="scss">
+$input-color: #fff;
+$dark-input-color: rgb(55 65 81 / var(--tw-bg-opacity));
+$border-color: #ccc;
+$dark-border-color: rgb(75 85 99 / var(--tw-border-opacity));
+
+revogr-filter-panel {
+  .select-css {
+    background-color: $input-color;
+    border-color: $border-color;
+  }
+}
+
+.dark {
+  revogr-filter-panel {
+    .select-css {
+      background-color: $dark-input-color;
+      border-color: $dark-border-color;
+      color: white;
+    }
+
+    .filter-holder {
+      input[type="text"] {
+        background-color: $dark-input-color;
+        color: white;
+      }
     }
   }
 }

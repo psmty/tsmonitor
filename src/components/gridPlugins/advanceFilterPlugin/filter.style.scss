@@ -1,3 +1,10 @@
+$border-color: #ccc;
+$background-item-hover-color: #eee;
+$input-color: #fff;
+
+$dark-border-color: rgb(75 85 99 / var(--tw-border-opacity));
+$dark-background-item-hover-color: rgb(55 65 81 / var(--tw-bg-opacity));
+$dark-input-color: rgb(55 65 81 / var(--tw-bg-opacity));
 
 revogr-filter-panel {
   min-width: 250px;
@@ -6,7 +13,7 @@ revogr-filter-panel {
     display: block;
     font-size: 13px;
     padding-bottom: 15px;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid $border-color;
 
     .search-input {
       margin-top: 10px;
@@ -14,14 +21,16 @@ revogr-filter-panel {
       align-items: center;
       width: 100%;
       padding: 5px;
-      border: 1px solid #ccc;
+      border: 1px solid $border-color;
       border-radius: 4px;
       gap: 5px;
+      background-color: $input-color;
 
       .search-field {
         width: 100%;
         height: 100%;
         outline: none;
+        background: transparent;
       }
     }
 
@@ -30,20 +39,45 @@ revogr-filter-panel {
       max-height: 100px;
       overflow: auto;
       padding: 5px 0;
-      border: 1px solid #ccc;
+      border: 1px solid $border-color;
       border-radius: 4px;
 
       label {
         padding: 4px;
         cursor: pointer;
 
-        &:hover{
-          background-color: #eee;
+        &:hover {
+          background-color: $background-item-hover-color;
           transition: .2s;
         }
 
         > input {
           margin-right: 5px;
+        }
+      }
+    }
+  }
+}
+
+.dark {
+  revogr-filter-panel {
+    .filter {
+      border-color: $dark-border-color;
+
+      .search-input {
+        border-color: $dark-border-color;
+        background-color: $dark-input-color;
+
+
+      }
+
+      .filter-list {
+        border-color: $dark-border-color;
+
+        label {
+          &:hover {
+            background-color: $dark-background-item-hover-color;
+          }
         }
       }
     }
