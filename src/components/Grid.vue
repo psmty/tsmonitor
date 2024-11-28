@@ -8,6 +8,7 @@
     :source="source"
     :exporting="true"
     :grouping="grouping"
+    :filter="true"
     hide-attribution
     range
     :theme="theme"
