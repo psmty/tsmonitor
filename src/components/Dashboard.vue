@@ -6,7 +6,8 @@
         <SelectionCount :max="source.length" :selected="selectedRows.size" />
         <TsButton @click="expandAll"><ExpandIcon :is-collapse="isExpanded" style="width: 10px;" /></TsButton>
         <TsButton @click="startChoosingColumn">Choose columns</TsButton>
-        <Select :source="groupByOptions" v-model:value="groupBy" prefix="Group by" />
+        <Select :key="'group-by'" :source="groupByOptions" v-model:value="groupBy" prefix="Group by" />
+        <Select :key="'highlight-version'" :source="versionOptions" v-model:value="highlightVersion" prefix="Version highlight" />
         <Search v-model="search" />
       </div>
       <div class="flex flex-row space-x-4">
@@ -44,7 +45,7 @@ import ExpandIcon from "./icons/ExpandIcon.vue";
 import Grid from "./Grid.vue";
 import ImportUrlsButton from "./ImportUrlsButton.vue";
 import Select from './select/Select.vue';
-import {computed, ref} from "vue";
+import {computed, ref } from "vue";
 import {useDashboardApi} from '../composables/useDashboard.ts';
 import SideBar from './SideBar.vue';
 import EditRowFields from './EditRowFields.vue';
@@ -83,7 +84,8 @@ const {
   columns,
   selectedColumns,
   gridColumnsSource,
-  columnSelectorSource
+  columnSelectorSource,
+  highlightVersion,
 } = useChooseColumn<MainGridPersonalization>(visibleSideBar, sideBarType, sideBarTitle, personalization, setPersonalizationValue, props.resources);
 
 const selectedRows = ref(new Set<string>());
@@ -91,6 +93,14 @@ const groupByOptions = computed<SelectSource[]>(() => {
   return [
     {value: 'Group by', id: EMPTY_ID},
     ...gridColumnsSource.map((column) => ({value: column.name, id: column.name}))
+  ];
+});
+
+const versionOptions = computed<SelectSource[]>(() => {
+  const vals = [...siteStatuses.value.values()].reduce((r, v) => { if (v.sgt5PublicVersion) r.add(v.sgt5PublicVersion); return r; }, new Set<string>())
+  return [
+    {value: 'Highlight version', id: EMPTY_ID},
+    ...[...vals].map((v) => ({value: v, id: v})).sort((a, b) => a.value.localeCompare(b.value))
   ];
 });
 const groupBy = computed({
@@ -184,11 +194,15 @@ const onHideSidebar = () => {
 const source = computed(() => {
   const options = [...siteStatuses.value.values()];
 
+  if (highlightVersion.value) {
+    // refresh the highlight version
+  }
+
   if (!search.value) {
     return options;
   }
 
-  return [...siteStatuses.value.values()].filter((item) => {
+  return options.filter((item) => {
     const predicate = search.value.toLowerCase();
 
     return item.url.toLowerCase().includes(predicate) || item.customer.toLowerCase().includes(predicate);
