@@ -1,5 +1,22 @@
 {
     "dockerComposeFile": "../docker-compose.yml",
     "service": "monitor",
-    "workspaceFolder": "/tsmonitor"
+    "workspaceFolder": "/tsmonitor",
+    "forwardPorts": [4321, 5432],
+    "containerEnv": {
+      "AUTH_SECRET": "${{ secrets.AUTH_SECRET }}",
+      "AUTH_TRUST_HOST": "${{ secrets.AUTH_TRUST_HOST }}",
+      "MS_CLIENT_ID": "${{ secrets.MS_CLIENT_ID }}",
+      "MS_CLIENT_SECRET": "${{ secrets.MS_CLIENT_SECRET }}",
+      "MS_TENANT_ID": "${{ secrets.MS_TENANT_ID }}",
+      "RESOURCES_CF_VALS": "${{ vars.RESOURCES_CF_VALS }}",
+      "POSTGRES_USER": "${{ secrets.POSTGRES_USER }}",
+      "POSTGRES_USER_EMAIL": "${{ secrets.POSTGRES_USER_EMAIL }}",
+      "POSTGRES_PASSWORD": "${{ secrets.POSTGRES_PASSWORD }}",
+      "POSTGRES_DB": "${{ secrets.POSTGRES_DB }}",
+      "POSTGRES_PORT": "${{ secrets.POSTGRES_PORT }}",
+      "POSTGRES_HOST": "${{ secrets.POSTGRES_HOST }}",
+      "SKIP_AUTH": "true"
+    },
+    "postCreateCommand": "npm install"
 }
