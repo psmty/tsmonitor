@@ -12,9 +12,10 @@
     hide-attribution
     range
     :theme="theme"
-    :plugins="[AdvanceFilterPlugin, RangePlugin]"
+    :plugins="[AdvanceFilterPlugin, RangePlugin, HighlightSelection]"
     :editors="gridEditors"
     :rangePluginEditableColumns.prop="rangePluginEditableColumns"
+    :selectedUrls.prop="selectedRows"
     @on-edit-row="onEditRow"
     @on-delete-row="onDeleteRow"
     @on-reload-row="onReloadRow"
@@ -41,6 +42,7 @@ import {DEFAULT_SETTINGS} from '../services/edit.defaults.ts';
 import {isCustomField} from '../services/edit.helpers.ts';
 import {GRID_EDITORS} from './gridEditors/editors.ts';
 import {RangePlugin} from './gridPlugins/rangePlugin.ts';
+import {HighlightSelection} from './gridPlugins/highlightSelection.ts';
 
 type UpdateRow = { prop: keyof SiteSettings, model: Site, newValue: any };
 
