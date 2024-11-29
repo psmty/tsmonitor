@@ -7,9 +7,11 @@ export const useDashboardApi = () => {
   let eventSource: EventSource | null = null;
 
   const siteStatuses = ref(new Map<string, Site & LicenseInfo>());
+  const loadingUrls = ref(new Set<string>());
 
   const saveSiteStatuses = (parsedSites: CrawlerParsed[]) => {
     parsedSites.forEach((newSite) => {
+      loadingUrls.value.delete(newSite.url);
       const site = siteStatuses.value.get(newSite.url);
       const licenseInfo = newSite.parsedData?.licenseInfo;
       const license: LicenseInfo = {
@@ -79,13 +81,17 @@ export const useDashboardApi = () => {
     }
   };
 
-  const loadSites = async (sites: SitesData[]) => {
+  const loadSites = async (sites: SitesData[], isUpdate = true) => {
     if (eventSource === null) {
       return;
     }
 
     try {
-      saveSiteStatuses(sites);
+      sites.forEach(({url}) => loadingUrls.value.add(url));
+
+      if (isUpdate) {
+        saveSiteStatuses(sites);
+      }
       const response = await fetch("/api/crawler", {
         method: "POST",
         body: JSON.stringify(sites),
@@ -146,7 +152,9 @@ export const useDashboardApi = () => {
   });
   return {
     siteStatuses,
+    loadingUrls,
     addSites,
+    loadSites,
     updateSites,
     deleteSites,
   };

@@ -94,7 +94,7 @@ export const getGridColumns = ({resources, highlightVersion}: {resources: string
     size: 150,
     sortable: true,
     readonly: true,
-    cellProperties: ({ value }) => ({class: {"font-medium !bg-green-300 text-primary-600 dark:text-primary-500 !text-black": highlightVersion?.value === value}}),
+    cellProperties: ({ value }) => ({class: {"font-medium text-primary-600 dark:text-primary-500 !text-black !bg-green-300 dark:!bg-green-300": highlightVersion?.value === value}}),
   },
   {
     name: 'SG Total Resources',

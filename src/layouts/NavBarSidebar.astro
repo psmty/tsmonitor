@@ -2,6 +2,7 @@
 /* eslint max-lines: 'off' */
 
 import ColorModeSwitcher from '../components/ColorModeSwitcher.astro';
+import Avatar from '../components/Avatar.vue';
 
 import { getSession } from "auth-astro/server";
 const session = await getSession(Astro.request);
@@ -53,7 +54,7 @@ const session = await getSession(Astro.request);
 
 			<div class="flex items-center">
 
-				
+
 				<ColorModeSwitcher />
 
 				<!-- Profile -->
@@ -67,11 +68,7 @@ const session = await getSession(Astro.request);
 							data-dropdown-toggle="dropdown-2"
 						>
 							<span class="sr-only">Open user menu</span>
-							<img
-								class="w-8 h-8 rounded-full"
-								src="https://cdn.jsdelivr.net/gh/alohe/avatars/png/vibrent_6.png"
-								alt="user photo"
-							/>
+							<Avatar client:only="vue" name={session?.user?.name || 'User'} />
 						</button>
 					</div>
 					<!-- Dropdown menu -->
