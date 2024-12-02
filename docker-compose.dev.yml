@@ -6,25 +6,25 @@
 
 services:
   # Uncomment for local development testing
-  app:
-    build:
-        context: .
-        dockerfile: Dockerfile # Assume your Dockerfile for the Node.js app is named 'Dockerfile' and located in the same directory
-    container_name: tsmonitor
-    image: tsmonitor
-    mem_limit: 1g
-    mem_reservation: 512m
+  # app:
+  #   build:
+  #       context: .
+  #       dockerfile: Dockerfile # Assume your Dockerfile for the Node.js app is named 'Dockerfile' and located in the same directory
+  #   container_name: tsmonitor
+  #   image: tsmonitor
+  #   mem_limit: 1g
+  #   mem_reservation: 512m
 
-    restart: always
-    ports:
-      - 8080:4321
-    env_file:
-      - .env
-    depends_on:
-      - db # Ensures db container starts before the app
-    volumes:
-    - ./logs:/logs
-    - ./sites:/app/cache/crawler
+  #   restart: always
+  #   ports:
+  #     - 8080:4321
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - db # Ensures db container starts before the app
+  #   volumes:
+  #   - ./logs:/logs
+  #   - ./sites:/app/cache/crawler
 
   db:
     image: postgres:latest # Use the official PostgreSQL image
