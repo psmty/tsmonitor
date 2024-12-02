@@ -5,9 +5,8 @@
 # docker-compose -f docker-compose.dev.yml down
 
 services:
-  # Uncomment for production
+  # Uncomment for local development testing
   app:
-    # Uncomment for local development
     build:
         context: .
         dockerfile: Dockerfile # Assume your Dockerfile for the Node.js app is named 'Dockerfile' and located in the same directory
