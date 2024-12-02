@@ -30,7 +30,7 @@ export const useChooseColumn = <T extends { selectedColumns: Array<string | numb
     return gridColumnsSource.map(c => ({
       name: String(c.name),
       id: String(c.prop)
-    })).filter(c => c.id !== URL_PROP);
+    })).filter(c => c.id !== URL_PROP).sort((a, b) => a.name.localeCompare(b.name));
   });
 
   const gridColumns = computed(() => {

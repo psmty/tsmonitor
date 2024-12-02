@@ -81,7 +81,7 @@ export const useDashboardApi = () => {
     }
   };
 
-  const loadSites = async (sites: SitesData[], isUpdate = true) => {
+  const loadSites = async (sites: SitesData[], isUpdate = true, force = false) => {
     if (eventSource === null) {
       return;
     }
@@ -94,7 +94,10 @@ export const useDashboardApi = () => {
       }
       const response = await fetch("/api/crawler", {
         method: "POST",
-        body: JSON.stringify(sites),
+        body: JSON.stringify({
+          sites,
+          force,
+        }),
       });
 
       if (!response.ok) {
@@ -112,8 +115,6 @@ export const useDashboardApi = () => {
     });
     const sitesData = await response.json();
     updateSiteSettings(sitesData);
-    // TODO: Probably we don't need to load data on update sites, and only update changed data
-    // await loadSites(sitesData);
   };
 
   const startCrawler = () => {
