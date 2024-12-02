@@ -1,30 +1,31 @@
-# docker-compose -f docker-compose.dev.yml up -d 
+# > run this file with the following command:
+# docker-compose -f docker-compose.dev.yml up -d
+
+# > stop the containers with the following command:
 # docker-compose -f docker-compose.dev.yml down
 
-version: "3.8"
-
 services:
-  # app:
-  #   # Uncomment for production
-  #   # image: ghcr.io/psmty/tsmonitor:latest
+  # Uncomment for production
+  app:
+    # Uncomment for local development
+    build:
+        context: .
+        dockerfile: Dockerfile # Assume your Dockerfile for the Node.js app is named 'Dockerfile' and located in the same directory
+    container_name: tsmonitor
+    image: tsmonitor
+    mem_limit: 1g
+    mem_reservation: 512m
 
-  #   # Uncomment for local development
-  #   build:
-  #       context: .
-  #       dockerfile: Dockerfile # Assume your Dockerfile for the Node.js app is named 'Dockerfile' and located in the same directory
-  #   container_name: tsmonitor
-  #   image: tsmonitor
-
-  #   restart: always
-  #   ports:
-  #     - 8080:4321
-  #   env_file:
-  #     - .env
-  #   depends_on:
-  #     - db # Ensures db container starts before the app
-  #   volumes:
-  #   - ./logs:/logs
-  #   - ./sites:/app/cache/crawler
+    restart: always
+    ports:
+      - 8080:4321
+    env_file:
+      - .env
+    depends_on:
+      - db # Ensures db container starts before the app
+    volumes:
+    - ./logs:/logs
+    - ./sites:/app/cache/crawler
 
   db:
     image: postgres:latest # Use the official PostgreSQL image
