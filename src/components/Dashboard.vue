@@ -93,7 +93,7 @@ const selectedRows = ref(new Set<string>());
 const groupByOptions = computed<SelectSource[]>(() => {
   return [
     {value: 'Group by', id: EMPTY_ID},
-    ...gridColumnsSource.map((column) => ({value: column.name, id: column.name}))
+    ...gridColumnsSource.map((column) => ({value: column.name, id: column.name})).sort((a, b) => a.value.localeCompare(b.value))
   ];
 });
 
@@ -235,7 +235,7 @@ const callReloadUrl = async (url: string) => {
     throw new Error(`Site ${url} does not exist!`);
   }
 
-  await loadSites([convertGridSiteToServerSiteData(site)], false)
+  await loadSites([convertGridSiteToServerSiteData(site)], false, true)
 }
 
 

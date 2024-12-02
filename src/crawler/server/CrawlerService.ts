@@ -76,18 +76,27 @@ export class CrawlerService {
     return runCrawler();
   }
 
-  async crawlAllSites(data: SitesData[]) {
+  async crawlAllSites(data: SitesData[], force = false) {
     const crawlPromises: Promise<SitesData | null>[] = (data).map((site) =>
-      limiter.schedule(async () =>
-        !this.recentlyDeletedUrls.has(site.url)
+      limiter.schedule({
+        // increase priority if force
+        priority: force ? 1 : 8,
+      }, async () => {
+        return !this.recentlyDeletedUrls.has(site.url)
           ? await this.fetchAndSaveToFile(site)
-          : null,
-      ),
+          : null;
+      }),
     );
     await Promise.all(crawlPromises);
     this.recentlyDeletedUrls.clear();
     if (this.clientsSender.size > 0) {
-      const parsed = await Promise.all((await this.config.getSites()).map(getVersionFromFile));
+      let parsed: Array<CrawlerParsed> = [];
+      // if force don't load saved data
+      if (force) {
+        parsed = await Promise.all((data).map(getVersionFromFile));
+      } else {
+        parsed = await Promise.all((await this.config.getSites()).map(getVersionFromFile));
+      }
       await this.notifyClients(parsed);
     }
   };
