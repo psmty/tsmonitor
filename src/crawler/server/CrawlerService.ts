@@ -44,7 +44,7 @@ export class CrawlerService {
     private config: {
       timeout: number;
       actionUrl: string;
-      getSites: () => Promise<Array<SitesData>>;
+      getSites: (urls?: string[]) => Promise<Array<SitesData>>;
       setOnline: (url: string, isOffline: boolean) => Promise<void>;
     },
   ) {}
@@ -93,7 +93,7 @@ export class CrawlerService {
       let parsed: Array<CrawlerParsed> = [];
       // if force don't load saved data
       if (force) {
-        parsed = await Promise.all((data).map(getVersionFromFile));
+        parsed = await Promise.all((await this.config.getSites(data.map((s) => s.url))).map(getVersionFromFile));
       } else {
         parsed = await Promise.all((await this.config.getSites()).map(getVersionFromFile));
       }
