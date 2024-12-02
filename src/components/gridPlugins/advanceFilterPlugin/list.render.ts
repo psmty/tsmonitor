@@ -96,7 +96,7 @@ export function renderList(
     });
   });
   [...values.values()]
-    .sort((a, b) => b.value.localeCompare(a.value))
+    .sort((a, b) => a.value.localeCompare(b.value))
     .forEach(({ value, label: lbl }) => {
       // Create the label element
       const label = document.createElement("label");
