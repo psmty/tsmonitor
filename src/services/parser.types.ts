@@ -17,7 +17,7 @@ export interface ServiceInfo {
   runningOn: string;
 }
 export type LicenseInfo = {
-  dl?: number;                // The extracted number from `dl`
+  dl?: string;                // The extracted number from `dl`
   sg?: number[];              // Array of numbers from `sg` (e.g., [248, 172, 255])
   ts?: number[];              // Array of numbers from `ts` (e.g., [0, 0, 0])
   pr?: string[];              // Array of strings from `pr` (e.g., ["sg", "t5", "ts", "api", "sch"])

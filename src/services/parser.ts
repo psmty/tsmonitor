@@ -22,7 +22,7 @@ function parseLicenseLine(line: string) {
       // Extract only the number from `dl`
       const dlMatch = value.match(/dl=(\d+)/);
       if (dlMatch) {
-        licenseInfo["dl"] = parseInt(dlMatch[1], 10);
+        licenseInfo["dl"] = dlMatch[1];
       }
     } else if (key === "sg" || key === "ts") {
       // Split `sg` or `ts` values into an array of numbers

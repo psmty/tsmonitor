@@ -15,6 +15,7 @@ export const useDashboardApi = () => {
       const site = siteStatuses.value.get(newSite.url);
       const licenseInfo = newSite.parsedData?.licenseInfo;
       const license: LicenseInfo = {
+        daysLeft: licenseInfo?.dl,
         sgTotalResource: licenseInfo?.sg?.[0] ?? '-',
         sgEnabledResource: licenseInfo?.sg?.[1] ?? '-',
         sgUsers:
