@@ -1,8 +1,10 @@
-import {onMounted, readonly, type Ref, shallowRef} from 'vue';
+import {onMounted, readonly, type Ref, type ShallowRef, shallowRef} from 'vue';
+import type {MultiFilterItem} from '@revolist/vue3-datagrid';
 
 export interface MainGridPersonalization {
   groupBy: string;
   selectedColumns: Array<string>;
+  gridFilters: MultiFilterItem;
 }
 
 type PersonalizationPages = 'mainGrid';
@@ -110,7 +112,7 @@ export function usePersonalization<T extends Record<string, any>>(pageKey: Perso
   });
 
   return {
-    personalization: readonly(personalization) as Readonly<Ref<T>>,
+    personalization: readonly(personalization) as Readonly<ShallowRef<T>>,
     setPersonalization,
     setPersonalizationValue,
     fetchPersonalization,

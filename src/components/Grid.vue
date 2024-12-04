@@ -23,6 +23,7 @@
     @beforeautofill="onAutofill"
     @afterfocus="selectCurrentRow"
     @setrange="onShiftSelect"
+    @beforefilterapply="syncFilter"
   />
 </template>
 <script lang="ts" setup>
@@ -30,10 +31,11 @@ import {
   type ColumnProp,
   type ColumnRegular,
   type ExportFilePlugin,
+  type MultiFilterItem,
   VGrid,
   VGridVueTemplate
 } from "@revolist/vue3-datagrid";
-import {computed, onMounted, ref, toRef, watch} from "vue";
+import {computed, onMounted, ref, toRef, watch, toRaw, nextTick} from "vue";
 import {keyBy, localJsDateToDateString, type Site, type SitesData, type SiteSettings} from "../services";
 import {CHECKBOX_COLUMN} from "./grid.columns";
 import ActionsRenderer from "./gridRenderers/ActionsRenderer.vue";
@@ -55,6 +57,7 @@ interface Props {
   grouping?: { props: [ColumnProp] };
   selectedRows: Set<string>;
   loadingUrls: Set<string>;
+  gridFilters?: MultiFilterItem
 }
 
 const props = defineProps<Props>();
@@ -63,6 +66,7 @@ const emits = defineEmits<{
   (e: "deleteRow", url: string[]): void;
   (e: 'updateRow', sites: Array<SitesData>): void;
   (e: 'reloadRow', site: string): void;
+  (e: 'syncFilter', filters: MultiFilterItem): void;
 }>();
 
 
@@ -270,6 +274,26 @@ const onShiftSelect = async (e: CustomEvent) => {
   }
 };
 
+let preventSyncFilters = false;
+
+const syncFilter = (e: CustomEvent) => {
+  if (preventSyncFilters) { return; }
+  const filterItems = e.detail.filterItems;
+  emits('syncFilter', toRaw(filterItems));
+}
+
+watch(() => props.gridFilters, async () => {
+  const plugins = await grid.value?.$el.getPlugins() as AdvanceFilterPlugin[];
+  const filterPlugin: AdvanceFilterPlugin | undefined = plugins.find(p => p.miniFilterUpdate);
+
+  if (filterPlugin) {
+    preventSyncFilters = true;
+    await nextTick()
+    await filterPlugin.onFilterChange(toRaw(props.gridFilters) ?? {});
+    preventSyncFilters = false;
+  }
+})
+
 // Needs to update checkboxes and group aggregation
 watch(() => props.selectedRows, () => {
   grid.value?.$el.refresh();
@@ -335,6 +359,22 @@ revogr-filter-panel {
   .select-css {
     background-color: $input-color;
     border-color: $border-color;
+  }
+}
+
+revogr-header {
+  .rgHeaderCell {
+    .rv-filter {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      &.active {
+        background-color: theme('colors.blue.600');
+        .filter-img {
+          color: #fff;
+        }
+      }
+    }
   }
 }
 

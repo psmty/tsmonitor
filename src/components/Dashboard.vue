@@ -21,8 +21,8 @@
         </button>
       </div>
     </div>
-    <Grid ref="grid" :columns="columns" :data="source" :selected-rows="selectedRows" :grouping="grouping" :loading-urls="loadingUrls"
-          @editRow="startEditRow" @delete-row="startDeleteRow" @update-row="editRow" @reload-row="callReloadUrl" />
+    <Grid ref="grid" :columns="columns" :data="source" :selected-rows="selectedRows" :grouping="grouping" :loading-urls="loadingUrls" :grid-filters="savedGridFilters"
+          @editRow="startEditRow" @delete-row="startDeleteRow" @update-row="editRow" @reload-row="callReloadUrl" @sync-filter="syncFilters"/>
 
     <SideBar v-model="visibleSideBar" @onHide="onHideSidebar">
       <template #title>{{ sideBarTitle }}</template>
@@ -55,7 +55,7 @@ import {SideBarType, useSideBar} from '../composables/useSideBar.ts';
 import {useEditRow} from '../composables/useEditRow.ts';
 import {useDeleteConfirmation} from '../composables/useDeleteConfirmation.ts';
 import {YES_NO, YES_NO_OPT} from "./grid.columns.ts";
-import type {GroupingOptions} from "@revolist/vue3-datagrid";
+import type {GroupingOptions, MultiFilterItem} from "@revolist/vue3-datagrid";
 import {EMPTY_ID, type SelectSource} from './select/defaults.ts';
 import {type MainGridPersonalization, usePersonalization} from '../composables/usePersonalization.ts';
 import {useChooseColumn} from '../composables/useChooseColumn.ts';
@@ -236,6 +236,14 @@ const callReloadUrl = async (url: string) => {
   }
 
   await loadSites([convertGridSiteToServerSiteData(site)], false, true)
+}
+
+const savedGridFilters = computed<MultiFilterItem>(() => {
+  return personalization.value?.gridFilters ?? {}
+});
+
+const syncFilters = (filters: MultiFilterItem) => {
+  setPersonalizationValue('gridFilters', filters)
 }
 
 
