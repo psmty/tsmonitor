@@ -24,6 +24,8 @@
     @afterfocus="selectCurrentRow"
     @setrange="onShiftSelect"
     @beforefilterapply="syncFilter"
+    @aftertrimmed="refreshRowCounter"
+    @afteranysource="refreshRowCounter"
   />
 </template>
 <script lang="ts" setup>
@@ -67,6 +69,7 @@ const emits = defineEmits<{
   (e: 'updateRow', sites: Array<SitesData>): void;
   (e: 'reloadRow', site: string): void;
   (e: 'syncFilter', filters: MultiFilterItem): void;
+  (e: 'updateRowCount', total: number): void;
 }>();
 
 
@@ -273,6 +276,12 @@ const onShiftSelect = async (e: CustomEvent) => {
     });
   }
 };
+
+const refreshRowCounter = async (e: CustomEvent) => {
+  const rows = await grid.value?.$el?.getVisibleSource();
+  const visibleRowsCount = rows?.length ?? 0;
+  emits('updateRowCount', visibleRowsCount);
+}
 
 let preventSyncFilters = false;
 

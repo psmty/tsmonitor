@@ -3,7 +3,7 @@
     class="flex flex-col grow bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 dark:bg-gray-800">
     <div class="flex items-center justify-between my-5 mx-5">
       <div class="flex flex-row space-x-4">
-        <SelectionCount :max="source.length" :selected="selectedRows.size" />
+        <SelectionCount :max="visibleSourceCount" :selected="selectedRows.size" />
         <TsButton @click="expandAll"><ExpandIcon :is-collapse="isExpanded" style="width: 10px;" /></TsButton>
         <TsButton @click="startChoosingColumn">Choose columns</TsButton>
         <Select :key="'group-by'" :source="groupByOptions" v-model:value="groupBy" prefix="Group by" />
@@ -22,7 +22,7 @@
       </div>
     </div>
     <Grid ref="grid" :columns="columns" :data="source" :selected-rows="selectedRows" :grouping="grouping" :loading-urls="loadingUrls" :grid-filters="savedGridFilters"
-          @editRow="startEditRow" @delete-row="startDeleteRow" @update-row="editRow" @reload-row="callReloadUrl" @sync-filter="syncFilters"/>
+          @editRow="startEditRow" @delete-row="startDeleteRow" @update-row="editRow" @reload-row="callReloadUrl" @sync-filter="syncFilters" @updateRowCount="setSourceCount"/>
 
     <SideBar v-model="visibleSideBar" @onHide="onHideSidebar">
       <template #title>{{ sideBarTitle }}</template>
@@ -73,6 +73,7 @@ const props = defineProps({
 });
 
 const search = ref('');
+const visibleSourceCount = ref(0);
 
 const {personalization, setPersonalizationValue} = usePersonalization<MainGridPersonalization>('mainGrid');
 const {siteStatuses, loadingUrls, deleteSites, addSites, updateSites, loadSites} = useDashboardApi();
@@ -203,6 +204,7 @@ const source = computed(() => {
     return options;
   }
 
+  // TODO: Refactor the search to use only Revo filters and not modify the original data source.
   return options.filter((item) => {
     const predicate = search.value.toLowerCase();
 
@@ -244,6 +246,11 @@ const savedGridFilters = computed<MultiFilterItem>(() => {
 
 const syncFilters = (filters: MultiFilterItem) => {
   setPersonalizationValue('gridFilters', filters)
+}
+
+const setSourceCount = (count: number) => {
+  selectedRows.value.clear();
+  visibleSourceCount.value = count;
 }
 
 
