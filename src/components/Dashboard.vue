@@ -93,7 +93,7 @@ const selectedRows = ref(new Set<string>());
 const groupByOptions = computed<SelectSource[]>(() => {
   return [
     {value: 'Group by', id: EMPTY_ID},
-    ...gridColumnsSource.map((column) => ({value: column.name, id: column.name}))
+    ...gridColumnsSource.map((column) => ({value: column.name, id: column.name})).sort((a, b) => a.value.localeCompare(b.value))
   ];
 });
 
@@ -101,7 +101,7 @@ const versionOptions = computed<SelectSource[]>(() => {
   const vals = [...siteStatuses.value.values()].reduce((r, v) => { if (v.sgt5PublicVersion) r.add(v.sgt5PublicVersion); return r; }, new Set<string>())
   return [
     {value: 'Highlight version', id: EMPTY_ID},
-    ...[...vals].map((v) => ({value: v, id: v})).sort((a, b) => a.value.localeCompare(b.value))
+    ...[...vals].map((v) => ({value: v, id: v})).sort((a, b) => b.value.localeCompare(a.value))
   ];
 });
 const groupBy = computed({
@@ -235,7 +235,7 @@ const callReloadUrl = async (url: string) => {
     throw new Error(`Site ${url} does not exist!`);
   }
 
-  await loadSites([convertGridSiteToServerSiteData(site)], false)
+  await loadSites([convertGridSiteToServerSiteData(site)], false, true)
 }
 
 

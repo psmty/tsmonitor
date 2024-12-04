@@ -21,6 +21,7 @@ export interface Site extends SiteSettings, Pick<SitesData, 'online' | 'pingat'>
 
 
 export type LicenseInfo = {
+  daysLeft?: string;
   sgTotalResource: number | string;
   sgEnabledResource: number | string;
   sgUsers: number | string;

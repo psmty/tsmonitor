@@ -26,6 +26,19 @@ export default defineConfig({
       // true for production
       noExternal: import.meta.env.PROD ? true : undefined
     },
+    build: {
+      rollupOptions: {
+        // Modify the chunking strategy here
+        output: {
+          // This prevents Rollup from creating separate chunks for libraries
+          manualChunks: (id) => {
+            if (id.includes('node_modules')) {
+              return 'vendor'; // All node_modules code will be bundled into a 'vendor' chunk
+            }
+          },
+        },
+      },
+    },
     // define: {
     //   "process.env": process.env
     // }

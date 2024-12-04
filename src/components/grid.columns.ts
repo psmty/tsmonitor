@@ -156,6 +156,22 @@ export const getGridColumns = ({resources, highlightVersion}: {resources: string
     cellTemplate: NEGATIVE_CHECK,
   },
   {
+    name: 'Days Left',
+    prop: 'daysLeft',
+    sortable: true,
+    readonly: true,
+    size: 150,
+    cellCompare: (prop, a, b) => parseInt(a[prop] || '-1', 10) - parseInt(b[prop] || '-1', 10),
+    cellTemplate: (h, { value }) => {
+      if (isNaN(parseInt(value, 10))) {
+        return '-';
+      }
+      const date = new Date();
+      date.setDate(date.getDate() + parseInt(value, 10));
+      return h('span', null, [value, h('span', { class: 'text-xs text-gray-500 dark:text-gray-400' }, ` (${date.toLocaleDateString()})`)]);
+    }
+  },
+  {
     name: 'Online',
     prop: 'online',
     size: 150,

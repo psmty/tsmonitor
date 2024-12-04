@@ -13,7 +13,7 @@ export const getInstance = (): CrawlerService => {
     instance = new CrawlerService({
       timeout: 3 * 60 * 1000, // 3 min,
       actionUrl: ACTION,
-      getSites: () => getSites(),
+      getSites: (urls?: string[]) => getSites(urls),
       setOnline: async (url, isOffline) => {
         setUrlOnline(url, isOffline);
       },

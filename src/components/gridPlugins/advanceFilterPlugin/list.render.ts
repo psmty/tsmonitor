@@ -2,14 +2,14 @@ import type {
   DataStore,
   DataType,
   DimensionRows,
-  ColumnProp
-} from '@revolist/revogrid';
+  ColumnProp,
+} from "@revolist/revogrid";
 type RowDataSources = {
   [T in DimensionRows]: DataStore<DataType, DimensionRows>;
 };
 
-const CHECKBOX_TAILWIND_CLASSES = 'w-4 h-4 border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600'
-
+const CHECKBOX_TAILWIND_CLASSES =
+  "w-4 h-4 border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600";
 
 function renderSearch({
   search,
@@ -18,16 +18,16 @@ function renderSearch({
   search: (txt: string) => void;
   selectAll: (checked: boolean) => void;
 }) {
-  const wr = document.createElement('div');
-  wr.classList.add('search-input');
-  const input = document.createElement('input');
-  input.classList.add('search-field');
+  const wr = document.createElement("div");
+  wr.classList.add("search-input");
+  const input = document.createElement("input");
+  input.classList.add("search-field");
   input.onkeydown = (e) => {
     e.stopPropagation();
   }; // keep event local, don't escalate farther to dom
   input.oninput = () => search(input.value.trim());
-  const selectAllCheck = document.createElement('input');
-  selectAllCheck.type = 'checkbox';
+  const selectAllCheck = document.createElement("input");
+  selectAllCheck.type = "checkbox";
   selectAllCheck.className = CHECKBOX_TAILWIND_CLASSES;
   selectAllCheck.onchange = () => {
     selectAll(selectAllCheck.checked);
@@ -50,14 +50,14 @@ export function renderList(
   >();
   let filteredData = columnData;
 
-  const filterList = document.createElement('ul');
-  filterList.classList.add('filter-list');
+  const filterList = document.createElement("ul");
+  filterList.classList.add("filter-list");
   const updateFilter = () => {
-    filterList.innerHTML = '';
+    filterList.innerHTML = "";
     filterList.append(...[...filteredData.values()].map((v) => v.el));
-  }
+  };
 
-  miniFilter.innerHTML = '';
+  miniFilter.innerHTML = "";
   miniFilter.appendChild(
     renderSearch({
       search(text) {
@@ -80,21 +80,31 @@ export function renderList(
   );
   miniFilter.appendChild(filterList);
 
+  const values = new Map<string, { value: string; label: string }>();
   Object.entries(dataProvider).forEach(([_type, storeService]) => {
-    storeService.store.get('source').forEach((item) => {
+    storeService.store.get("source").forEach((item) => {
       let originalValue = item[columnProp]?.toString().trim();
       let value = originalValue?.toLowerCase();
       if (!value) {
-        value = '';
-        originalValue = 'Empty';
+        value = "";
+        originalValue = "Empty";
       }
+      values.set(value, {
+        value,
+        label: originalValue,
+      });
+    });
+  });
+  [...values.values()]
+    .sort((a, b) => a.value.localeCompare(b.value))
+    .forEach(({ value, label: lbl }) => {
       // Create the label element
-      const label = document.createElement('label');
+      const label = document.createElement("label");
       label.htmlFor = value;
 
       // Create the input element
-      const input = document.createElement('input');
-      input.type = 'checkbox';
+      const input = document.createElement("input");
+      input.type = "checkbox";
       input.className = CHECKBOX_TAILWIND_CLASSES;
       input.id = value;
       input.checked = !exlude.has(value);
@@ -109,13 +119,12 @@ export function renderList(
 
       // Append the input element and text node to the label element
       label.appendChild(input);
-      label.appendChild(document.createTextNode(originalValue));
+      label.appendChild(document.createTextNode(lbl));
       columnData.set(value, {
         el: label,
         input,
       });
     });
-  });
 
   updateFilter();
   return columnData;

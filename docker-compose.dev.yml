@@ -1,19 +1,19 @@
-# docker-compose -f docker-compose.dev.yml up -d 
+# > run this file with the following command:
+# docker-compose -f docker-compose.dev.yml up -d
+
+# > stop the containers with the following command:
 # docker-compose -f docker-compose.dev.yml down
 
-version: "3.8"
-
 services:
+  # Uncomment for local development testing
   # app:
-  #   # Uncomment for production
-  #   # image: ghcr.io/psmty/tsmonitor:latest
-
-  #   # Uncomment for local development
   #   build:
   #       context: .
   #       dockerfile: Dockerfile # Assume your Dockerfile for the Node.js app is named 'Dockerfile' and located in the same directory
   #   container_name: tsmonitor
   #   image: tsmonitor
+  #   mem_limit: 1g
+  #   mem_reservation: 512m
 
   #   restart: always
   #   ports:

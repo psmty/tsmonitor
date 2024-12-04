@@ -44,7 +44,8 @@ export const GET: APIRoute = async ({ request }) => {
 
 export const POST: APIRoute = async ({ request }) => {
   try {
-    await getInstance().crawlAllSites(await request.json());
+    const data = await request.json();
+    await getInstance().crawlAllSites(data.sites, data.force);
     return new Response(null, { status: 200 });
   } catch (error) {
     console.error(error);

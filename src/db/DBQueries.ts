@@ -1,7 +1,11 @@
 import {db} from './index.ts';
 import type {SitesData} from '../services/site.types.ts';
 
-export async function getSites(): Promise<SitesData[]>  {
+export async function getSites(urls?: string[]): Promise<SitesData[]>  {
+  if (urls?.length) {
+    const {rows} = await db.query("SELECT * FROM sites WHERE url = ANY($1::text[]);", [urls]);
+    return rows;
+  }
   const {rows} = await db.query("SELECT * FROM sites ORDER BY url;");
   return rows;
 }
