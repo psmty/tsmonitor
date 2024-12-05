@@ -23,6 +23,9 @@
     @beforeautofill="onAutofill"
     @afterfocus="selectCurrentRow"
     @setrange="onShiftSelect"
+    @afterfilterapply="syncFilter"
+    @aftertrimmed="refreshRowCounter"
+    @afteranysource="refreshRowCounter"
   />
 </template>
 <script lang="ts" setup>
@@ -30,10 +33,11 @@ import {
   type ColumnProp,
   type ColumnRegular,
   type ExportFilePlugin,
+  type MultiFilterItem,
   VGrid,
   VGridVueTemplate
 } from "@revolist/vue3-datagrid";
-import {computed, onMounted, ref, toRef, watch} from "vue";
+import {computed, onMounted, ref, toRef, watch, toRaw, nextTick} from "vue";
 import {keyBy, localJsDateToDateString, type Site, type SitesData, type SiteSettings} from "../services";
 import {CHECKBOX_COLUMN} from "./grid.columns";
 import ActionsRenderer from "./gridRenderers/ActionsRenderer.vue";
@@ -55,6 +59,7 @@ interface Props {
   grouping?: { props: [ColumnProp] };
   selectedRows: Set<string>;
   loadingUrls: Set<string>;
+  gridFilters?: string
 }
 
 const props = defineProps<Props>();
@@ -63,6 +68,8 @@ const emits = defineEmits<{
   (e: "deleteRow", url: string[]): void;
   (e: 'updateRow', sites: Array<SitesData>): void;
   (e: 'reloadRow', site: string): void;
+  (e: 'syncFilter', filters: string): void;
+  (e: 'updateRowCount', total: number): void;
 }>();
 
 
@@ -270,6 +277,44 @@ const onShiftSelect = async (e: CustomEvent) => {
   }
 };
 
+const refreshRowCounter = async (e: CustomEvent) => {
+  const rows = await grid.value?.$el?.getVisibleSource();
+  const visibleRowsCount = rows?.length ?? 0;
+  emits('updateRowCount', visibleRowsCount);
+}
+
+const getFilterPlugin = async (): Promise<AdvanceFilterPlugin|null> => {
+  const plugins = await grid.value?.$el.getPlugins() as AdvanceFilterPlugin[];
+  const filterPlugin: AdvanceFilterPlugin | undefined = plugins.find(p => p.miniFilterUpdate);
+
+  return filterPlugin ?? null;
+}
+
+// Set filters from personalization only when grid has been inited
+let isFiltersInit = false;
+const syncFilter = async () => {
+  const filterPlugin = await getFilterPlugin();
+  if (!filterPlugin) { return; }
+  emits('syncFilter', filterPlugin.getJSON());
+  isFiltersInit = true;
+}
+
+
+const unsubFilterWatcher = watch(() => props.gridFilters, async () => {
+  if (isFiltersInit) {
+    unsubFilterWatcher();
+    return;
+  }
+
+  const filterPlugin = await getFilterPlugin();
+
+  if (filterPlugin && props.gridFilters) {
+    await nextTick()
+    await filterPlugin.onFilterChange(filterPlugin.parseJSON(props.gridFilters));
+    unsubFilterWatcher();
+  }
+})
+
 // Needs to update checkboxes and group aggregation
 watch(() => props.selectedRows, () => {
   grid.value?.$el.refresh();
@@ -335,6 +380,22 @@ revogr-filter-panel {
   .select-css {
     background-color: $input-color;
     border-color: $border-color;
+  }
+}
+
+revogr-header {
+  .rgHeaderCell {
+    .rv-filter {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      &.active {
+        background-color: theme('colors.blue.600');
+        .filter-img {
+          color: #fff;
+        }
+      }
+    }
   }
 }
 
