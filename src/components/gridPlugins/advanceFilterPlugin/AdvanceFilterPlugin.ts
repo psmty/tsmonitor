@@ -6,6 +6,7 @@ import {
   type PluginProviders,
   type ColumnRegular,
   type ColumnProp,
+  type MultiFilterItem,
   isFilterBtn,
 } from '@revolist/revogrid';
 import { renderList } from './list.render';
@@ -75,13 +76,13 @@ export class AdvanceFilterPlugin extends FilterPlugin {
             currentMiniFilter = {
               id: filters.length,
               type: FIlTER_MINI,
-              value: Array.from(excluded),
+              value: excluded,
               relation: 'and',
               hidden: true,
             };
             filters.push(currentMiniFilter);
           } else {
-            currentMiniFilter.value = Array.from(excluded);
+            currentMiniFilter.value = excluded;
           }
           this.onFilterChange(this.multiFilterItems);
         },
@@ -95,5 +96,47 @@ export class AdvanceFilterPlugin extends FilterPlugin {
       this.miniFilterUpdate(e.detail.prop);
     }
     super.headerclick(e);
+  }
+
+  getJSON() {
+    const tempMultiFilters: MultiFilterItem = {};
+
+    for (const key in this.multiFilterItems) {
+        if (Object.prototype.hasOwnProperty.call(this.multiFilterItems, key)) {
+            const entries = this.multiFilterItems[key];
+
+            tempMultiFilters[key] = entries.map(entry => {
+                if (entry.value instanceof Set) {
+                    // Return a new object with the value converted to an array
+                    return { ...entry, value: Array.from(entry.value) };
+                }
+                // Return the entry unchanged if value is not a Set
+                return { ...entry };
+            });
+        }
+    }
+
+    return JSON.stringify(tempMultiFilters);
+  }
+
+  parseJSON(config: string): MultiFilterItem {
+    const newData: MultiFilterItem = JSON.parse(config);
+
+    for (const key in newData) {
+        if (Object.prototype.hasOwnProperty.call(newData, key)) {
+            const entries = newData[key];
+
+            newData[key] = entries.map(entry => {
+                if (entry.type === FIlTER_MINI && Array.isArray(entry.value)) {
+                    // Return a new object with the value converted to a Set
+                    return { ...entry, value: new Set(entry.value) };
+                }
+                // Return the entry unchanged if conditions are not met
+                return { ...entry };
+            });
+        }
+    }
+
+    return newData;
   }
 }

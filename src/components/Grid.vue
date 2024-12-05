@@ -295,8 +295,7 @@ let isFiltersInit = false;
 const syncFilter = async () => {
   const filterPlugin = await getFilterPlugin();
   if (!filterPlugin) { return; }
-  const filterItems = filterPlugin.multiFilterItems;
-  emits('syncFilter', JSON.stringify(filterItems));
+  emits('syncFilter', filterPlugin.getJSON());
   isFiltersInit = true;
 }
 
@@ -311,7 +310,7 @@ const unsubFilterWatcher = watch(() => props.gridFilters, async () => {
 
   if (filterPlugin && props.gridFilters) {
     await nextTick()
-    await filterPlugin.onFilterChange(JSON.parse(props.gridFilters));
+    await filterPlugin.onFilterChange(filterPlugin.parseJSON(props.gridFilters));
     unsubFilterWatcher();
   }
 })
