@@ -75,13 +75,13 @@ export class AdvanceFilterPlugin extends FilterPlugin {
             currentMiniFilter = {
               id: filters.length,
               type: FIlTER_MINI,
-              value: excluded,
+              value: Array.from(excluded),
               relation: 'and',
               hidden: true,
             };
             filters.push(currentMiniFilter);
           } else {
-            currentMiniFilter.value = excluded;
+            currentMiniFilter.value = Array.from(excluded);
           }
           this.onFilterChange(this.multiFilterItems);
         },

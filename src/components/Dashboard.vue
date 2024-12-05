@@ -240,11 +240,11 @@ const callReloadUrl = async (url: string) => {
   await loadSites([convertGridSiteToServerSiteData(site)], false, true)
 }
 
-const savedGridFilters = computed<MultiFilterItem>(() => {
-  return personalization.value?.gridFilters ?? {}
+const savedGridFilters = computed<string>(() => {
+  return personalization.value?.gridFilters ?? ''
 });
 
-const syncFilters = (filters: MultiFilterItem) => {
+const syncFilters = (filters: string) => {
   setPersonalizationValue('gridFilters', filters)
 }
 

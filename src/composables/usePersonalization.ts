@@ -1,10 +1,10 @@
-import {onMounted, readonly, type Ref, type ShallowRef, shallowRef} from 'vue';
+import {onMounted, readonly, ref, type Ref, type ShallowRef, shallowRef, toRaw} from 'vue';
 import type {MultiFilterItem} from '@revolist/vue3-datagrid';
 
 export interface MainGridPersonalization {
   groupBy: string;
   selectedColumns: Array<string>;
-  gridFilters: MultiFilterItem;
+  gridFilters: string;
 }
 
 type PersonalizationPages = 'mainGrid';
@@ -18,7 +18,7 @@ const STORE_NAME = 'personalization';
 export function usePersonalization<T extends Record<string, any>>(pageKey: PersonalizationPages) {
   let dbInstance: IDBDatabase | null = null;
 
-  const personalization = shallowRef<Partial<T>>();
+  const personalization = ref<Partial<T>>();
 
   // Open the IndexedDB instance if not already opened
   async function openDB() {
@@ -49,11 +49,11 @@ export function usePersonalization<T extends Record<string, any>>(pageKey: Perso
     await openDB();
     const transaction = dbInstance!.transaction(STORE_NAME, 'readwrite');
     const store = transaction.objectStore(STORE_NAME);
-    store.put({...personalization.value, [key]: value}, pageKey); // Storing the object with key-value pair
+    store.put({...toRaw(personalization.value), [key]: value}, pageKey); // Storing the object with key-value pair
 
     transaction.oncomplete = () => {
       if (personalization.value) {
-        personalization.value = {...personalization.value, [key]: value};
+        personalization.value[key] = value;
       }
     };
 
@@ -112,7 +112,7 @@ export function usePersonalization<T extends Record<string, any>>(pageKey: Perso
   });
 
   return {
-    personalization: readonly(personalization) as Readonly<ShallowRef<T>>,
+    personalization: readonly(personalization) as Readonly<Ref<T>>,
     setPersonalization,
     setPersonalizationValue,
     fetchPersonalization,

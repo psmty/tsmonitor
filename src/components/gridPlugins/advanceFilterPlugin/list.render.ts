@@ -41,9 +41,10 @@ export function renderList(
   miniFilter: HTMLElement,
   columnProp: ColumnProp,
   dataProvider: RowDataSources,
-  exlude = new Set<string>(),
-  filter: (excluded: Set<any>) => void,
+  exludeValue: any[] = [],
+  filter: (excluded: Array<any>) => void,
 ) {
+  const exlude = new Set(exludeValue)
   const columnData = new Map<
     string,
     { el: HTMLElement; input: HTMLInputElement }
@@ -74,7 +75,7 @@ export function renderList(
           data.input.checked = checked;
           checked ? exlude.delete(key) : exlude.add(key);
         });
-        filter(exlude);
+        filter(Array.from(exlude));
       },
     }),
   );
@@ -114,7 +115,7 @@ export function renderList(
         } else {
           exlude.delete(value);
         }
-        filter(exlude);
+        filter(Array.from(exlude));
       };
 
       // Append the input element and text node to the label element

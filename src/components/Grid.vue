@@ -23,7 +23,7 @@
     @beforeautofill="onAutofill"
     @afterfocus="selectCurrentRow"
     @setrange="onShiftSelect"
-    @beforefilterapply="syncFilter"
+    @afterfilterapply="syncFilter"
     @aftertrimmed="refreshRowCounter"
     @afteranysource="refreshRowCounter"
   />
@@ -59,7 +59,7 @@ interface Props {
   grouping?: { props: [ColumnProp] };
   selectedRows: Set<string>;
   loadingUrls: Set<string>;
-  gridFilters?: MultiFilterItem
+  gridFilters?: string
 }
 
 const props = defineProps<Props>();
@@ -68,7 +68,7 @@ const emits = defineEmits<{
   (e: "deleteRow", url: string[]): void;
   (e: 'updateRow', sites: Array<SitesData>): void;
   (e: 'reloadRow', site: string): void;
-  (e: 'syncFilter', filters: MultiFilterItem): void;
+  (e: 'syncFilter', filters: string): void;
   (e: 'updateRowCount', total: number): void;
 }>();
 
@@ -283,23 +283,36 @@ const refreshRowCounter = async (e: CustomEvent) => {
   emits('updateRowCount', visibleRowsCount);
 }
 
-let preventSyncFilters = false;
-
-const syncFilter = (e: CustomEvent) => {
-  if (preventSyncFilters) { return; }
-  const filterItems = e.detail.filterItems;
-  emits('syncFilter', toRaw(filterItems));
-}
-
-watch(() => props.gridFilters, async () => {
+const getFilterPlugin = async (): Promise<AdvanceFilterPlugin|null> => {
   const plugins = await grid.value?.$el.getPlugins() as AdvanceFilterPlugin[];
   const filterPlugin: AdvanceFilterPlugin | undefined = plugins.find(p => p.miniFilterUpdate);
 
-  if (filterPlugin) {
-    preventSyncFilters = true;
+  return filterPlugin ?? null;
+}
+
+// Set filters from personalization only when grid has been inited
+let isFiltersInit = false;
+const syncFilter = async () => {
+  const filterPlugin = await getFilterPlugin();
+  if (!filterPlugin) { return; }
+  const filterItems = filterPlugin.multiFilterItems;
+  emits('syncFilter', JSON.stringify(filterItems));
+  isFiltersInit = true;
+}
+
+
+const unsubFilterWatcher = watch(() => props.gridFilters, async () => {
+  if (isFiltersInit) {
+    unsubFilterWatcher();
+    return;
+  }
+
+  const filterPlugin = await getFilterPlugin();
+
+  if (filterPlugin && props.gridFilters) {
     await nextTick()
-    await filterPlugin.onFilterChange(toRaw(props.gridFilters) ?? {});
-    preventSyncFilters = false;
+    await filterPlugin.onFilterChange(JSON.parse(props.gridFilters));
+    isFiltersInit = true
   }
 })
 
