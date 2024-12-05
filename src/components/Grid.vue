@@ -312,7 +312,7 @@ const unsubFilterWatcher = watch(() => props.gridFilters, async () => {
   if (filterPlugin && props.gridFilters) {
     await nextTick()
     await filterPlugin.onFilterChange(JSON.parse(props.gridFilters));
-    isFiltersInit = true
+    unsubFilterWatcher();
   }
 })
 
