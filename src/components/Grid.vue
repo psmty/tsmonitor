@@ -12,7 +12,7 @@
     hide-attribution
     range
     :theme="theme"
-    :plugins="[AdvanceFilterPlugin, RangePlugin, HighlightSelection]"
+    :plugins="[AdvanceFilterPlugin, RangePlugin, HighlightSelection, GreyedOutOfflineSites]"
     :editors="gridEditors"
     :rangePluginEditableColumns.prop="rangePluginEditableColumns"
     :selectedUrls.prop="selectedRows"
@@ -47,6 +47,7 @@ import {isCustomField} from '../services/edit.helpers.ts';
 import {GRID_EDITORS} from './gridEditors/editors.ts';
 import {RangePlugin} from './gridPlugins/rangePlugin.ts';
 import {HighlightSelection} from './gridPlugins/highlightSelection.ts';
+import {GreyedOutOfflineSites} from './gridPlugins/greyedOutOfflineSites.ts';
 
 type UpdateRow = { prop: keyof SiteSettings, model: Site, newValue: any };
 
@@ -59,7 +60,7 @@ interface Props {
   grouping?: { props: [ColumnProp] };
   selectedRows: Set<string>;
   loadingUrls: Set<string>;
-  gridFilters?: string
+  gridFilters?: string;
 }
 
 const props = defineProps<Props>();
@@ -138,7 +139,7 @@ const onDeleteRow = (e: CustomEvent) => {
 const onReloadRow = (e: CustomEvent) => {
   const {url} = e.detail;
   emits('reloadRow', url);
-}
+};
 
 const getExportingPlugin = async () => {
   const plugins = await grid.value?.$el.getPlugins() as ExportFilePlugin[];
@@ -281,23 +282,25 @@ const refreshRowCounter = async (e: CustomEvent) => {
   const rows = await grid.value?.$el?.getVisibleSource();
   const visibleRowsCount = rows?.length ?? 0;
   emits('updateRowCount', visibleRowsCount);
-}
+};
 
-const getFilterPlugin = async (): Promise<AdvanceFilterPlugin|null> => {
+const getFilterPlugin = async (): Promise<AdvanceFilterPlugin | null> => {
   const plugins = await grid.value?.$el.getPlugins() as AdvanceFilterPlugin[];
   const filterPlugin: AdvanceFilterPlugin | undefined = plugins.find(p => p.miniFilterUpdate);
 
   return filterPlugin ?? null;
-}
+};
 
 // Set filters from personalization only when grid has been inited
 let isFiltersInit = false;
 const syncFilter = async () => {
   const filterPlugin = await getFilterPlugin();
-  if (!filterPlugin) { return; }
+  if (!filterPlugin) {
+    return;
+  }
   emits('syncFilter', filterPlugin.getJSON());
   isFiltersInit = true;
-}
+};
 
 
 const unsubFilterWatcher = watch(() => props.gridFilters, async () => {
@@ -309,11 +312,11 @@ const unsubFilterWatcher = watch(() => props.gridFilters, async () => {
   const filterPlugin = await getFilterPlugin();
 
   if (filterPlugin && props.gridFilters) {
-    await nextTick()
+    await nextTick();
     await filterPlugin.onFilterChange(filterPlugin.parseJSON(props.gridFilters));
     unsubFilterWatcher();
   }
-})
+});
 
 // Needs to update checkboxes and group aggregation
 watch(() => props.selectedRows, () => {
@@ -389,14 +392,25 @@ revogr-header {
       display: flex;
       align-items: center;
       justify-content: center;
+
       &.active {
         background-color: theme('colors.blue.600');
+
         .filter-img {
           color: #fff;
         }
       }
     }
   }
+}
+
+
+.offline-row-bg {
+  background-color: theme('colors.gray.200')!important;
+}
+
+.highlight-row-bg {
+  background-color: theme('colors.yellow.100') !important;
 }
 
 .dark {
@@ -413,6 +427,14 @@ revogr-header {
         color: white;
       }
     }
+  }
+
+  .offline-row-bg {
+    background-color: theme('colors.zinc.700')!important;
+  }
+
+  .highlight-row-bg {
+    background-color: theme('colors.indigo.950') !important;
   }
 }
 </style>

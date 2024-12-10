@@ -1,7 +1,7 @@
 import {BasePlugin, type PluginProviders, type DimensionCols, type ColumnRegular, type CellProps} from '@revolist/revogrid';
 import {classObjectFromClassProp} from './helpers.ts';
 
-export const SELECTED_BG = '!bg-yellow-100 dark:!bg-indigo-950';
+export const SELECTED_BG = 'highlight-row-bg';
 
 // TODO: Refactor this plugin to add checkbox column and keep selectedRows here
 export class HighlightSelection extends BasePlugin {
