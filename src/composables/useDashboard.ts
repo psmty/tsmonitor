@@ -2,8 +2,11 @@ import { onMounted, onUnmounted, ref } from "vue";
 import type { CrawlerParsed } from "../services/parser.types.ts";
 import type { LicenseInfo, Site, SitesData } from "../services/site.types.ts";
 import { DEFAULT_SETTINGS } from "../services/edit.defaults.ts";
+import {useLoader} from './useLoader.ts';
 
 export const useDashboardApi = () => {
+  const {showLoader} = useLoader();
+
   let eventSource: EventSource | null = null;
 
   const siteStatuses = ref(new Map<string, Site & LicenseInfo>());
@@ -143,10 +146,12 @@ export const useDashboardApi = () => {
   };
 
   onMounted(async () => {
+    showLoader(true);
     const response = await fetch("/api/list");
     const sites: SitesData[] = await response.json();
     saveSiteStatuses(sites);
     startCrawler();
+    showLoader(false);
   });
 
   onUnmounted(() => {

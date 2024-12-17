@@ -2,6 +2,7 @@
 import { SITE_TITLE } from '../lib/constants';
 import CopyrightNotice from '../components/CopyrightNotice.astro';
 import Alert from "../components/Alert.vue";
+import MainLoader from "../components/MainLoader.vue";
 
 const { class: clazz } = Astro.props;
 ---
@@ -39,6 +40,7 @@ const { class: clazz } = Astro.props;
 	>
 		<slot />
 		<Alert client:only="vue" />
+		<MainLoader client:load="vue" />
 	</body>
 </html>
 
