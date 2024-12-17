@@ -62,3 +62,26 @@ export function groupBy<T, K extends keyof any, V>(
     return result;
   }, {} as Record<K, Array<V>>);
 }
+
+/**
+ * Sorts an array of objects based on an array of values for a specific key.
+ *
+ * @param items - Array of objects to be sorted.
+ * @param order - Array of values representing the desired order.
+ * @param key - The key in the objects whose values will be compared.
+ * @returns A sorted array of objects.
+ */
+export function sortByOrder<T, K extends keyof T>(
+  items: T[],
+  order: (T[K])[],
+  key: K
+): T[] {
+  const orderMap = new Map(order.map((value, index) => [value, index]));
+
+  return [...items].sort((a, b) => {
+    const indexA = orderMap.get(a[key]) ?? Number.MAX_SAFE_INTEGER;
+    const indexB = orderMap.get(b[key]) ?? Number.MAX_SAFE_INTEGER;
+
+    return indexA - indexB;
+  });
+}

@@ -1,10 +1,11 @@
 import {onMounted, readonly, ref, type Ref, type ShallowRef, shallowRef, toRaw} from 'vue';
-import type {MultiFilterItem} from '@revolist/vue3-datagrid';
+import type {ColumnProp, MultiFilterItem} from '@revolist/vue3-datagrid';
 
 export interface MainGridPersonalization {
   groupBy: string;
   selectedColumns: Array<string>;
   gridFilters: string;
+  columnOrder: ColumnProp[]
 }
 
 type PersonalizationPages = 'mainGrid';

@@ -26,6 +26,8 @@
     @afterfilterapply="syncFilter"
     @aftertrimmed="refreshRowCounter"
     @afteranysource="refreshRowCounter"
+    @columndragstart="onColReorderStart"
+    @beforecolumndragend="onColReorderMove"
   />
 </template>
 <script lang="ts" setup>
@@ -51,6 +53,8 @@ import {GreyedOutOfflineSites} from './gridPlugins/greyedOutOfflineSites.ts';
 
 type UpdateRow = { prop: keyof SiteSettings, model: Site, newValue: any };
 
+const FIXED_COLUMN_PROPS = ['checkbox', 'edit'];
+
 const grid = ref<{ $el: HTMLRevoGridElement } | null>(null);
 const gridEditors = GRID_EDITORS;
 
@@ -71,6 +75,7 @@ const emits = defineEmits<{
   (e: 'reloadRow', site: string): void;
   (e: 'syncFilter', filters: string): void;
   (e: 'updateRowCount', total: number): void;
+  (e: 'colReorder', propsOrder: ColumnProp[]): void;
 }>();
 
 
@@ -283,6 +288,29 @@ const refreshRowCounter = async (e: CustomEvent) => {
   const visibleRowsCount = rows?.length ?? 0;
   emits('updateRowCount', visibleRowsCount);
 };
+
+const onColReorderStart = (e: CustomEvent) => {
+  const prop = e.detail.prop;
+
+  if (FIXED_COLUMN_PROPS.includes(prop)) {
+    e.preventDefault();
+  }
+}
+
+const onColReorderMove = (e: CustomEvent) => {
+  const newPosition = e.detail.newPosition.itemIndex - FIXED_COLUMN_PROPS.length;
+  const startPosition = e.detail.startPosition.itemIndex - FIXED_COLUMN_PROPS.length;
+  if (newPosition < 0) {
+    e.preventDefault();
+    return;
+  }
+
+  const columnProps = props.columns.map(({prop}) => prop);
+  const orderingColumn = columnProps.splice(startPosition, 1);
+  columnProps.splice(newPosition, 0, orderingColumn[0]);
+  emits('colReorder', columnProps);
+}
+
 
 const getFilterPlugin = async (): Promise<AdvanceFilterPlugin | null> => {
   const plugins = await grid.value?.$el.getPlugins() as AdvanceFilterPlugin[];
