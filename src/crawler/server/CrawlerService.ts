@@ -32,7 +32,6 @@ async function getVersionFromFile(site: SitesData): Promise<CrawlerParsed> {
 }
 
 export class CrawlerService {
-  private isWorking = false;
   private recentlyDeletedUrls = new Set<string>();
 
   private clientsSender = new Map<
@@ -50,12 +49,7 @@ export class CrawlerService {
   ) {}
 
   async startIfNotWorking() {
-    if (this.isWorking) {
-      return;
-    }
     console.log("START CrawlerService");
-
-    this.isWorking = true;
 
     const runCrawler = async () => {
       const startTime = Date.now(); // Record start time
@@ -110,9 +104,7 @@ export class CrawlerService {
     // Initial connection message
     sendEvent([]);
 
-    if (!this.isWorking) {
-      return;
-    }
+    // Load saved data
     const parsed = await Promise.all((await this.config.getSites()).map(getVersionFromFile));
     // Load saved data
     sendEvent(parsed);

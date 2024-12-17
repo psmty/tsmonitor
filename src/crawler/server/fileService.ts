@@ -1,4 +1,3 @@
-import zlib from 'zlib';
 import fs from 'fs';
 import * as crypto from 'node:crypto';
 import { parseHtmlString, type ParsedData } from '../../services';
@@ -8,25 +7,18 @@ const STATIC_PATH = 'cache/crawler/';
 const getFilePath = (url: string) => {
   // TODO: change path
   const safeUrl = crypto.createHash('sha256').update(url).digest('hex');
-  return `${STATIC_PATH}${safeUrl}.gz`;
+  return `${STATIC_PATH}${safeUrl}.txt`;
 }
 
 
 export const saveToFile = (url: string, text: string): Promise<void> => {
   return new Promise((resolve, reject) => {
-    zlib.gzip(text, (gzipErr, buffer) => {
-      if (gzipErr) {
-        reject(gzipErr); // Handle compression error
-        return;
+    fs.writeFile(getFilePath(url), text, (writeErr) => {
+      if (writeErr) {
+        reject(writeErr); // Handle file write error
+      } else {
+        resolve(); // Resolve when write is successful
       }
-
-      fs.writeFile(getFilePath(url), buffer, (writeErr) => {
-        if (writeErr) {
-          reject(writeErr); // Handle file write error
-        } else {
-          resolve(); // Resolve when write is successful
-        }
-      });
     });
   });
 }
@@ -34,27 +26,19 @@ export const saveToFile = (url: string, text: string): Promise<void> => {
 export const getFromFile = (url: string): Promise<ParsedData|null>  => {
   const filePath = getFilePath(url);
   return new Promise((resolve, reject) => {
-    fs.readFile(filePath, (readErr, compressedData) => {
+    fs.readFile(filePath, 'utf8', async (readErr, text) => {
       if (readErr) {
         reject(readErr); // Handle file read error
         return;
       }
-
-      zlib.gunzip(compressedData, async (unzipErr, buffer) => {
-        if (unzipErr) {
-          reject(unzipErr); // Handle decompression error
-        } else {
-          const text = buffer.toString();
-          const data = parseHtmlString(text);
-          try {
-            const lastEditedSite = await getLastEditTime(filePath);
-            data.updatedAt = lastEditedSite.toISOString();
-          } catch (e) {
-            //
-          }
-          resolve(data); // Resolve with decompressed data
-        }
-      });
+      const data = parseHtmlString(text);
+      try {
+        const lastEditedSite = await getLastEditTime(filePath);
+        data.updatedAt = lastEditedSite.toISOString();
+      } catch (e) {
+        //
+      }
+      resolve(data); // Resolve with decompressed data
     });
   });
 }
