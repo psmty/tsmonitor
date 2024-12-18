@@ -135,7 +135,8 @@ export const useDashboardApi = () => {
 
     eventSource.onerror = (e) => {
       console.error("Error with EventSource", e);
-      stopCrawler();
+      // Reconnect
+      startCrawler();
     };
   };
 
