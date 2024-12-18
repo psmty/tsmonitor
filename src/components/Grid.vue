@@ -28,6 +28,9 @@
     @afteranysource="refreshRowCounter"
     @columndragstart="onColReorderStart"
     @beforecolumndragend="onColReorderMove"
+    @aftergridinit="initPingatService"
+    @aftergridrender="updatePingat"
+    @viewportscroll="updatePingat"
   />
 </template>
 <script lang="ts" setup>
@@ -39,8 +42,14 @@ import {
   VGrid,
   VGridVueTemplate
 } from "@revolist/vue3-datagrid";
-import {computed, onMounted, ref, toRef, watch, toRaw, nextTick} from "vue";
-import {keyBy, localJsDateToDateString, type Site, type SitesData, type SiteSettings} from "../services";
+import {computed, onMounted, ref, toRef, watch, toRaw, nextTick, onUnmounted} from "vue";
+import {
+  keyBy,
+  localJsDateToDateString,
+  type Site,
+  type SitesData,
+  type SiteSettings
+} from "../services";
 import {CHECKBOX_COLUMN} from "./grid.columns";
 import ActionsRenderer from "./gridRenderers/ActionsRenderer.vue";
 import {AdvanceFilterPlugin} from './gridPlugins/advanceFilterPlugin/AdvanceFilterPlugin.ts';
@@ -50,6 +59,7 @@ import {GRID_EDITORS} from './gridEditors/editors.ts';
 import {RangePlugin} from './gridPlugins/rangePlugin.ts';
 import {HighlightSelection} from './gridPlugins/highlightSelection.ts';
 import {GreyedOutOfflineSites} from './gridPlugins/greyedOutOfflineSites.ts';
+import {usePingatService} from '../composables/usePingatService.ts';
 
 type UpdateRow = { prop: keyof SiteSettings, model: Site, newValue: any };
 
@@ -57,6 +67,8 @@ const FIXED_COLUMN_PROPS = ['checkbox', 'edit'];
 
 const grid = ref<{ $el: HTMLRevoGridElement } | null>(null);
 const gridEditors = GRID_EDITORS;
+
+const {initPingatService, stopPingatService, updatePingat} = usePingatService(grid);
 
 interface Props {
   data: Array<Site>;
@@ -115,6 +127,10 @@ onMounted(() => {
     checkTheme();
   });
 });
+
+onUnmounted(() => {
+  stopPingatService();
+})
 
 const sourceLookup = computed(() => {
   return keyBy(source.value, (item) => item.url);
@@ -295,7 +311,7 @@ const onColReorderStart = (e: CustomEvent) => {
   if (FIXED_COLUMN_PROPS.includes(prop)) {
     e.preventDefault();
   }
-}
+};
 
 const onColReorderMove = (e: CustomEvent) => {
   const newPosition = e.detail.newPosition.itemIndex - FIXED_COLUMN_PROPS.length;
@@ -309,7 +325,7 @@ const onColReorderMove = (e: CustomEvent) => {
   const orderingColumn = columnProps.splice(startPosition, 1);
   columnProps.splice(newPosition, 0, orderingColumn[0]);
   emits('colReorder', columnProps);
-}
+};
 
 
 const getFilterPlugin = async (): Promise<AdvanceFilterPlugin | null> => {
@@ -434,7 +450,7 @@ revogr-header {
 
 
 .offline-row-bg {
-  background-color: theme('colors.gray.200')!important;
+  background-color: theme('colors.gray.200') !important;
 }
 
 .highlight-row-bg {
@@ -458,7 +474,7 @@ revogr-header {
   }
 
   .offline-row-bg {
-    background-color: theme('colors.zinc.700')!important;
+    background-color: theme('colors.zinc.700') !important;
   }
 
   .highlight-row-bg {
