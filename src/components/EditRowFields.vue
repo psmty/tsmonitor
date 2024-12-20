@@ -187,10 +187,12 @@ const updateRow = () => {
       throw new Error(`${url} hasn't been found`);
     }
 
+    const isNewUrl = url !== newUrl.value;
+
     return {
       url: url!,
       settings: getSiteSettings(existingSite),
-      newUrl: newUrl.value
+      newUrl: isNewUrl ? newUrl.value : undefined
     };
   });
   emits('update', siteData);
