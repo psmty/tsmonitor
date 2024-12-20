@@ -1,8 +1,9 @@
-import { onMounted, onUnmounted, ref } from "vue";
-import type { CrawlerParsed } from "../services/parser.types.ts";
-import type { LicenseInfo, Site, SitesData } from "../services/site.types.ts";
-import { DEFAULT_SETTINGS } from "../services/edit.defaults.ts";
+import {onMounted, onUnmounted, ref} from "vue";
+import type {CrawlerParsed} from "../services/parser.types.ts";
+import type {LicenseInfo, Site, SitesData} from "../services/site.types.ts";
+import {DEFAULT_SETTINGS} from "../services/edit.defaults.ts";
 import {useLoader} from './useLoader.ts';
+import axios from '../services/api/axios.ts';
 
 export const useDashboardApi = () => {
   const {showLoader} = useLoader();
@@ -23,7 +24,7 @@ export const useDashboardApi = () => {
         sgEnabledResource: licenseInfo?.sg?.[1] ?? '-',
         sgUsers:
           ((licenseInfo?.sg?.[1] || 0) -
-          (licenseInfo?.sg?.[0] || 0)) || '-',
+            (licenseInfo?.sg?.[0] || 0)) || '-',
         sgEnabledResourceWithCredentials:
           licenseInfo?.sg?.[2] || '-',
         licenseLimit: licenseInfo?.sg?.[3] || '-',
@@ -31,25 +32,25 @@ export const useDashboardApi = () => {
         tsEnabledResource: licenseInfo?.ts?.[1] || '-',
         tsUsers:
           (licenseInfo?.ts?.[1] || 0) -
-          (licenseInfo?.ts?.[0] || 0) || '-',
+          (licenseInfo?.ts?.[0] || 0) || '-'
       };
       const result: Site & LicenseInfo = {
         ...(site ?? {}),
         pingat: newSite.pingat ?? new Date(),
         online: newSite.online,
         url: newSite.url,
-        ...{ ...DEFAULT_SETTINGS, ...(newSite.settings ?? {}) },
+        ...{...DEFAULT_SETTINGS, ...(newSite.settings ?? {})},
         ...(newSite.parsedData ?? {}),
         ...(newSite.settings ?? {}),
         sgt5PublicVersion: newSite.parsedData?.sgt5PublicVersion?.trim() || "-",
-        ...license,
+        ...license
       };
       siteStatuses.value.set(newSite.url, result);
     });
   };
 
   const updateSiteSettings = (sites: SitesData[]) => {
-    sites.forEach(({ url, settings, newUrl }) => {
+    sites.forEach(({url, settings, newUrl}) => {
       if (!siteStatuses.value.has(url)) {
         console.error(`${url} is not exists`);
         return;
@@ -60,17 +61,12 @@ export const useDashboardApi = () => {
       if (!!newUrl) {
         siteStatuses.value.delete(url);
       }
-      siteStatuses.value.set(setUrl, { ...currentData, ...settings, url: setUrl });
+      siteStatuses.value.set(setUrl, {...currentData, ...settings, url: setUrl});
     });
   };
 
   const addSites = async (urls: SitesData[]) => {
-    const response = await fetch("/api/list", {
-      method: "POST",
-      body: JSON.stringify(urls),
-    });
-
-    const newAddedUrls: SitesData[] | null = await response.json();
+    const newAddedUrls: SitesData[] | null = await axios.post("/api/list", urls);
     if (newAddedUrls === null) {
       console.warn("No new sites have been added.");
       return;
@@ -79,11 +75,7 @@ export const useDashboardApi = () => {
   };
 
   const deleteSites = async (urls: string[]) => {
-    const response = await fetch("/api/list", {
-      method: "DELETE",
-      body: JSON.stringify(urls),
-    });
-    const deletedRows: { rowCount: number } = await response.json();
+    const deletedRows: { rowCount: number } = await axios.delete("/api/list", {data: urls});
     if (deletedRows.rowCount > 0) {
       urls.forEach((url) => siteStatuses.value.delete(url));
     }
@@ -100,28 +92,20 @@ export const useDashboardApi = () => {
       if (isUpdate) {
         saveSiteStatuses(sites);
       }
-      const response = await fetch("/api/crawler", {
-        method: "POST",
-        body: JSON.stringify({
-          sites,
-          force,
-        }),
+      await axios.post("/api/crawler", {
+        sites,
+        force
       });
-
-      if (!response.ok) {
-        throw new Error(`Update failed with status ${response.status}`);
-      }
     } catch (error) {
       console.error(`Failed to update sites`, error);
     }
   };
 
   const updateSites = async (editFields: SitesData[]) => {
-    const response = await fetch("/api/list", {
-      method: "PUT",
-      body: JSON.stringify(editFields),
-    });
-    const sitesData = await response.json();
+    const sitesData: Array<SitesData> | null = await axios.put("/api/list", editFields);
+    if (!sitesData) {
+      return;
+    }
     updateSiteSettings(sitesData);
   };
 
@@ -152,8 +136,8 @@ export const useDashboardApi = () => {
 
   onMounted(async () => {
     showLoader(true);
-    const response = await fetch("/api/list");
-    const sites: SitesData[] = await response.json();
+    const sites: SitesData[]|null = await axios.get("/api/list");
+    if (sites === null) { return; }
     saveSiteStatuses(sites);
     startCrawler();
     showLoader(false);
@@ -168,6 +152,6 @@ export const useDashboardApi = () => {
     addSites,
     loadSites,
     updateSites,
-    deleteSites,
+    deleteSites
   };
 };

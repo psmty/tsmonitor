@@ -49,7 +49,7 @@ export async function updateMultipleSiteSettings(sitesData: SitesData[]) {
     RETURNING *;
   `;
 
-  const values = sitesData.flatMap((site) => [site.settings, site.url]);
+  const values = sitesData.flatMap((site) => [site.settings, site.newUrl ?? site.url]);
   return await db.query(sql, values);
 }
 
