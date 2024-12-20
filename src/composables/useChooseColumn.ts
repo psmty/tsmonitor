@@ -1,4 +1,4 @@
-import {computed, type Ref, ref} from 'vue';
+import {computed, type Ref, ref, watch} from 'vue';
 import {SideBarType} from './useSideBar.ts';
 import {getGridColumns, URL_PROP} from '../components/grid.columns.ts';
 import { EMPTY_ID } from '../components/select/defaults.ts';
@@ -29,6 +29,19 @@ export const useChooseColumn = <T extends { selectedColumns?: Array<string | num
     }
   });
 
+  /**
+   * Don't trigger column redraw on each sort
+   */
+  const initialColumnSort = ref<ColumnProp[] | null>(null);
+  const sortedColumnsUnsubscribe = watch(
+    columnOrder,
+    (newValue) => {
+      initialColumnSort.value = newValue;
+      sortedColumnsUnsubscribe();
+    },
+    { immediate: false, flush: 'sync' }
+  );
+
   const columnSelectorSource = computed(() => {
     let source =  gridColumnsSource.filter(c => c.prop !== URL_PROP);
     if (columnOrder.value) {
@@ -46,9 +59,9 @@ export const useChooseColumn = <T extends { selectedColumns?: Array<string | num
 
   const gridColumns = computed(() => {
     const source =  gridColumnsSource.filter(c => c.prop === URL_PROP || selectedColumns.value.has(c.prop));
-    if (columnOrder.value) {
+    if (initialColumnSort.value) {
       // If column order saved in personalization we need to sort columns
-      return sortByOrder(source, columnOrder.value, 'prop');
+      return sortByOrder(source, initialColumnSort.value, 'prop');
     }
 
     return source;
