@@ -48,7 +48,7 @@ import {
   localJsDateToDateString,
   type Site,
   type SitesData,
-  type SiteSettings
+  type SiteSettings, validateUrl
 } from "../services";
 import {CHECKBOX_COLUMN} from "./grid.columns";
 import ActionsRenderer from "./gridRenderers/ActionsRenderer.vue";
@@ -60,8 +60,9 @@ import {RangePlugin} from './gridPlugins/rangePlugin.ts';
 import {HighlightSelection} from './gridPlugins/highlightSelection.ts';
 import {GreyedOutOfflineSites} from './gridPlugins/greyedOutOfflineSites.ts';
 import {usePingatService} from '../composables/usePingatService.ts';
+import {AlertType, useAlert} from '../composables/useAlert.ts';
 
-type UpdateRow = { prop: keyof SiteSettings, model: Site, newValue: any };
+type UpdateRow = { prop: keyof SiteSettings | 'url', model: Site, newValue: any };
 
 const FIXED_COLUMN_PROPS = ['checkbox', 'edit'];
 
@@ -69,6 +70,7 @@ const grid = ref<{ $el: HTMLRevoGridElement } | null>(null);
 const gridEditors = GRID_EDITORS;
 
 const {initPingatService, stopPingatService, updatePingat} = usePingatService(grid);
+const {showAlert} = useAlert();
 
 interface Props {
   data: Array<Site>;
@@ -188,9 +190,16 @@ const updateRow = (rows: Array<UpdateRow>) => {
     }
     const settings: SitesData['settings'] = {...DEFAULT_SETTINGS};
 
-    if (!isCustomField(prop)) {
+    const isUrlChanges = prop === 'url';
+
+    if (!isUrlChanges && !isCustomField(prop)) {
       // User should be able to edit only custom field columns.
       throw new Error(`${prop} is not a setting value`);
+    }
+
+    if (isUrlChanges && !validateUrl(newValue)) {
+      showAlert('Invalid URL', AlertType.Warning);
+      return;
     }
 
     Object.keys(settings).forEach(key => {
@@ -206,10 +215,16 @@ const updateRow = (rows: Array<UpdateRow>) => {
       }
     });
 
-    updatedRows.push({
+    const row: SitesData = {
       url: model.url,
       settings: settings
-    });
+    };
+
+    if (isUrlChanges) {
+      row.newUrl = newValue;
+    }
+
+    updatedRows.push(row);
   });
 
   if (updatedRows.length === 0) {
@@ -222,7 +237,14 @@ const updateRow = (rows: Array<UpdateRow>) => {
 const onCellEdit = (e: CustomEvent) => {
   e.preventDefault();
   const {val, prop} = e.detail;
-  const toUpdate = Array.from(props.selectedRows).map((url) => {
+
+  let rows = Array.from(props.selectedRows);
+
+  if (prop === 'url') {
+    rows = [rows[0]];
+  }
+
+  const toUpdate = rows.map((url) => {
     return {
       prop,
       model: sourceLookup.value[url],

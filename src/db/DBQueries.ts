@@ -49,7 +49,7 @@ export async function updateMultipleSiteSettings(sitesData: SitesData[]) {
     RETURNING *;
   `;
 
-  const values = sitesData.flatMap((site) => [site.settings, site.url]);
+  const values = sitesData.flatMap((site) => [site.settings, site.newUrl ?? site.url]);
   return await db.query(sql, values);
 }
 
@@ -79,4 +79,18 @@ export async function deleteSites(urls: Array<string>) {
 
   const values = [urls];
   return await db.query(sql, values);
+}
+
+export async function changeUrl(sites: SitesData[]) {
+  const sql = `
+    UPDATE sites
+    SET url = CASE
+      ${sites.map((_, i) => `WHEN url = $${i * 2 + 1} THEN $${i * 2 + 2}`).join(' ')}
+    END
+    WHERE url IN (${sites.map((_, i) => `$${i * 2 + 1}`).join(', ')});
+  `;
+
+  const params = sites.flatMap(({ url, newUrl }) => [url, newUrl]);
+
+  await db.query(sql, params);
 }

@@ -6,13 +6,15 @@ export interface SiteSettings extends Partial<ParsedData> {
   environment: string|null,
   hasIntegration: boolean,
   resource?: string
+  url?: string;
 }
 
 export interface SitesData {
   url: string;
   online?: boolean
   pingat?: Date
-  settings: Partial<SiteSettings>|null
+  settings: Partial<SiteSettings>|null,
+  newUrl?: string
 }
 
 export interface Site extends SiteSettings, Pick<SitesData, 'online' | 'pingat'> {
