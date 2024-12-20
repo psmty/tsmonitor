@@ -175,7 +175,7 @@ const updateRow = () => {
     throw new Error(`editUrl can't be null for updating row`);
   }
 
-  if (!isMultipleEdit && !isValidUrl(newUrl.value)) {
+  if (!isMultipleEdit.value && !isValidUrl(newUrl.value)) {
       showAlert('Invalid URL', AlertType.Warning);
       return;
   }

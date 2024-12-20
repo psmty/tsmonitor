@@ -48,7 +48,7 @@ import {
   localJsDateToDateString,
   type Site,
   type SitesData,
-  type SiteSettings
+  type SiteSettings, validateUrl
 } from "../services";
 import {CHECKBOX_COLUMN} from "./grid.columns";
 import ActionsRenderer from "./gridRenderers/ActionsRenderer.vue";
@@ -60,6 +60,7 @@ import {RangePlugin} from './gridPlugins/rangePlugin.ts';
 import {HighlightSelection} from './gridPlugins/highlightSelection.ts';
 import {GreyedOutOfflineSites} from './gridPlugins/greyedOutOfflineSites.ts';
 import {usePingatService} from '../composables/usePingatService.ts';
+import {AlertType, useAlert} from '../composables/useAlert.ts';
 
 type UpdateRow = { prop: keyof SiteSettings | 'url', model: Site, newValue: any };
 
@@ -69,6 +70,7 @@ const grid = ref<{ $el: HTMLRevoGridElement } | null>(null);
 const gridEditors = GRID_EDITORS;
 
 const {initPingatService, stopPingatService, updatePingat} = usePingatService(grid);
+const {showAlert} = useAlert();
 
 interface Props {
   data: Array<Site>;
@@ -193,6 +195,11 @@ const updateRow = (rows: Array<UpdateRow>) => {
     if (!isUrlChanges && !isCustomField(prop)) {
       // User should be able to edit only custom field columns.
       throw new Error(`${prop} is not a setting value`);
+    }
+
+    if (isUrlChanges && !validateUrl(newValue)) {
+      showAlert('Invalid URL', AlertType.Warning);
+      return;
     }
 
     Object.keys(settings).forEach(key => {
