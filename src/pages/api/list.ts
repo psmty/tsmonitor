@@ -2,7 +2,7 @@ import type { APIRoute } from "astro";
 import type {SitesData} from '../../services';
 import {
   getSites,
-  setSites, deleteSites, updateMultipleSiteSettings
+  setSites, deleteSites, updateMultipleSiteSettings, changeUrl
 } from '../../db/DBQueries.ts';
 import {getUpdatedSites, getSitesMap} from '../../services/api/server/list/helpers.ts';
 import { getInstance } from "../../crawler/server/index.ts";
@@ -53,6 +53,11 @@ export const PUT: APIRoute = async ({ props, locals, request }) => {
   try {
     const sitesData: SitesData[] = await request.json();
     await updateMultipleSiteSettings(sitesData);
+
+    const changedUrls = sitesData.filter(({newUrl}) => !!newUrl);
+    if (changedUrls.length) {
+      await changeUrl(changedUrls);
+    }
 
     return new Response(JSON.stringify(sitesData));
   } catch (error) {

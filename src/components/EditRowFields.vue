@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-4 h-full overflow-y-auto px-4">
 
-    <div v-if="isCreationMode">
+    <div v-if="!isMultipleEdit">
       <label for="url" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">URL</label>
       <input v-model.trim.lazy="newUrl" type="text" name="title" id="url"
              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
@@ -92,7 +92,10 @@ const hasIntegrationValue = computed({
   set: (value: string) => hasIntegration.value = setBooleanValue(value)
 });
 
+const isMultipleEdit = computed(() => (props.editUrls?.length ?? 0) > 1);
+
 const setSiteDataSettings = (siteData: SiteSettings) => {
+  newUrl.value = siteData.url ?? '';
   customer.value = siteData.customer;
   environment.value = siteData.environment;
   hasIntegration.value = siteData.hasIntegration;
@@ -116,7 +119,7 @@ const initEdit = () => {
   }
 
   // Multiple edit
-  if (props.editUrls?.length > 1) {
+  if (isMultipleEdit.value) {
     return;
   }
 
@@ -172,6 +175,11 @@ const updateRow = () => {
     throw new Error(`editUrl can't be null for updating row`);
   }
 
+  if (!isMultipleEdit && !isValidUrl(newUrl.value)) {
+      showAlert('Invalid URL', AlertType.Warning);
+      return;
+  }
+
   const siteData: SitesData[] = props.editUrls.map((url) => {
     const existingSite = props.source.get(url);
 
@@ -181,7 +189,8 @@ const updateRow = () => {
 
     return {
       url: url!,
-      settings: getSiteSettings(existingSite)
+      settings: getSiteSettings(existingSite),
+      newUrl: newUrl.value
     };
   });
   emits('update', siteData);

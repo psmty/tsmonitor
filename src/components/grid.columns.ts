@@ -56,7 +56,7 @@ export const getGridColumns = ({resources, highlightVersion}: {resources: string
     prop: 'url',
     size: 300,
     sortable: true,
-    readonly: true,
+    readonly: false,
     cellTemplate: (h, { value }) => {
       return h('a', { class: 'font-medium hover:underline text-primary-600 dark:text-primary-500', href: value, target: '_blank' }, value?.replace('https://', ''));
     }

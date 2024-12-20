@@ -49,14 +49,18 @@ export const useDashboardApi = () => {
   };
 
   const updateSiteSettings = (sites: SitesData[]) => {
-    sites.forEach(({ url, settings }) => {
+    sites.forEach(({ url, settings, newUrl }) => {
       if (!siteStatuses.value.has(url)) {
         console.error(`${url} is not exists`);
         return;
       }
 
+      const setUrl = newUrl ? newUrl : url;
       const currentData = siteStatuses.value.get(url)!;
-      siteStatuses.value.set(url, { ...currentData, ...settings });
+      if (!!newUrl) {
+        siteStatuses.value.delete(url);
+      }
+      siteStatuses.value.set(setUrl, { ...currentData, ...settings, url: setUrl });
     });
   };
 
