@@ -12,9 +12,8 @@ type PersonalizationPages = 'mainGrid';
 
 type valueOf<T> = T[keyof T];
 
-export const DATABASE_NAME = 'tsMonitorDB';
-export const STORE_NAME = 'personalization';
-export const DB_VERSION = 1;
+const DATABASE_NAME = 'tsMonitorDB';
+const STORE_NAME = 'personalization';
 
 
 export function usePersonalization<T extends Record<string, any>>(pageKey: PersonalizationPages) {
@@ -27,7 +26,7 @@ export function usePersonalization<T extends Record<string, any>>(pageKey: Perso
     if (dbInstance) return;
 
     return new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open(DATABASE_NAME, DB_VERSION);
+      const request = indexedDB.open(DATABASE_NAME, 1);
 
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBRequest).result;
