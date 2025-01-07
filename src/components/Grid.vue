@@ -368,18 +368,31 @@ const syncFilter = async () => {
   isFiltersInit = true;
 };
 
+const updateFilters = async () => {
+  const filterPlugin = await getFilterPlugin();
+  if (filterPlugin && props.gridFilters !== undefined) {
+    await nextTick();
+    await filterPlugin.onFilterChange(
+      !!props.gridFilters
+        ? filterPlugin.parseJSON(props.gridFilters)
+        : {}
+    );
+    // Return true if filter has been updated
+    return true;
+  }
 
+  // Return false if the filter remains unchanged
+  return false;
+}
+
+// Set saved filters for initial load
 const unsubFilterWatcher = watch(() => props.gridFilters, async () => {
   if (isFiltersInit) {
     unsubFilterWatcher();
     return;
   }
 
-  const filterPlugin = await getFilterPlugin();
-
-  if (filterPlugin && props.gridFilters) {
-    await nextTick();
-    await filterPlugin.onFilterChange(filterPlugin.parseJSON(props.gridFilters));
+  if (await updateFilters()) {
     unsubFilterWatcher();
   }
 });
@@ -390,7 +403,8 @@ watch(() => props.selectedRows, () => {
 }, {deep: true});
 
 defineExpose({
-  exportToCSV
+  exportToCSV,
+  updateFilters
 });
 </script>
 

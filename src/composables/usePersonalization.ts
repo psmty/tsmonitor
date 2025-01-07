@@ -5,7 +5,7 @@ export interface MainGridPersonalization {
   groupBy: string;
   selectedColumns: Array<string>;
   gridFilters: string;
-  columnOrder: ColumnProp[]
+  columnOrder: ColumnProp[];
 }
 
 type PersonalizationPages = 'mainGrid';
@@ -108,6 +108,26 @@ export function usePersonalization<T extends Record<string, any>>(pageKey: Perso
     };
   }
 
+  async function deletePersonalizationKey(key: keyof T) {
+    await openDB();
+    const transaction = dbInstance!.transaction(STORE_NAME, 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.get(pageKey);
+
+    request.onsuccess = () => {
+      const data = request.result;
+      if (data && key in data) {
+        delete data[key];
+        store.put(data, pageKey);
+      }
+      fetchPersonalization();
+    };
+
+    request.onerror = (event) => {
+      console.error('Error retrieving item:', event);
+    };
+  }
+
   onMounted(async () => {
     await fetchPersonalization();
   });
@@ -117,6 +137,7 @@ export function usePersonalization<T extends Record<string, any>>(pageKey: Perso
     setPersonalization,
     setPersonalizationValue,
     fetchPersonalization,
-    deletePersonalization
+    deletePersonalization,
+    deletePersonalizationKey
   };
 }
