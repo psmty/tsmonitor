@@ -28,6 +28,7 @@ export type LicenseInfo = {
   sgEnabledResource: number | string;
   sgUsers: number | string;
   sgEnabledResourceWithCredentials: number | string;
+  sgTeamResource: number | string;
   licenseLimit: number | string;
   tsTotalResource: number | string;
   tsEnabledResource: number | string;

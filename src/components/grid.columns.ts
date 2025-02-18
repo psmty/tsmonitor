@@ -112,6 +112,13 @@ export const getGridColumns = ({resources, highlightVersion}: {resources: string
     readonly: true,
   },
   {
+    name: 'SG Team Resources',
+    prop: 'sgTeamResource',
+    size: 150,
+    sortable: true,
+    readonly: true,
+  },
+  {
     name: 'SG Delta Resources',
     prop: 'sgUsers',
     size: 150,
