@@ -27,6 +27,7 @@ export const useDashboardApi = () => {
             (licenseInfo?.sg?.[0] || 0)) || '-',
         sgEnabledResourceWithCredentials:
           licenseInfo?.sg?.[2] || '-',
+        sgTeamResource: licenseInfo?.tr || '-',
         licenseLimit: licenseInfo?.sg?.[3] || '-',
         tsTotalResource: licenseInfo?.ts?.[0] || '-',
         tsEnabledResource: licenseInfo?.ts?.[1] || '-',

@@ -31,6 +31,8 @@ function parseLicenseLine(line: string) {
       licenseInfo[key] = value.split(",");
     } else if (key === "fu") {
       licenseInfo[key] = parseInt(value, 10);
+    } else if (key === "tr") {
+      licenseInfo[key] = parseInt(value, 10);
     }
   });
 

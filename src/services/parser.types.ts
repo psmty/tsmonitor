@@ -22,6 +22,7 @@ export type LicenseInfo = {
   ts?: number[];              // Array of numbers from `ts` (e.g., [0, 0, 0])
   pr?: string[];              // Array of strings from `pr` (e.g., ["sg", "t5", "ts", "api", "sch"])
   fu?: string | number;       // `fu` may be a string like "NA" or a number
+  tr?: string | number;       // `tr` may be a string like "NA" or a number
 };
 
 export interface ServerInfo {
