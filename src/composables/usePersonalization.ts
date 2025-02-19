@@ -5,16 +5,15 @@ export interface MainGridPersonalization {
   groupBy: string;
   selectedColumns: Array<string>;
   gridFilters: string;
-  columnOrder: ColumnProp[]
+  columnOrder: ColumnProp[];
 }
 
 type PersonalizationPages = 'mainGrid';
 
 type valueOf<T> = T[keyof T];
 
-export const DATABASE_NAME = 'tsMonitorDB';
-export const STORE_NAME = 'personalization';
-export const DB_VERSION = 1;
+const DATABASE_NAME = 'tsMonitorDB';
+const STORE_NAME = 'personalization';
 
 
 export function usePersonalization<T extends Record<string, any>>(pageKey: PersonalizationPages) {
@@ -27,7 +26,7 @@ export function usePersonalization<T extends Record<string, any>>(pageKey: Perso
     if (dbInstance) return;
 
     return new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open(DATABASE_NAME, DB_VERSION);
+      const request = indexedDB.open(DATABASE_NAME, 1);
 
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBRequest).result;
@@ -109,6 +108,26 @@ export function usePersonalization<T extends Record<string, any>>(pageKey: Perso
     };
   }
 
+  async function deletePersonalizationKey(key: keyof T) {
+    await openDB();
+    const transaction = dbInstance!.transaction(STORE_NAME, 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.get(pageKey);
+
+    request.onsuccess = () => {
+      const data = request.result;
+      if (data && key in data) {
+        delete data[key];
+        store.put(data, pageKey);
+      }
+      fetchPersonalization();
+    };
+
+    request.onerror = (event) => {
+      console.error('Error retrieving item:', event);
+    };
+  }
+
   onMounted(async () => {
     await fetchPersonalization();
   });
@@ -118,6 +137,7 @@ export function usePersonalization<T extends Record<string, any>>(pageKey: Perso
     setPersonalization,
     setPersonalizationValue,
     fetchPersonalization,
-    deletePersonalization
+    deletePersonalization,
+    deletePersonalizationKey
   };
 }

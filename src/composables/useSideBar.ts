@@ -4,6 +4,7 @@ export enum SideBarType {
   Edit = 'Edit',
   Delete = 'Delete',
   ChooseColumn = 'ChooseColumn',
+  Settings = 'Settings',
 }
 
 

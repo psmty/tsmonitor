@@ -19,11 +19,12 @@
           @click="exportToCsv">
           Export to CSV
         </button>
+        <TsButton @click="startGridSettings"><GearIcon class="w-4 h-4"/></TsButton>
       </div>
     </div>
     <Grid ref="grid" :columns="columns" :data="source" :selected-rows="selectedRows" :grouping="grouping" :loading-urls="loadingUrls" :grid-filters="savedGridFilters"
           @editRow="startEditRow" @delete-row="startDeleteRow" @update-row="editRow" @reload-row="callReloadUrl" @sync-filter="syncFilters" @updateRowCount="setSourceCount" @colReorder="saveColumnOrder"/>
-
+    <!--// TODO: Refactor sidebar logic. Move them to single component with button. And add lazy loading-->
     <SideBar v-model="visibleSideBar" @onHide="onHideSidebar">
       <template #title>{{ sideBarTitle }}</template>
 
@@ -36,6 +37,8 @@
 
       <ChooseColumn v-else-if="sideBarType === SideBarType.ChooseColumn" v-model.selectedItems="selectedColumns"
                     :source="columnSelectorSource" />
+
+      <GridSettings v-else-if="sideBarType === SideBarType.Settings" @clearFilters="clearFilters"/>
     </SideBar>
   </div>
 </template>
@@ -45,7 +48,7 @@ import ExpandIcon from "./icons/ExpandIcon.vue";
 import Grid from "./Grid.vue";
 import ImportUrlsButton from "./ImportUrlsButton.vue";
 import Select from './select/Select.vue';
-import {computed, ref } from "vue";
+import {computed, nextTick, ref, watch} from "vue";
 import {useDashboardApi} from '../composables/useDashboard.ts';
 import SideBar from './SideBar.vue';
 import EditRowFields from './EditRowFields.vue';
@@ -64,6 +67,9 @@ import SelectionCount from './SelectionCount.vue';
 import TsButton from './TsButton.vue';
 import Search from './Search.vue';
 import {convertGridSiteToServerSiteData} from '../services/edit.helpers.ts';
+import GearIcon from './icons/GearIcon.vue';
+import {useGridSettings} from '../composables/useGridSettings.ts';
+import GridSettings from './GridSettings.vue';
 
 const props = defineProps({
   resources: {
@@ -72,10 +78,12 @@ const props = defineProps({
   }
 });
 
+const grid = ref<(typeof Grid | null)>(null);
+
 const search = ref('');
 const visibleSourceCount = ref(0);
 
-const {personalization, setPersonalizationValue} = usePersonalization<MainGridPersonalization>('mainGrid');
+const {personalization, setPersonalizationValue, deletePersonalizationKey} = usePersonalization<MainGridPersonalization>('mainGrid');
 const {siteStatuses, loadingUrls, deleteSites, addSites, updateSites, loadSites} = useDashboardApi();
 
 const {visibleSideBar, sideBarType, sideBarTitle, hideSidebar, clearSideBarType} = useSideBar();
@@ -89,6 +97,7 @@ const {
   columnSelectorSource,
   highlightVersion,
 } = useChooseColumn<MainGridPersonalization>(visibleSideBar, sideBarType, sideBarTitle, personalization, setPersonalizationValue, props.resources);
+const {startGridSettings} = useGridSettings(visibleSideBar, sideBarType, sideBarTitle);
 
 const selectedRows = ref(new Set<string>());
 const groupByOptions = computed<SelectSource[]>(() => {
@@ -248,6 +257,16 @@ const syncFilters = (filters: string) => {
   setPersonalizationValue('gridFilters', filters)
 }
 
+const clearFilters = async () => {
+  const unsubWatcher = watch(savedGridFilters, async () => {
+    await nextTick();
+    await grid.value?.updateFilters();
+    unsubWatcher();
+  });
+  await deletePersonalizationKey('gridFilters');
+  hideSidebar();
+}
+
 const setSourceCount = (count: number) => {
   selectedRows.value.clear();
   visibleSourceCount.value = count;
@@ -257,8 +276,6 @@ const saveColumnOrder = (order: ColumnProp[]) => {
   setPersonalizationValue('columnOrder', order)
 }
 
-
-const grid = ref<(typeof Grid | null)>(null);
 const exportToCsv = () => {
   grid.value?.exportToCSV();
 };
