@@ -23,7 +23,7 @@ export const useDashboardApi = () => {
         sgTotalResource: licenseInfo?.sg?.[0] ?? '-',
         sgEnabledResource: licenseInfo?.sg?.[1] ?? '-',
         sgUsers:
-          ((licenseInfo?.sg?.[1] || 0) -
+          ((licenseInfo?.sg?.[3] || 0) -
             (licenseInfo?.sg?.[0] || 0)) || '-',
         sgEnabledResourceWithCredentials:
           licenseInfo?.sg?.[2] || '-',
