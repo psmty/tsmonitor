@@ -1,0 +1,16 @@
+FROM alpine:latest
+
+# Install PostgreSQL client and cron
+RUN apk add --no-cache postgresql-client busybox
+
+# Set working directory
+WORKDIR /
+
+# Copy the backup script
+COPY backup_script.sh /backup_script.sh
+
+# Give execution permissions to the script
+RUN chmod +x /backup_script.sh
+
+# Set default cron schedule if not provided
+CMD ["/bin/sh", "-c", "echo \"${CRON_SCHEDULE:-0 2 * * *} /backup_script.sh >> /var/log/cron.log 2>&1\" | crontab - && crond -f -l 2"]
