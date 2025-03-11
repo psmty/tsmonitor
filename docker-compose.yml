@@ -46,6 +46,7 @@ services:
   backup:
     image: ghcr.io/psmty/tsmonitor-backup:latest
     container_name: postgres_backup
+    restart: always
     environment:
       - PG_HOST=db
       - PG_USER=${POSTGRES_USER} 
