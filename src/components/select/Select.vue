@@ -63,7 +63,7 @@ const selectedTitle = computed(() => {
   }
 
   if (selected.id === EMPTY_ID) {
-    return selected.value;
+    return props.prefix;
   }
 
   return props.prefix ? `${props.prefix} ${selected.value}` : selected.value;

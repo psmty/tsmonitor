@@ -120,7 +120,7 @@ export const getGridColumns = ({resources, highlightVersion}: {resources: string
     cellProperties: ({ value }) => ({class: {"font-medium text-primary-600 dark:text-primary-500 !text-black !bg-green-300 dark:!bg-green-300": highlightVersion?.value === value}}),
   },
   {
-    name: 'Version Major',
+    name: 'Major version',
     prop: 'sgt5PublicVersionMajor',
     size: 150,
     sortable: true,

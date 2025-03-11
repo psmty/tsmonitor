@@ -44,23 +44,23 @@ services:
     networks:
       - internal
 
-  backup:
-    build:
-      context: .
-      dockerfile: Dockerfile.backup
-    container_name: postgres_backup
-    environment:
-      - PG_HOST=db
-      - PG_USER=${POSTGRES_USER} 
-      - PG_PASSWORD=${POSTGRES_PASSWORD}
-      - PG_DB=${POSTGRES_DB}
-      - CRON_SCHEDULE=0 2 * * *
-    depends_on:
-      - db
-    volumes:
-      - ./backup_data:/backups
-    networks:
-      - internal
+  # backup:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.backup
+  #   container_name: postgres_backup
+  #   environment:
+  #     - PG_HOST=db
+  #     - PG_USER=${POSTGRES_USER} 
+  #     - PG_PASSWORD=${POSTGRES_PASSWORD}
+  #     - PG_DB=${POSTGRES_DB}
+  #     - CRON_SCHEDULE=0 2 * * *
+  #   depends_on:
+  #     - db
+  #   volumes:
+  #     - ./backup_data:/backups
+  #   networks:
+  #     - internal
 
   flyway:
     image: flyway/flyway:latest
