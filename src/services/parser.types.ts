@@ -41,6 +41,7 @@ export interface ParsedData {
   licenseInfo?: LicenseInfo;
   documentInfo: DocumentInfo;
   sgt5PublicVersion: string;
+  sgt5PublicVersionMajor: string;
   updatedAt?: string;
 }
 

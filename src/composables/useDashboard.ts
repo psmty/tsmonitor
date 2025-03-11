@@ -44,6 +44,7 @@ export const useDashboardApi = () => {
         ...(newSite.parsedData ?? {}),
         ...(newSite.settings ?? {}),
         sgt5PublicVersion: newSite.parsedData?.sgt5PublicVersion?.trim() || "-",
+        sgt5PublicVersionMajor: newSite.parsedData?.sgt5PublicVersion?.trim()?.split('.')?.slice(0,3)?.join('.') || "-",
         ...license
       };
       siteStatuses.value.set(newSite.url, result);

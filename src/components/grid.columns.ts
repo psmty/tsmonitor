@@ -1,4 +1,4 @@
-import type { ColumnDataSchemaModel, ColumnRegular, HyperFunc, VNode } from '@revolist/vue3-datagrid';
+import type { CellCompareFunc, ColumnDataSchemaModel, ColumnRegular, DataType, HyperFunc, VNode } from '@revolist/vue3-datagrid';
 import {CustomFieldsName} from '../services/consts';
 import type { Ref } from 'vue';
 import {booleanDataSource, environmentDataSource, getResourceDataSource} from './select/defaults.ts';
@@ -42,6 +42,28 @@ const NEGATIVE_CHECK = (h: HyperFunc<VNode>, { value }: { value?: number }) => {
 }
 
 export const URL_PROP = 'url';
+
+const cellCompare: CellCompareFunc = (prop: string, a: DataType, b: DataType) => {
+  const aVal = a?.[prop];
+  const bVal = b?.[prop];
+
+  // Handle numeric values
+  if (typeof aVal === 'number' && typeof bVal === 'number') {
+    return aVal - bVal;
+  }
+
+  // Convert to lowercase strings for string comparison
+  const av = aVal?.toString().toLowerCase();
+  const bv = bVal?.toString().toLowerCase();
+
+  if (av === bv) {
+    return 0;
+  }
+  if (av > bv) {
+    return 1;
+  }
+  return -1;
+}
 
 export const getGridColumns = ({resources, highlightVersion}: {resources: string[], highlightVersion?: Ref<string>}):ColumnRegular[] => [
   {
@@ -98,11 +120,20 @@ export const getGridColumns = ({resources, highlightVersion}: {resources: string
     cellProperties: ({ value }) => ({class: {"font-medium text-primary-600 dark:text-primary-500 !text-black !bg-green-300 dark:!bg-green-300": highlightVersion?.value === value}}),
   },
   {
+    name: 'Version Major',
+    prop: 'sgt5PublicVersionMajor',
+    size: 150,
+    sortable: true,
+    readonly: true,
+    cellProperties: ({ value }) => ({class: {"font-medium text-primary-600 dark:text-primary-500 !text-black !bg-green-300 dark:!bg-green-300": highlightVersion?.value === value}}),
+  },
+  {
     name: 'SG Total Resources',
     prop: 'sgTotalResource',
     size: 150,
     sortable: true,
     readonly: true,
+    cellCompare,
   },
   {
     name: 'SG Enabled Resources',
@@ -117,6 +148,7 @@ export const getGridColumns = ({resources, highlightVersion}: {resources: string
     size: 150,
     sortable: true,
     readonly: true,
+    cellCompare,
   },
   {
     name: 'SG Delta Resources',
@@ -132,6 +164,7 @@ export const getGridColumns = ({resources, highlightVersion}: {resources: string
     size: 150,
     sortable: true,
     readonly: true,
+    cellCompare,
   },
   {
     name: 'License Limit',
@@ -139,6 +172,7 @@ export const getGridColumns = ({resources, highlightVersion}: {resources: string
     size: 150,
     sortable: true,
     readonly: true,
+    cellCompare,
   },
 
   {
@@ -147,6 +181,7 @@ export const getGridColumns = ({resources, highlightVersion}: {resources: string
     size: 150,
     sortable: true,
     readonly: true,
+    cellCompare,
   },
   {
     name: 'TS Enabled Resources',
@@ -154,6 +189,7 @@ export const getGridColumns = ({resources, highlightVersion}: {resources: string
     size: 150,
     sortable: true,
     readonly: true,
+    cellCompare,
   },
   {
     name: 'TS Delta Resources',
@@ -162,6 +198,7 @@ export const getGridColumns = ({resources, highlightVersion}: {resources: string
     sortable: true,
     readonly: true,
     cellTemplate: NEGATIVE_CHECK,
+    cellCompare,
   },
   {
     name: 'Days Left',

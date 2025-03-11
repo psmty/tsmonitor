@@ -42,6 +42,23 @@ services:
       - pgdata:/var/lib/postgresql/data # Persist data in a Docker volume
       - ./migrations/V1__init.sql:/docker-entrypoint-initdb.d/init.sql:ro
       - ./migrations:/flyway/sql
+  
+  backup:
+    image: ghcr.io/psmty/tsmonitor-backup:latest
+    container_name: postgres_backup
+    environment:
+      - PG_HOST=db
+      - PG_USER=${POSTGRES_USER} 
+      - PG_PASSWORD=${POSTGRES_PASSWORD}
+      - PG_DB=${POSTGRES_DB}
+      - CRON_SCHEDULE=0 2 * * *
+    depends_on:
+      - db
+    volumes:
+      - ./backup_data:/backups
+    networks:
+      - internal
+
   flyway:
     image: flyway/flyway:latest
     container_name: migration
@@ -59,3 +76,4 @@ networks:
 
 volumes:
   pgdata:
+  backup_data:

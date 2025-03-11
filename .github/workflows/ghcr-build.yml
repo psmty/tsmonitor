@@ -58,3 +58,11 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/${{ github.repository }}:latest
+
+      - name: Build and push Docker Backup image to GHCR
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: Dockerfile.backup
+          push: true
+          tags: ghcr.io/${{ github.repository }}-backup:latest

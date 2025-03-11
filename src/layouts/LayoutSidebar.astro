@@ -1,12 +1,16 @@
 ---
-import LayoutCommon from './LayoutCommon.astro';
-import NavBarSidebar from './NavBarSidebar.astro';
+import LayoutCommon from "./LayoutCommon.astro";
+import NavBarSidebar from "./NavBarSidebar.astro";
 
 import { getSession } from "auth-astro/server";
 
-const session = await getSession(Astro.request);
-if (!session) {
-	Astro.redirect("/api/auth/signin");
+try {
+	const session = await getSession(Astro.request);
+	if (!session) {
+		Astro.redirect("/api/auth/signin");
+	}
+} catch (error) {
+	console.error(error);
 }
 ---
 
